@@ -1,0 +1,3055 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODEPRAC 2.0 - Competitive Programming Practice Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #ea580c;
+            --light: #f1f5f9;
+            --dark: #1e293b;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        nav {
+            background: white;
+            border-bottom: 2px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--dark);
+            text-decoration: none;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: var(--light);
+            color: var(--primary);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-block {
+            width: 100%;
+            display: block;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: var(--dark);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: var(--light);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border-color: var(--success);
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: var(--danger);
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #0c4a6e;
+            border-color: var(--primary);
+        }
+
+        /* Auth Page */
+        .auth-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .auth-left {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .auth-right {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background: var(--light);
+        }
+
+        .auth-box {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .auth-box h2 {
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 1rem;
+            color: var(--secondary);
+        }
+
+        .auth-toggle a {
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        main {
+            padding: 2rem 0;
+            min-height: calc(100vh - 80px);
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .page-header p {
+            color: var(--secondary);
+        }
+
+        /* Dashboard */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card h3 {
+            color: var(--secondary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* Code Editor */
+        .editor-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .code-editor {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+
+        textarea.code-editor {
+            border: 1px solid #334155;
+            min-height: 400px;
+            padding: 1rem;
+        }
+
+        .output-container {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: 4px;
+            min-height: 400px;
+            overflow-y: auto;
+        }
+
+        .output-header {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+
+        .output-content {
+            background: #1e293b;
+            color: #10b981;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .output-error {
+            color: #ef4444;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.25rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--secondary);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 1.5rem;
+            gap: 0;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 1rem;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--secondary);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-warning {
+            background: #fed7aa;
+            color: #92400e;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #0c4a6e;
+        }
+
+        /* Utilities */
+        .hidden {
+            display: none;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-secondary {
+            color: var(--secondary);
+        }
+
+        .mt-1 {
+            margin-top: 0.5rem;
+        }
+
+        .mt-2 {
+            margin-top: 1rem;
+        }
+
+        .mt-3 {
+            margin-top: 1.5rem;
+        }
+
+        .mt-4 {
+            margin-top: 2rem;
+        }
+
+        .mb-1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .mb-2 {
+            margin-bottom: 1rem;
+        }
+
+        .mb-3 {
+            margin-bottom: 1.5rem;
+        }
+
+        .mb-4 {
+            margin-bottom: 2rem;
+        }
+
+        .p-2 {
+            padding: 1rem;
+        }
+
+        .p-3 {
+            padding: 1.5rem;
+        }
+
+        .p-4 {
+            padding: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+            }
+
+            .auth-left {
+                display: none;
+            }
+
+            .editor-container {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            nav .container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+                width: 100%;
+            }
+        }
+
+        .success-message {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .error-message {
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--light);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flex-gap {
+            display: flex;
+            gap: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="container">
+            <div class="nav-brand">CODEPRAC 2.0</div>
+            <ul class="nav-links" id="navLinks">
+                <li><a onclick="showPage('dashboard')">Dashboard</a></li>
+                <li><a id="adminLink" onclick="showPage('admin')" class="hidden">Admin</a></li>
+                <li><a id="collegeLink" onclick="showPage('college')" class="hidden">College</a></li>
+                <li><a id="deptLink" onclick="showPage('department')" class="hidden">Department</a></li>
+                <li><a id="studentLink" onclick="showPage('student')" class="hidden">Practice</a></li>
+                <li><a onclick="logout()" id="logoutBtn" class="hidden">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Auth Page -->
+    <div id="authPage">
+        <div class="auth-container">
+            <div class="auth-left">
+                <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">CODEPRAC 2.0</h1>
+                <p style="font-size: 1.1rem; text-align: center;">Master Competitive Programming</p>
+                <p style="margin-top: 2rem; opacity: 0.9;">Practice with AI-powered evaluation and intelligent feedback
+                </p>
+            </div>
+            <div class="auth-right">
+                <div class="auth-box">
+                    <h2>Login</h2>
+                    <div id="authMessage"></div>
+
+                    <!-- Login Form -->
+                    <div id="loginForm">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="loginEmail" placeholder="you@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="loginPassword" placeholder="••••••••">
+                        </div>
+                        <button class="btn btn-primary btn-block" onclick="login()">Login</button>
+                        <div class="auth-toggle">
+                            Don't have an account? <a onclick="toggleAuthForm()">Register</a>
+                        </div>
+                    </div>
+
+                    <!-- Register Form -->
+                    <div id="registerForm" class="hidden">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="registerName" placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="registerEmail" placeholder="you@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="registerPassword" placeholder="••••••••">
+                        </div>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <select id="registerRole">
+                                <option value="student">Student</option>
+                                <option value="college">College Admin</option>
+                                <option value="department">Department Admin</option>
+                                <option value="admin">Super Admin</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary btn-block" onclick="register()">Register</button>
+                        <div class="auth-toggle">
+                            Already have an account? <a onclick="toggleAuthForm()">Login</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <main id="mainApp" class="hidden">
+        <div class="container">
+            <!-- Dashboard Page -->
+            <div id="dashboardPage" class="page">
+                <div class="page-header">
+                    <h1>Dashboard</h1>
+                    <p>Welcome back! Here's your overview.</p>
+                </div>
+
+                <div class="dashboard-grid" id="dashboardStats">
+                    <div class="stat-card">
+                        <h3>Total Questions</h3>
+                        <div class="value" id="totalQuestions">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Questions Solved</h3>
+                        <div class="value" id="questionsSolved">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Success Rate</h3>
+                        <div class="value" id="successRate">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Submissions</h3>
+                        <div class="value" id="totalSubmissions">0</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Recent Activity</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Question</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activityTable">
+                            <tr>
+                                <td colspan="3" class="text-center text-secondary">No recent activity</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Admin Page -->
+            <div id="adminPage" class="page hidden">
+                <div class="page-header">
+                    <h1>Admin Panel</h1>
+                    <p>Manage colleges, departments, and users</p>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('colleges', event)">Colleges</button>
+                    <button class="tab-btn" onclick="switchTab('departments', event)">Departments</button>
+                    <button class="tab-btn" onclick="switchTab('batches', event)">Batches</button>
+                    <button class="tab-btn" onclick="switchTab('students', event)">Students</button>
+                </div>
+
+                <!-- Colleges Tab -->
+                <div id="collegesTab" class="tab-content active">
+                    <div class="flex-between mb-3">
+                        <h2>Colleges</h2>
+                        <button class="btn btn-primary" onclick="openModal('collegeModal')">Add College</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="collegesTable">
+                            <tr>
+                                <td colspan="4" class="text-center text-secondary">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Departments Tab -->
+                <div id="departmentsTab" class="tab-content hidden">
+                    <div class="flex-between mb-3">
+                        <h2>Departments</h2>
+                        <button class="btn btn-primary" onclick="openModal('deptModal')">Add Department</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>College</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deptTable">
+                            <tr>
+                                <td colspan="5" class="text-center text-secondary">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Batches Tab -->
+                <div id="batchesTab" class="tab-content hidden">
+                    <div class="flex-between mb-3">
+                        <h2>Batches</h2>
+                        <button class="btn btn-primary" onclick="openModal('batchModal')">Add Batch</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Department</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batchTable">
+                            <tr>
+                                <td colspan="4" class="text-center text-secondary">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Students Tab -->
+                <div id="studentsTab" class="tab-content hidden">
+                    <div class="flex-between mb-3">
+                        <h2>Students</h2>
+                        <button class="btn btn-primary" onclick="openModal('studentModal')">Add Student</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Batch</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTable">
+                            <tr>
+                                <td colspan="5" class="text-center text-secondary">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- College Page -->
+            <div id="collegePage" class="page hidden">
+                <div class="page-header">
+                    <h1>College Dashboard</h1>
+                    <p>View departments and manage college resources</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <div class="flex-between">
+                            <h3 style="margin:0">Departments</h3>
+                            <div class="flex-gap">
+                                <button class="btn btn-primary" onclick="openModal('deptModal')">Add Department</button>
+                                <button class="btn btn-primary" onclick="openModal('batchModal')">Add Batch</button>
+                                <button class="btn btn-primary" onclick="openModal('studentModal')">Add Student</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid">
+                        <div id="departmentsList"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Performance Overview</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Students</th>
+                                <th>Questions Solved</th>
+                                <th>Success Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody id="collegePerformance">
+                            <tr>
+                                <td colspan="4" class="text-center text-secondary">No data available</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Department Page -->
+            <div id="departmentPage" class="page hidden">
+                <div class="page-header">
+                    <h1>Department Management</h1>
+                    <p>Manage batches, topics, and questions</p>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('topics', event)">Topics</button>
+                    <button class="tab-btn" onclick="switchTab('questions', event)">Questions</button>
+                    <button class="tab-btn" onclick="switchTab('batches-dept', event)">Batches</button>
+                    <button class="tab-btn" onclick="switchTab('notes', event)">Notes</button>
+                </div>
+
+                <!-- Topics Tab -->
+                <div id="topicsTab" class="tab-content active">
+                    <div class="flex-between mb-3">
+                        <h2>Topics</h2>
+                        <button class="btn btn-primary" onclick="openModal('topicModal')">Add Topic</button>
+                    </div>
+                    <div class="grid">
+                        <div id="topicsList"></div>
+                    </div>
+                </div>
+
+                <!-- Questions Tab -->
+                <div id="questionsTab" class="tab-content hidden">
+                    <div class="flex-between mb-3">
+                        <h2>Questions</h2>
+                        <button class="btn btn-primary" onclick="openModal('questionModal')">Add Question</button>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Topic</th>
+                                <th>Difficulty</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="questionsTable">
+                            <tr>
+                                <td colspan="5" class="text-center text-secondary">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <!-- Notes Tab -->
+                <div id="notesTab" class="tab-content hidden">
+                    <div class="flex-between mb-3">
+                        <h2>Notes</h2>
+                        <button class="btn btn-primary" onclick="openModal('noteModal')">Add Note</button>
+                    </div>
+                    <div class="grid" id="notesList">
+                        <div class="text-secondary">No notes available</div>
+                    </div>
+                </div>
+                <!-- Batches Tab -->
+                <div id="batches-deptTab" class="tab-content hidden">
+                    <div class="flex-between mb-3">
+                        <h2>Batches</h2>
+                        <div class="flex-gap">
+                            <button class="btn btn-primary" onclick="openModal('batchDeptModal')">Add Batch</button>
+                            <button class="btn btn-secondary" onclick="openModal('bulkUploadModal')">Bulk Upload
+                                Students</button>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Year</th>
+                                <th>Students</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="batchDeptTable">
+                            <tr>
+                                <td colspan="5" class="text-center text-secondary">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Student Page -->
+            <div id="studentPage" class="page hidden">
+                <div class="page-header">
+                    <h1>Practice Problems</h1>
+                    <p>Solve competitive programming questions and get instant feedback</p>
+                </div>
+
+                <div class="grid-2">
+                    <!-- Questions List -->
+                    <div>
+                        <div class="card">
+                            <div class="card-header">Questions</div>
+                            <div id="questionsList" style="max-height: 600px; overflow-y: auto;">
+                                <p class="text-center text-secondary">Loading questions...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question Details & Editor -->
+                    <div>
+                        <div class="card">
+                            <div class="card-header">Question Details</div>
+                            <div id="questionDetails" class="text-center text-secondary">
+                                Select a question to view details
+                            </div>
+                        </div>
+
+                        <div class="card mt-3">
+                            <div class="card-header">Code Submission</div>
+                            <div id="submissionForm" class="hidden">
+                                <div class="form-group">
+                                    <label>Language</label>
+                                    <select id="codeLanguage">
+                                        <option value="python">Python</option>
+                                        <option value="cpp">C++</option>
+                                        <option value="java">Java</option>
+                                        <option value="javascript">JavaScript</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Code</label>
+                                    <textarea id="codeEditor" class="code-editor"
+                                        placeholder="Write your code here..."></textarea>
+                                </div>
+                                <button class="btn btn-success btn-block" onclick="submitCode()">
+                                    <span id="submitBtnText">Submit Code</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card mt-3">
+                            <div class="card-header">Execution Results</div>
+                            <div id="executionResults" class="output-container">
+                                <div class="text-secondary text-center">No submission yet</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modals -->
+    <!-- College Modal -->
+    <div id="collegeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add College</h3>
+                <button class="close-btn" onclick="closeModal('collegeModal')">&times;</button>
+            </div>
+            <form onsubmit="addCollege(event)">
+                <div class="form-group">
+                    <label>College Name</label>
+                    <input type="text" id="collegeName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="collegeEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="collegePassword" placeholder="Set password (min 6 chars)">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create College</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Department Modal -->
+    <div id="deptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Department</h3>
+                <button class="close-btn" onclick="closeModal('deptModal')">&times;</button>
+            </div>
+            <form onsubmit="addDepartment(event)">
+                <div class="form-group">
+                    <label>Department Name</label>
+                    <input type="text" id="deptName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="deptEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="deptPassword" placeholder="Set password (min 6 chars)">
+                </div>
+                <div class="form-group">
+                    <label>College</label>
+                    <select id="deptCollege" required>
+                        <option value="">Select College</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Department</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Topic Modal -->
+    <div id="topicModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Topic</h3>
+                <button class="close-btn" onclick="closeModal('topicModal')">&times;</button>
+            </div>
+            <form onsubmit="addTopic(event)">
+                <div class="form-group">
+                    <label>Topic Name</label>
+                    <input type="text" id="topicName" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="topicDesc"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Topic</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Question Modal -->
+    <div id="questionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Question</h3>
+                <button class="close-btn" onclick="closeModal('questionModal')">&times;</button>
+            </div>
+            <form onsubmit="addQuestion(event)">
+                <div class="form-group">
+                    <label>Question Title</label>
+                    <input type="text" id="questionTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="questionDesc" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Difficulty</label>
+                    <select id="questionDifficulty" required>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Topic</label>
+                    <select id="questionTopic" required>
+                        <option value="">Select Topic</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Batch</label>
+                    <select id="questionBatch" required>
+                        <option value="">Select Batch</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Language</label>
+                    <select id="questionLanguage" required>
+                        <option value="python">Python</option>
+                        <option value="cpp">C++</option>
+                        <option value="java">Java</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sample Input</label>
+                    <textarea id="sampleInput"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Sample Output</label>
+                    <textarea id="sampleOutput"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Question</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div id="noteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Note</h3>
+                <button class="close-btn" onclick="closeModal('noteModal')">&times;</button>
+            </div>
+            <form onsubmit="addNote(event)">
+                <div class="form-group">
+                    <label>Topic</label>
+                    <select id="noteTopic" required>
+                        <option value="">Select Topic</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="noteTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Google Drive Link</label>
+                    <input type="text" id="noteLink" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Note</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Batch Modal (Admin) -->
+    <div id="batchModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Batch</h3>
+                <button class="close-btn" onclick="closeModal('batchModal')">&times;</button>
+            </div>
+            <form onsubmit="addBatch(event)">
+                <div class="form-group">
+                    <label>Batch Name (YYYY-YYYY)</label>
+                    <input type="text" id="batchName" required>
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <select id="batchDept" required>
+                        <option value="">Select Department</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>College</label>
+                    <select id="batchCollege" required>
+                        <option value="">Select College</option>
+                    </select>
+                    <div id="batchCollegeHelp" class="text-secondary mt-1" style="font-size:0.9rem"></div>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="batchEmail" placeholder="Batch contact email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="batchPassword" placeholder="Set password (min 6 chars)">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Batch</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Batch Modal (Department) -->
+    <div id="batchDeptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Batch</h3>
+                <button class="close-btn" onclick="closeModal('batchDeptModal')">&times;</button>
+            </div>
+            <form onsubmit="addDeptBatch(event)">
+                <div class="form-group">
+                    <label>Batch Name (YYYY-YYYY)</label>
+                    <input type="text" id="batchDeptName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="batchDeptEmail" required placeholder="Batch contact email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="batchDeptPassword" placeholder="Set password (min 6 chars)">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Batch</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add Student</h3>
+                <button class="close-btn" onclick="closeModal('studentModal')">&times;</button>
+            </div>
+            <form onsubmit="addStudent(event)">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="studentUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="studentEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password (optional)</label>
+                    <input type="password" id="studentPassword" placeholder="Set password (optional)">
+                </div>
+                <div class="form-group">
+                    <label>Batch</label>
+                    <select id="studentBatch" required>
+                        <option value="">Select Batch</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Create Student</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bulk Upload Modal (Department) -->
+    <div id="bulkUploadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Bulk Upload Students (CSV)</h3>
+                <button class="close-btn" onclick="closeModal('bulkUploadModal')">&times;</button>
+            </div>
+            <form onsubmit="uploadStudents(event)">
+                <div class="form-group">
+                    <label>Batch</label>
+                    <select id="bulkBatch" required>
+                        <option value="">Select Batch</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>CSV File</label>
+                    <input type="file" id="bulkFile" accept="text/csv" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Upload</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = 'http://localhost:5000/api';
+        let currentUser = null;
+        let currentToken = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+        });
+
+        // Auth Functions
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const messageDiv = document.getElementById('authMessage');
+
+            if (!email || !password) {
+                showMessage(messageDiv, 'Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password }),
+                    mode: 'cors'
+                });
+
+                const data = await response.json();
+                const payload = data.data || data;
+
+                if (response.ok && payload && payload.token) {
+                    currentToken = payload.token;
+                    currentUser = payload.user;
+                    localStorage.setItem('token', currentToken);
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    showApp();
+                    loadDashboard();
+                    showMessage(messageDiv, data.message || 'Login successful', 'success');
+                } else {
+                    showMessage(messageDiv, data.message || 'Login failed', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage(messageDiv, 'Connection error: ' + error.message, 'error');
+            }
+        }
+
+        async function register() {
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const role = document.getElementById('registerRole').value;
+            const messageDiv = document.getElementById('authMessage');
+
+            if (!name || !email || !password) {
+                showMessage(messageDiv, 'Please fill all fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, role }),
+                    mode: 'cors'
+                });
+
+                const data = await response.json();
+                const payload = data.data || data;
+
+                if (response.ok && payload && payload.token) {
+                    currentToken = payload.token;
+                    currentUser = payload.user;
+                    localStorage.setItem('token', currentToken);
+                    localStorage.setItem('user', JSON.stringify(currentUser));
+                    showApp();
+                    loadDashboard();
+                    showMessage(messageDiv, data.message || 'Registration successful', 'success');
+                } else {
+                    showMessage(messageDiv, data.message || 'Registration failed', 'error');
+                }
+            } catch (error) {
+                console.error('Register error:', error);
+                showMessage(messageDiv, 'Connection error: ' + error.message, 'error');
+            }
+        }
+
+        function logout() {
+            currentToken = null;
+            currentUser = null;
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            document.getElementById('authPage').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            toggleAuthForm(true);
+        }
+
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+
+            if (token && user) {
+                currentToken = token;
+                currentUser = JSON.parse(user);
+                showApp();
+                setupNavigation();
+            }
+        }
+
+        // UI Functions
+        function toggleAuthForm(reset = false) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            if (reset) {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            } else {
+                loginForm.classList.toggle('hidden');
+                registerForm.classList.toggle('hidden');
+            }
+        }
+
+        function showApp() {
+            document.getElementById('authPage').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            setupNavigation();
+        }
+
+        function setupNavigation() {
+            const role = currentUser?.role || 'student';
+            document.getElementById('logoutBtn').classList.remove('hidden');
+            document.getElementById('adminLink').classList.toggle('hidden', role !== 'admin');
+            document.getElementById('collegeLink').classList.toggle('hidden', role !== 'college');
+            document.getElementById('deptLink').classList.toggle('hidden', role !== 'department');
+            document.getElementById('studentLink').classList.remove('hidden');
+        }
+
+        function showPage(page) {
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            document.getElementById(page + 'Page').classList.remove('hidden');
+
+            if (page === 'dashboard') loadDashboard();
+            else if (page === 'admin') loadAdmin();
+            else if (page === 'college') loadCollege();
+            else if (page === 'department') loadDepartment();
+            else if (page === 'student') loadStudent();
+        }
+
+        function switchTab(tab, ev) {
+            // Hide all tab contents and remove their active state
+            document.querySelectorAll('.tab-content').forEach(t => { t.classList.add('hidden'); t.classList.remove('active'); });
+            // Deactivate all tab buttons
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            // Show and mark active the selected content
+            const content = document.getElementById(tab + 'Tab');
+            if (content) { content.classList.remove('hidden'); content.classList.add('active'); }
+
+            // Safely set the active class on the clicked button (accept event or find by onclick)
+            const btn = (ev && ev.target) ? ev.target : document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`);
+            if (btn) btn.classList.add('active');
+
+            // Load data for the selected tab
+            if (tab === 'colleges') {
+                loadAdmin();
+            } else if (tab === 'departments') {
+                loadAdmin().then(loadDepartments);
+            } else if (tab === 'batches') {
+                loadAdmin().then(loadBatches);
+            } else if (tab === 'students') {
+                loadBatches().then(loadStudents);
+            } else if (tab === 'batches-dept') {
+                loadDeptBatches();
+            } else if (tab === 'notes') {
+                loadNotes();
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            // Populate modal-dependent selects asynchronously to avoid race conditions
+            if (modalId === 'batchModal') {
+                populateBatchModal().catch(err => console.error('Failed to populate batch modal', err));
+            }
+
+            if (modalId === 'studentModal') {
+                // ensure batches are loaded for student modal
+                loadBatches().catch(err => console.error('Failed to load batches for student modal', err));
+            }
+
+            if (modalId === 'deptModal') {
+                const sel = document.getElementById('deptCollege');
+                if (sel && currentUser && currentUser.role === 'college') {
+                    sel.value = currentUser.college_id || '';
+                    sel.disabled = true;
+                } else if (sel) {
+                    sel.disabled = false;
+                }
+
+                // Reset editing state if opening for create
+                if (!window._editingDeptId) {
+                    document.querySelector('#deptModal .modal-header h3').innerText = 'Add Department';
+                    document.querySelector('#deptModal button[type="submit"]').innerText = 'Create Department';
+                }
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            // Reset college modal editing state if closed
+            if (modalId === 'collegeModal') {
+                editingCollegeId = null;
+                document.querySelector('#collegeModal .modal-header h3').innerText = 'Add College';
+                document.querySelector('#collegeModal button[type="submit"]').innerText = 'Create College';
+                document.getElementById('collegeName').value = '';
+                document.getElementById('collegeEmail').value = '';
+            }
+            // Reset department modal editing state if closed
+            if (modalId === 'deptModal') {
+                window._editingDeptId = null;
+                document.querySelector('#deptModal .modal-header h3').innerText = 'Add Department';
+                document.querySelector('#deptModal button[type="submit"]').innerText = 'Create Department';
+                document.getElementById('deptName').value = '';
+                document.getElementById('deptEmail').value = '';
+                document.getElementById('deptCollege').value = '';
+            }
+            // Reset batch modal editing state if closed
+            if (modalId === 'batchModal') {
+                editingBatchId = null;
+                document.querySelector('#batchModal .modal-header h3').innerText = 'Add Batch';
+                document.querySelector('#batchModal button[type="submit"]').innerText = 'Create Batch';
+                document.getElementById('batchName').value = '';
+                document.getElementById('batchDept').value = '';
+                document.getElementById('batchCollege').value = '';
+            }
+            // Reset department batch modal state
+            if (modalId === 'batchDeptModal') {
+                document.querySelector('#batchDeptModal .modal-header h3').innerText = 'Add Batch';
+                document.querySelector('#batchDeptModal button[type="submit"]').innerText = 'Create Batch';
+                document.getElementById('batchDeptName').value = '';
+            }
+            // Reset student modal
+            if (modalId === 'studentModal') {
+                document.querySelector('#studentModal .modal-header h3').innerText = 'Add Student';
+                document.getElementById('studentUsername').value = '';
+                document.getElementById('studentEmail').value = '';
+                document.getElementById('studentBatch').value = '';
+            }
+            // Reset bulk upload modal
+            if (modalId === 'bulkUploadModal') {
+                document.getElementById('bulkFile').value = '';
+                document.getElementById('bulkBatch').value = '';
+            }
+        }
+
+        function showMessage(element, message, type) {
+            element.innerHTML = `<div class="alert alert-${type === 'error' ? 'error' : type}">${message}</div>`;
+            setTimeout(() => element.innerHTML = '', 5000);
+        }
+
+        // Page Loaders
+        async function loadDashboard() {
+            try {
+                // Only fetch student performance if logged-in user is a student
+                if ((currentUser && currentUser.role === 'student') || (!currentUser && localStorage.getItem('user') && JSON.parse(localStorage.getItem('user')).role === 'student')) {
+                    const response = await fetch(`${API_BASE}/student/performance`, {
+                        headers: { 'Authorization': `Bearer ${currentToken}` }
+                    });
+
+                    if (!response.ok) {
+                        console.warn('Dashboard student performance fetch failed', response.status);
+                        return;
+                    }
+
+                    const data = await response.json();
+                    // Update stats and activity with data.data.performance
+                } else {
+                    // For non-student roles (admin/college/department), no student performance to load
+                    // Optionally, fetch admin-specific stats here
+                    return;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        // Track current editing college id when editing via modal
+        let editingCollegeId = null;
+
+        async function loadAdmin() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/colleges`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (!response.ok) {
+                    console.error('Failed to fetch colleges', response.status);
+                    document.getElementById('collegesTable').innerHTML = '<tr><td colspan="4" class="text-center text-secondary">Failed to load colleges</td></tr>';
+                    return;
+                }
+
+                const resp = await response.json();
+                const colleges = (resp.data && resp.data.colleges) || resp.colleges || [];
+
+                // Store for other views (departments) and build id->name map
+                window._collegesList = colleges;
+                window._collegesMap = {};
+                colleges.forEach(c => { window._collegesMap[c.id] = c.name; });
+                console.debug('loadAdmin: fetched colleges count', colleges.length);
+
+                // Populate college selects used in department modal
+                const deptSelect = document.getElementById('deptCollege');
+                if (deptSelect) {
+                    deptSelect.innerHTML = '<option value="">Select college</option>' + colleges.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+                }
+
+                const tbody = document.getElementById('collegesTable');
+                if (!colleges || colleges.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-secondary">No colleges found</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                colleges.forEach(c => {
+                    const tr = document.createElement('tr');
+                    const statusText = c.is_disabled ? 'Disabled' : 'Active';
+
+                    tr.innerHTML = `
+                        <td>${escapeHtml(c.name || '')}</td>
+                        <td>${escapeHtml(c.email || '')}</td>
+                        <td>${statusText}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" onclick="editCollege('${c.id}')">Edit</button>
+                            <button class="btn btn-sm ${c.is_disabled ? 'btn-success' : 'btn-danger'}" onclick="toggleCollege('${c.id}', ${c.is_disabled ? 'true' : 'false'})">${c.is_disabled ? 'Enable' : 'Disable'}</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteCollege('${c.id}')">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error loading admin:', error);
+                document.getElementById('collegesTable').innerHTML = '<tr><td colspan="4" class="text-center text-secondary">Error loading colleges</td></tr>';
+            }
+        }
+
+        // Helper to safely escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/[&<>">']/g, function (m) {
+                return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]);
+            });
+        }
+
+        // Open modal for editing
+        function editCollege(id) {
+            // Fetch college data and fill form
+            fetch(`${API_BASE}/admin/colleges/${id}`, { headers: { 'Authorization': `Bearer ${currentToken}` } })
+                .then(r => r.json())
+                .then(resp => {
+                    const payload = resp.data || resp;
+                    const college = payload.college || {};
+                    document.getElementById('collegeName').value = college.name || '';
+                    document.getElementById('collegeEmail').value = college.email || '';
+                    editingCollegeId = id;
+                    document.querySelector('#collegeModal .modal-header h3').innerText = 'Edit College';
+                    document.querySelector('#collegeModal button[type="submit"]').innerText = 'Update College';
+                    openModal('collegeModal');
+                })
+                .catch(err => console.error('Failed to fetch college for edit', err));
+        }
+
+        async function toggleCollege(id, currentlyDisabled) {
+            try {
+                const url = `${API_BASE}/admin/colleges/${id}/${currentlyDisabled ? 'enable' : 'disable'}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (!response.ok) throw new Error('Request failed');
+                await loadAdmin();
+            } catch (err) {
+                console.error('Failed to toggle college', err);
+                alert('Action failed: ' + err.message);
+            }
+        }
+
+        async function deleteCollege(id) {
+            if (!confirm('Are you sure you want to permanently delete this college? This action cannot be undone.')) return;
+            try {
+                const response = await fetch(`${API_BASE}/admin/colleges/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.message || 'Request failed');
+                }
+                await loadAdmin();
+            } catch (err) {
+                console.error('Failed to delete college', err);
+                alert('Action failed: ' + err.message);
+            }
+        }
+
+        async function addCollege(event) {
+            event.preventDefault();
+            const name = document.getElementById('collegeName').value.trim();
+            const email = document.getElementById('collegeEmail').value.trim();
+            const password = document.getElementById('collegePassword').value || '';
+
+            if (!name || !email) {
+                alert('Please fill name and email');
+                return;
+            }
+
+            // When creating a college, password is required (for edits it's optional)
+            if (!editingCollegeId) {
+                if (!password || password.length < 6) {
+                    alert('Please set a password (min 6 chars)');
+                    return;
+                }
+            }
+
+            try {
+                const payload = { name, email };
+                if (!editingCollegeId) payload.password = password;
+
+                let url = `${API_BASE}/admin/colleges`;
+                let method = 'POST';
+
+                if (editingCollegeId) {
+                    url = `${API_BASE}/admin/colleges/${editingCollegeId}`;
+                    method = 'PUT';
+                }
+
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.message || 'Request failed');
+                }
+
+                // Reset and reload
+                editingCollegeId = null;
+                document.querySelector('#collegeModal .modal-header h3').innerText = 'Add College';
+                document.querySelector('#collegeModal button[type="submit"]').innerText = 'Create College';
+                document.getElementById('collegeName').value = '';
+                document.getElementById('collegeEmail').value = '';
+                document.getElementById('collegePassword').value = '';
+                closeModal('collegeModal');
+                await loadAdmin();
+            } catch (err) {
+                console.error('Failed to add/update college', err);
+                alert('Failed: ' + err.message);
+            }
+        }
+
+        async function loadCollege() {
+            try {
+                // Load departments for the college view
+                const response = await fetch(`${API_BASE}/college/departments`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (!response.ok) {
+                    document.getElementById('departmentsList').innerHTML = '<div class="text-secondary">Failed to load departments</div>';
+                    return;
+                }
+
+                const resp = await response.json();
+                const depts = (resp.data && resp.data.departments) || resp.departments || [];
+                const container = document.getElementById('departmentsList');
+
+                if (!depts || depts.length === 0) {
+                    container.innerHTML = '<div class="text-secondary">No departments found</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                depts.forEach(d => {
+                    const card = document.createElement('div');
+                    card.className = 'card p-3';
+                    card.innerHTML = `
+                        <div class="flex-between">
+                            <div>
+                                <h4 style="margin-bottom:4px">${escapeHtml(d.name || '')}</h4>
+                                <div class="text-secondary">${escapeHtml(d.email || '')}</div>
+                            </div>
+                            <div class="flex-gap">
+                                <button class="btn btn-sm btn-primary" onclick="openBatchForDept('${d.id}')">Add Batch</button>
+                                <button class="btn btn-sm btn-secondary" onclick="editDepartment('${d.id}')">Edit</button>
+                                <button class="btn btn-sm ${d.is_disabled ? 'btn-success' : 'btn-danger'}" onclick="toggleDepartment('${d.id}', ${d.is_disabled ? 'true' : 'false'})">${d.is_disabled ? 'Enable' : 'Disable'}</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteDepartment('${d.id}')">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+
+                // Optionally load performance data
+                try {
+                    const perfResp = await fetch(`${API_BASE}/college/performance`, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                    if (perfResp.ok) {
+                        const p = await perfResp.json();
+                        const rows = (p.data && p.data.performance) || p.performance || [];
+                        const tbody = document.getElementById('collegePerformance');
+                        if (!rows || rows.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-secondary">No data available</td></tr>';
+                        } else {
+                            tbody.innerHTML = '';
+                            rows.forEach(r => {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td>${escapeHtml(r.department_name || r.department_id || '')}</td>
+                                    <td>${escapeHtml(r.students || '0')}</td>
+                                    <td>${escapeHtml(r.questions_solved || '0')}</td>
+                                    <td>${escapeHtml(r.success_rate ? (r.success_rate + '%') : '0%')}</td>
+                                `;
+                                tbody.appendChild(tr);
+                            });
+                        }
+                    }
+                } catch (e) {
+                    /* ignore perf errors */
+                }
+            } catch (error) {
+                console.error('Error loading college:', error);
+                document.getElementById('departmentsList').innerHTML = '<div class="text-secondary">Error loading departments</div>';
+            }
+        }
+
+        async function loadDepartments() {
+            try {
+                let url = `${API_BASE}/admin/departments`;
+                if (currentUser && currentUser.role === 'college') url = `${API_BASE}/college/departments`;
+
+                const response = await fetch(url, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+
+                if (!response.ok) {
+                    document.getElementById('deptTable').innerHTML = '<tr><td colspan="5" class="text-center text-secondary">Failed to load departments</td></tr>';
+                    return;
+                }
+
+                const resp = await response.json();
+                const depts = (resp.data && resp.data.departments) || resp.departments || [];
+                const tbody = document.getElementById('deptTable');
+                if (!depts || depts.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary">No departments found</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                depts.forEach(d => {
+                    const tr = document.createElement('tr');
+                    const collegeName = (window._collegesMap && window._collegesMap[d.college_id]) || d.college_id || '';
+                    tr.innerHTML = `
+                        <td>${escapeHtml(d.name || '')}</td>
+                        <td>${escapeHtml(collegeName)}</td>
+                        <td>${escapeHtml(d.email || '')}</td>
+                        <td>${d.is_disabled ? 'Disabled' : 'Active'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" onclick="editDepartment('${d.id}')">Edit</button>
+                            <button class="btn btn-sm ${d.is_disabled ? 'btn-success' : 'btn-danger'}" onclick="toggleDepartment('${d.id}', ${d.is_disabled ? 'true' : 'false'})">${d.is_disabled ? 'Enable' : 'Disable'}</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteDepartment('${d.id}')">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error loading departments:', error);
+                document.getElementById('deptTable').innerHTML = '<tr><td colspan="5" class="text-center text-secondary">Error loading departments</td></tr>';
+            }
+
+            async function deleteDepartment(id) {
+                if (!confirm('Permanently delete this department?')) return;
+                try {
+                    let url = `${API_BASE}/admin/departments/${id}`;
+                    if (currentUser && currentUser.role === 'college') url = `${API_BASE}/college/departments/${id}`;
+                    const resp = await fetch(url, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` } });
+                    if (!resp.ok) throw new Error('Request failed');
+                    await loadDepartments();
+                } catch (err) {
+                    console.error('Failed to delete department', err);
+                    alert('Delete failed: ' + (err.message || err));
+                }
+            }
+        }
+
+        // Batches (Admin)
+        async function loadBatches() {
+            try {
+                // Ensure departments map exists (admin-only view)
+                if (!window._departmentsList && currentUser && currentUser.role === 'admin') {
+                    const deptResp = await fetch(`${API_BASE}/admin/departments`, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                    if (deptResp.ok) {
+                        const ddata = await deptResp.json();
+                        const depts = (ddata.data && ddata.data.departments) || ddata.departments || [];
+                        window._departmentsList = depts;
+                        window._departmentsMap = {};
+                        depts.forEach(d => { window._departmentsMap[d.id] = d.name; });
+
+// populate dept select for admin/college batch modal
+                    const select = document.getElementById('batchDept');
+                    if (select) select.innerHTML = '<option value="">Select Department</option>' + depts.map(d => `<option value="${d.id}">${escapeHtml(d.name)}</option>`).join('');
+                }
+            }
+             } catch (e) {
+                        // ignore
+                    }
+
+                // Ensure colleges list exists (admin)
+                if (!window._collegesList && currentUser && currentUser.role === 'admin') await loadAdmin();
+
+                // If current user is college, ensure department select is populated with college departments
+                if (currentUser && currentUser.role === 'college') {
+                    try {
+                        const dr = await fetch(`${API_BASE}/college/departments`, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                        if (dr.ok) {
+                            const dd = await dr.json();
+                            const cdepts = (dd.data && dd.data.departments) || dd.departments || [];
+                            const select = document.getElementById('batchDept');
+                            if (select) select.innerHTML = '<option value="">Select Department</option>' + cdepts.map(d => `<option value="${d.id}">${escapeHtml(d.name)}</option>`).join('');
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
+                }
+
+                let url = `${API_BASE}/admin/batches`;
+                if (currentUser && currentUser.role === 'department') url = `${API_BASE}/department/batches`;
+                else if (currentUser && currentUser.role === 'college') url = `${API_BASE}/college/batches`;
+
+                const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!resp.ok) {
+                    document.getElementById('batchTable').innerHTML = '<tr><td colspan="4" class="text-center text-secondary">Failed to load batches</td></tr>';
+                    return;
+                }
+
+                const data = await resp.json();
+                const batches = (data.data && data.data.batches) || data.batches || [];
+                const tbody = document.getElementById('batchTable');
+                if (!batches || batches.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center text-secondary">No batches found</td></tr>';
+                    return;
+                }
+
+                window._batchesList = batches;
+                window._batchesMap = {};
+                tbody.innerHTML = '';
+                batches.forEach(b => {
+                    window._batchesMap[b.id] = b.batch_name;
+                    const tr = document.createElement('tr');
+                    const deptName = (window._departmentsMap && window._departmentsMap[b.department_id]) || b.department_id || '';
+                    tr.innerHTML = `
+                            <td>${escapeHtml(b.batch_name || '')}</td>
+                            <td>${escapeHtml(deptName)}</td>
+                            <td>${b.is_disabled ? 'Disabled' : 'Active'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-secondary" onclick="editBatch('${b.id}')">Edit</button>
+                                <button class="btn btn-sm ${b.is_disabled ? 'btn-success' : 'btn-danger'}" onclick="toggleBatch('${b.id}', ${b.is_disabled ? 'true' : 'false'})">${b.is_disabled ? 'Enable' : 'Disable'}</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteBatch('${b.id}')">Delete</button>
+                            </td>
+                        `;
+                    tbody.appendChild(tr);
+                });
+                // populate batch select for student modal
+                const sb = document.getElementById('studentBatch');
+                if (sb) sb.innerHTML = '<option value="">Select Batch</option>' + batches.map(b => `<option value="${b.id}">${escapeHtml(b.batch_name)}</option>`).join('');
+
+                // populate batch select for admin batch modal college list
+                async function populateBatchModal() {
+                    try {
+                        // Try to load colleges explicitly to ensure fresh data
+                        try {
+                            const cResp = await fetch(`${API_BASE}/admin/colleges`, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                            if (cResp.ok) {
+                                const cdata = await cResp.json();
+                                const colleges = (cdata.data && cdata.data.colleges) || cdata.colleges || [];
+                                window._collegesList = colleges;
+                                window._collegesMap = {};
+                                colleges.forEach(c => { window._collegesMap[c.id] = c.name; });
+                                console.debug('populateBatchModal: fetched colleges count', colleges.length);
+                            } else {
+                                console.warn('populateBatchModal: failed to fetch colleges', cResp.status);
+                                const help = document.getElementById('batchCollegeHelp');
+                                if (help) help.innerHTML = `Failed to load colleges (status ${cResp.status}). Please refresh or check your permissions.`;
+                            }
+                        } catch (e) {
+                            console.error('populateBatchModal: error fetching colleges', e);
+                            const help = document.getElementById('batchCollegeHelp');
+                            if (help) help.innerHTML = 'Failed to load colleges. Please refresh or check your permissions.';
+                        }
+
+                        // Ensure departments are loaded
+                        if (!window._departmentsList) {
+                            const resp = await fetch(`${API_BASE}/admin/departments`, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                            if (resp.ok) {
+                                const ddata = await resp.json();
+                                const depts = (ddata.data && ddata.data.departments) || ddata.departments || [];
+                                window._departmentsList = depts;
+                                window._departmentsMap = {};
+                                depts.forEach(d => { window._departmentsMap[d.id] = d.name; });
+                            }
+                        }
+
+                        const bc = document.getElementById('batchCollege');
+                        if (bc) {
+                            const colleges = window._collegesList || [];
+                            const help = document.getElementById('batchCollegeHelp');
+                            if (colleges.length === 0) {
+                                bc.innerHTML = '<option value="">Select College</option><option value="__none__">No colleges available</option>';
+                                if (help) help.innerHTML = 'No colleges available. <button class="btn btn-sm btn-primary" onclick="openModal(\'collegeModal\')">Create College</button>';
+                            } else {
+                                bc.innerHTML = '<option value="">Select College</option>' + colleges.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+                                if (help) help.innerHTML = '';
+                            }
+
+                            // If current user is college, preselect and disable college select and load college departments
+                            if (currentUser && currentUser.role === 'college') {
+                                bc.value = currentUser.college_id || '';
+                                bc.disabled = true;
+                                try {
+                                    const dr = await fetch(`${API_BASE}/college/departments`, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                                    if (dr.ok) {
+                                        const dd = await dr.json();
+                                        const cdepts = (dd.data && dd.data.departments) || dd.departments || [];
+                                        const bd = document.getElementById('batchDept');
+                                        if (bd) bd.innerHTML = '<option value="">Select Department</option>' + cdepts.map(d => `<option value="${d.id}">${escapeHtml(d.name)}</option>`).join('');
+                                    }
+                                } catch (e) {
+                                    // ignore
+                                }
+                            } else if (bc) {
+                                bc.disabled = false;
+                            }
+                        }
+
+                        const bd = document.getElementById('batchDept');
+                        if (bd) {
+                            const depts = window._departmentsList || [];
+                            if (depts.length === 0) {
+                                bd.innerHTML = '<option value="">Select Department</option><option value="">No departments available</option>';
+                            } else {
+                                bd.innerHTML = '<option value="">Select Department</option>' + depts.map(d => `<option value="${d.id}">${escapeHtml(d.name)}</option>`).join('');
+                            }
+                        }
+                    } catch (err) {
+                        console.error('populateBatchModal error', err);
+                    }
+                }
+
+                // Open batch modal pre-selecting the given department (College dashboard quick-add)
+                async function openBatchForDept(deptId) {
+                    try {
+                        // Ensure modal selects are populated
+                        await populateBatchModal();
+                        const bd = document.getElementById('batchDept');
+                        if (bd) bd.value = deptId;
+                        openModal('batchModal');
+                    } catch (e) {
+                        console.error('Failed to open batch modal for dept', e);
+                        // fallback to opening modal
+                        openModal('batchModal');
+                    }
+                }
+
+        // Add or update a batch
+        let editingBatchId = null;
+        async function addBatch(event) {
+            event.preventDefault();
+            const name = document.getElementById('batchName').value.trim();
+            const deptId = document.getElementById('batchDept').value;
+            const collegeId = document.getElementById('batchCollege').value;
+            const password = document.getElementById('batchPassword').value || '';
+            const email = document.getElementById('batchEmail').value.trim();
+
+            const batchRe = /^\d{4}-\d{4}$/;
+            if (!name || !email) return alert('Please fill all fields');
+            if (!batchRe.test(name)) return alert('Batch name must be in format YYYY-YYYY');
+
+            // Password required when creating a batch
+            if (!editingBatchId && (!password || password.length < 6)) return alert('Please set a password (min 6 chars)');
+
+            try {
+                let baseUrl = `${API_BASE}/admin/batches`;
+                let payload = { batch_name: name, department_id: deptId, college_id: collegeId, email };
+
+                // If department user, use department endpoint which infers department from token
+                if (currentUser && currentUser.role === 'department') {
+                    baseUrl = `${API_BASE}/department/batches`;
+                    payload = { batch_name: name, email, password };
+                } else if (currentUser && currentUser.role === 'college') {
+                    baseUrl = `${API_BASE}/college/batches`;
+                    payload = { batch_name: name, department_id: deptId, email, password };
+                }
+
+                let url = baseUrl;
+                let method = 'POST';
+                if (editingBatchId) { url = `${baseUrl}/${editingBatchId}`; method = 'PUT'; }
+
+                const resp = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.message || 'Request failed');
+                }
+
+                // Reset state and reload
+                editingBatchId = null;
+                document.getElementById('batchName').value = '';
+                document.getElementById('batchEmail').value = '';
+                document.getElementById('batchPassword').value = '';
+                document.getElementById('batchDept').value = '';
+                document.getElementById('batchCollege').value = '';
+                closeModal('batchModal');
+                await loadBatches();
+            } catch (err) {
+                console.error('Failed to create/update batch', err);
+                alert('Failed: ' + err.message);
+            }
+        }
+
+        // Edit batch - populate modal then open
+        async function editBatch(id) {
+            try {
+                let url = `${API_BASE}/admin/batches/${id}`;
+                if (currentUser && currentUser.role === 'department') url = `${API_BASE}/department/batches/${id}`;
+                const r = await fetch(url, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!r.ok) throw new Error('Failed to fetch batch');
+                const resp = await r.json();
+                const payload = resp.data || resp;
+                const batch = payload.batch || {};
+
+                // ensure modal selects are populated
+                await populateBatchModal();
+
+                document.getElementById('batchName').value = batch.batch_name || '';
+                document.getElementById('batchDept').value = batch.department_id || '';
+                document.getElementById('batchCollege').value = batch.college_id || '';
+                editingBatchId = id;
+                document.querySelector('#batchModal .modal-header h3').innerText = 'Edit Batch';
+                document.querySelector('#batchModal button[type="submit"]').innerText = 'Update Batch';
+                openModal('batchModal');
+            } catch (err) {
+                console.error('Failed to load batch for edit', err);
+                alert('Failed to load batch for edit');
+            }
+        }
+
+        // Department page batches (department admin)
+        async function loadDeptBatches() {
+            try {
+                const resp = await fetch(`${API_BASE}/department/batches`, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!resp.ok) {
+                    document.getElementById('batchDeptTable').innerHTML = '<tr><td colspan="3" class="text-center text-secondary">Failed to load batches</td></tr>';
+                    return;
+                }
+                const data = await resp.json();
+                const batches = (data.data && data.data.batches) || data.batches || [];
+                const tbody = document.getElementById('batchDeptTable');
+                if (!batches || batches.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-secondary">No batches found</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+                batches.forEach(b => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                            <td>${escapeHtml(b.batch_name || '')}</td>
+                            <td>${b.is_disabled ? 'Disabled' : 'Active'}</td>
+                            <td>
+                                <!-- Department cannot edit batch name currently -->
+                            </td>
+                        `;
+                    tbody.appendChild(tr);
+                });
+                // populate dept batch selects
+                const bulk = document.getElementById('bulkBatch');
+                if (bulk) bulk.innerHTML = '<option value="">Select Batch</option>' + batches.map(b => `<option value="${b.id}">${escapeHtml(b.batch_name)}</option>`).join('');
+            } catch (err) {
+                console.error('Failed to load department batches', err);
+                document.getElementById('batchDeptTable').innerHTML = '<tr><td colspan="3" class="text-center text-secondary">Error loading batches</td></tr>';
+            }
+        }
+
+        async function addDeptBatch(event) {
+            event.preventDefault();
+            const name = document.getElementById('batchDeptName').value.trim();
+            const password = document.getElementById('batchDeptPassword').value || '';
+            const email = document.getElementById('batchDeptEmail').value.trim();
+            if (!name) return alert('Please fill batch name');
+            if (!email) return alert('Please provide an email for the batch');
+            if (!password || password.length < 6) return alert('Please set a password (min 6 chars)');
+
+            try {
+                const response = await fetch(`${API_BASE}/department/batches`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+                    body: JSON.stringify({ batch_name: name, email, password })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.message || 'Request failed');
+                }
+
+                document.getElementById('batchDeptName').value = '';
+                document.getElementById('batchDeptEmail').value = '';
+                document.getElementById('batchDeptPassword').value = '';
+                closeModal('batchDeptModal');
+                await loadDeptBatches();
+            } catch (err) {
+                console.error('Failed to create batch', err);
+                alert('Failed: ' + err.message);
+            }
+        }
+
+        // Students (Admin)
+        async function loadStudents() {
+            try {
+                // ensure batches loaded
+                if (!window._batchesList) await loadBatches();
+                let studentsUrl = `${API_BASE}/admin/students`;
+                if (currentUser && currentUser.role === 'department') studentsUrl = `${API_BASE}/department/students`;
+                else if (currentUser && currentUser.role === 'college') studentsUrl = `${API_BASE}/college/students`;
+                const resp = await fetch(studentsUrl, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!resp.ok) {
+                    document.getElementById('studentTable').innerHTML = '<tr><td colspan="5" class="text-center text-secondary">Failed to load students</td></tr>';
+                    return;
+                }
+                const data = await resp.json();
+                const students = (data.data && data.data.students) || data.students || [];
+                const tbody = document.getElementById('studentTable');
+                if (!students || students.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary">No students found</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+                students.forEach(s => {
+                    const tr = document.createElement('tr');
+                    const batchName = (window._batchesMap && window._batchesMap[s.batch_id]) || s.batch_id || '';
+                    tr.innerHTML = `
+                            <td>${escapeHtml(s.username || '')}</td>
+                            <td>${escapeHtml(s.email || '')}</td>
+                            <td>${escapeHtml(batchName)}</td>
+                            <td>${s.is_disabled ? 'Disabled' : 'Active'}</td>
+                            <td>
+                                <button class="btn btn-sm btn-secondary" onclick="editStudent('${s.id}')">Edit</button>
+                                <button class="btn btn-sm ${s.is_disabled ? 'btn-success' : 'btn-danger'}" onclick="toggleStudent('${s.id}', ${s.is_disabled ? 'true' : 'false'})">${s.is_disabled ? 'Enable' : 'Disable'}</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteStudent('${s.id}')">Delete</button>
+                            </td>
+                        `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                console.error('Failed to load students', err);
+                document.getElementById('studentTable').innerHTML = '<tr><td colspan="5" class="text-center text-secondary">Error loading students</td></tr>';
+            }
+        }
+
+        async function editStudent(id) {
+            try {
+                let url = `${API_BASE}/admin/students/${id}`;
+                if (currentUser && currentUser.role === 'department') url = `${API_BASE}/department/students/${id}`;
+                else if (currentUser && currentUser.role === 'college') url = `${API_BASE}/college/students/${id}`;
+                const resp = await fetch(url, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!resp.ok) throw new Error('Request failed');
+                const data = await resp.json();
+                const student = (data.data && data.data.student) || data.student || {};
+                document.getElementById('studentUsername').value = student.username || '';
+                document.getElementById('studentEmail').value = student.email || '';
+                document.getElementById('studentBatch').value = student.batch_id || '';
+                window._editingStudentId = id;
+                document.querySelector('#studentModal .modal-header h3').innerText = 'Edit Student';
+                document.querySelector('#studentModal button[type="submit"]').innerText = 'Update Student';
+                openModal('studentModal');
+            } catch (err) {
+                console.error('Failed to load student', err);
+                alert('Failed to load student: ' + (err.message || err));
+            }
+        }
+
+        async function deleteStudent(id) {
+            if (!confirm('Permanently delete this student?')) return;
+            try {
+                let url = `${API_BASE}/admin/students/${id}`;
+                if (currentUser && currentUser.role === 'department') url = `${API_BASE}/department/students/${id}`;
+                else if (currentUser && currentUser.role === 'college') url = `${API_BASE}/college/students/${id}`;
+                const resp = await fetch(url, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!resp.ok) throw new Error('Request failed');
+                if (currentUser && currentUser.role === 'college') await loadCollege(); else await loadStudents();
+            } catch (err) {
+                console.error('Failed to delete student', err);
+                alert('Delete failed: ' + (err.message || err));
+            }
+        }
+
+        async function addStudent(event) {
+            event.preventDefault();
+            const username = document.getElementById('studentUsername').value.trim();
+            const email = document.getElementById('studentEmail').value.trim();
+            const batchId = document.getElementById('studentBatch').value;
+            if (!username || !email || !batchId) return alert('Please fill all fields');
+
+            try {
+                const password = document.getElementById('studentPassword').value;
+                const body = { username, email, batch_id: batchId };
+                if (password) body.password = password;
+
+                let base = `${API_BASE}/admin/students`;
+                if (currentUser && currentUser.role === 'department') base = `${API_BASE}/department/students`;
+                else if (currentUser && currentUser.role === 'college') base = `${API_BASE}/college/students`;
+
+                let url = base;
+                let method = 'POST';
+                if (window._editingStudentId) {
+                    url = `${base}/${window._editingStudentId}`;
+                    method = 'PUT';
+                    // only send fields allowed for update
+                    delete body.password; // don't change password here
+                }
+
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.message || 'Request failed');
+                }
+
+                const data = await response.json();
+
+                if (method === 'POST') {
+                    const pwd = data.data && data.data.password ? data.data.password : '(see server response)';
+                    alert('Student created. Password: ' + pwd);
+                } else {
+                    alert('Student updated');
+                }
+
+                // Reset form
+                window._editingStudentId = null;
+                document.getElementById('studentUsername').value = '';
+                document.getElementById('studentEmail').value = '';
+                document.getElementById('studentPassword').value = '';
+                closeModal('studentModal');
+                if (currentUser && currentUser.role === 'college') await loadCollege(); else await loadStudents();
+            } catch (err) {
+                console.error('Failed to create student', err);
+                alert('Failed: ' + err.message);
+            }
+        }
+
+        async function toggleStudent(id, currentlyDisabled) {
+            try {
+                let base = `${API_BASE}/admin/students`;
+                if (currentUser && currentUser.role === 'department') base = `${API_BASE}/department/students`;
+                else if (currentUser && currentUser.role === 'college') base = `${API_BASE}/college/students`;
+                const url = `${base}/${id}/${currentlyDisabled ? 'enable' : 'disable'}`;
+                const response = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!response.ok) throw new Error('Request failed');
+                if (currentUser && currentUser.role === 'college') await loadCollege(); else await loadStudents();
+            } catch (err) {
+                console.error('Failed to toggle student', err);
+                alert('Action failed: ' + err.message);
+            }
+        }
+
+        async function uploadStudents(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById('bulkFile');
+            const batchId = document.getElementById('bulkBatch').value;
+            if (!fileInput.files.length || !batchId) return alert('Please select a file and batch');
+
+            try {
+                const formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+                formData.append('batch_id', batchId);
+
+                const resp = await fetch(`${API_BASE}/department/students/upload`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${currentToken}` },
+                    body: formData
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    throw new Error(err.message || 'Upload failed');
+                }
+
+                const data = await resp.json();
+                alert('Upload complete. Created: ' + (data.data && data.data.created ? data.data.created.length : 0) + ', Errors: ' + (data.data && data.data.errors ? data.data.errors.length : 0));
+                document.getElementById('bulkFile').value = '';
+                closeModal('bulkUploadModal');
+                await loadDeptBatches();
+            } catch (err) {
+                console.error('Failed to upload students', err);
+                alert('Upload failed: ' + err.message);
+            }
+        }
+
+        async function addDepartment(event) {
+            event.preventDefault();
+            const name = document.getElementById('deptName').value.trim();
+            const email = document.getElementById('deptEmail').value.trim();
+            const collegeId = document.getElementById('deptCollege').value;
+            const password = document.getElementById('deptPassword').value || '';
+
+            if (!name || !email || !collegeId) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            // Password required when creating
+            if (!window._editingDeptId) {
+                if (!password || password.length < 6) {
+                    alert('Please set a password (min 6 chars)');
+                    return;
+                }
+            }
+
+            try {
+                let baseUrl = `${API_BASE}/admin/departments`;
+                if (currentUser && currentUser.role === 'college') baseUrl = `${API_BASE}/college/departments`;
+
+                let url = baseUrl;
+                let method = 'POST';
+                const finalCollegeId = (currentUser && currentUser.role === 'college') ? currentUser.college_id : collegeId;
+                const payload = { name, email, college_id: finalCollegeId };
+                if (!window._editingDeptId) payload.password = password;
+
+                if (window._editingDeptId) {
+                    url = `${baseUrl}/${window._editingDeptId}`;
+                    method = 'PUT';
+                }
+
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.message || 'Request failed');
+                }
+
+                window._editingDeptId = null;
+                document.getElementById('deptName').value = '';
+                document.getElementById('deptEmail').value = '';
+                document.getElementById('deptPassword').value = '';
+                closeModal('deptModal');
+                if (currentUser && currentUser.role === 'college') await loadCollege();
+                else await loadDepartments();
+            } catch (err) {
+                console.error('Failed to create/update department', err);
+                alert('Failed: ' + err.message);
+            }
+        }
+
+        async function toggleDepartment(id, currentlyDisabled) {
+            try {
+                let base = `${API_BASE}/admin/departments`;
+                if (currentUser && currentUser.role === 'college') base = `${API_BASE}/college/departments`;
+                const url = `${base}/${id}/${currentlyDisabled ? 'enable' : 'disable'}`;
+                const response = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!response.ok) throw new Error('Request failed');
+                // refresh the appropriate view
+                if (currentUser && currentUser.role === 'college') await loadCollege();
+                else await loadDepartments();
+            } catch (err) {
+                console.error('Failed to toggle department', err);
+                alert('Action failed: ' + err.message);
+            }
+        }
+
+        async function deleteDepartment(id) {
+            if (!confirm('Permanently delete this department?')) return;
+            try {
+                let url = `${API_BASE}/admin/departments/${id}`;
+                if (currentUser && currentUser.role === 'college') url = `${API_BASE}/college/departments/${id}`;
+                const resp = await fetch(url, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!resp.ok) throw new Error('Request failed');
+                if (currentUser && currentUser.role === 'college') await loadCollege();
+                else await loadDepartments();
+            } catch (err) {
+                console.error('Failed to delete department', err);
+                alert('Delete failed: ' + (err.message || err));
+            }
+        }
+
+        async function toggleBatch(id, currentlyDisabled) {
+            try {
+                let base = `${API_BASE}/admin/batches`;
+                if (currentUser && currentUser.role === 'department') base = `${API_BASE}/department/batches`;
+                const url = `${base}/${id}/${currentlyDisabled ? 'enable' : 'disable'}`;
+                const response = await fetch(url, { method: 'POST', headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!response.ok) throw new Error('Request failed');
+                await loadBatches();
+            } catch (err) {
+                console.error('Failed to toggle batch', err);
+                alert('Action failed: ' + err.message);
+            }
+        }
+
+        async function deleteBatch(id) {
+            if (!confirm('Permanently delete this batch?')) return;
+            try {
+                let url = `${API_BASE}/admin/batches/${id}`;
+                if (currentUser && currentUser.role === 'department') url = `${API_BASE}/department/batches/${id}`;
+                else if (currentUser && currentUser.role === 'college') url = `${API_BASE}/college/batches/${id}`;
+                const resp = await fetch(url, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!resp.ok) throw new Error('Request failed');
+                if (currentUser && currentUser.role === 'college') await loadCollege();
+                else await loadBatches();
+            } catch (err) {
+                console.error('Failed to delete batch', err);
+                alert('Delete failed: ' + (err.message || err));
+            }
+        }
+
+        function editDepartment(id) {
+            let url = `${API_BASE}/admin/departments/${id}`;
+            if (currentUser && currentUser.role === 'college') url = `${API_BASE}/college/departments/${id}`;
+            fetch(url, { headers: { 'Authorization': `Bearer ${currentToken}` } })
+                .then(r => r.json())
+                .then(resp => {
+                    const payload = resp.data || resp;
+                    const dept = payload.department || {};
+                    document.getElementById('deptName').value = dept.name || '';
+                    document.getElementById('deptEmail').value = dept.email || '';
+                    document.getElementById('deptCollege').value = dept.college_id || '';
+                    // mark editing (reuse deptModal for edit)
+                    window._editingDeptId = id;
+                    document.querySelector('#deptModal .modal-header h3').innerText = 'Edit Department';
+                    document.querySelector('#deptModal button[type="submit"]').innerText = 'Update Department';
+                    openModal('deptModal');
+                })
+                .catch(err => console.error('Failed to load department for edit', err));
+        }
+
+        async function loadDepartment() {
+            try {
+                const response = await fetch(`${API_BASE}/department/topics`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                const data = await response.json();
+                const topics = (data.data && data.data.topics) || data.topics || [];
+                const topicsList = document.getElementById('topicsList');
+                const topicSelect = document.getElementById('questionTopic');
+                const noteTopicSelect = document.getElementById('noteTopic');
+
+                if (!topics || topics.length === 0) {
+                    topicsList.innerHTML = '<div class="text-secondary">No topics found</div>';
+                } else {
+                    topicsList.innerHTML = '';
+                    topics.forEach(t => {
+                        const div = document.createElement('div');
+                        div.className = 'card';
+                        div.innerHTML = `<h4>${escapeHtml(t.name)}</h4>`;
+                        topicsList.appendChild(div);
+                    });
+                }
+
+                if (topicSelect) topicSelect.innerHTML = '<option value="">Select Topic</option>' + topics.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('');
+                if (noteTopicSelect) noteTopicSelect.innerHTML = '<option value="">Select Topic</option>' + topics.map(t => `<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('');
+                // topics map
+                window._topicsMap = {};
+                topics.forEach(t => { window._topicsMap[t.id] = t.name; });
+
+                // Also populate batches for question creation
+                const batchSel = document.getElementById('questionBatch');
+                if (!window._batchesList) await loadDeptBatches();
+                if (batchSel && window._batchesList) batchSel.innerHTML = '<option value="">Select Batch</option>' + window._batchesList.map(b => `<option value="${b.id}">${escapeHtml(b.batch_name)}</option>`).join('');
+                // Load questions and notes
+                await loadQuestions();
+                await loadNotes();
+            } catch (error) {
+                console.error('Error loading department:', error);
+            }
+        }
+
+        async function addTopic(event) {
+            event.preventDefault();
+            const name = document.getElementById('topicName').value.trim();
+            if (!name) return alert('Please provide a topic name');
+
+            try {
+                const resp = await fetch(`${API_BASE}/department/topics`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+                    body: JSON.stringify({ name })
+                });
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    throw new Error(err.message || 'Request failed');
+                }
+                document.getElementById('topicName').value = '';
+                closeModal('topicModal');
+                await loadDepartment();
+            } catch (err) {
+                console.error('Failed to create topic', err);
+                alert('Failed: ' + err.message);
+            }
+        }
+
+        async function loadQuestions() {
+            try {
+                const resp = await fetch(`${API_BASE}/department/questions`, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!resp.ok) {
+                    document.getElementById('questionsTable').innerHTML = '<tr><td colspan="5" class="text-center text-secondary">Failed to load questions</td></tr>';
+                    return;
+                }
+                const data = await resp.json();
+                const questions = (data.data && data.data.questions) || data.questions || [];
+                const tbody = document.getElementById('questionsTable');
+                if (!questions || questions.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-secondary">No questions found</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+                questions.forEach(q => {
+                    const tr = document.createElement('tr');
+                    const topicName = (window._topicsMap && window._topicsMap[q.topic_id]) || q.topic_id || '';
+                    tr.innerHTML = `
+                        <td>${escapeHtml(q.title || '')}</td>
+                        <td>${escapeHtml(topicName)}</td>
+                        <td>${escapeHtml(q.language || '')}</td>
+                        <td>Active</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" onclick="editQuestion('${q.id}')">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteQuestion('${q.id}')">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (err) {
+                console.error('Failed to load questions', err);
+                document.getElementById('questionsTable').innerHTML = '<tr><td colspan="5" class="text-center text-secondary">Error loading questions</td></tr>';
+            }
+        }
+
+        async function addQuestion(event) {
+            event.preventDefault();
+            const title = document.getElementById('questionTitle').value.trim();
+            const description = document.getElementById('questionDesc').value.trim();
+            const topicId = document.getElementById('questionTopic').value;
+            const batchId = document.getElementById('questionBatch').value;
+            const language = document.getElementById('questionLanguage').value;
+            const sampleInput = document.getElementById('sampleInput').value || '';
+            const sampleOutput = document.getElementById('sampleOutput').value || '';
+
+            if (!title || !description || !topicId || !batchId || !language) return alert('Please fill all required fields');
+
+            try {
+                let url = `${API_BASE}/department/questions`;
+                let method = 'POST';
+                
+                if (window._editingQuestionId) {
+                    url = `${API_BASE}/department/questions/${window._editingQuestionId}`;
+                    method = 'PUT';
+                }
+
+                const resp = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+                    body: JSON.stringify({ title, description, topic_id: topicId, batch_id: batchId, language, sample_input: sampleInput, sample_output: sampleOutput })
+                });
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    throw new Error(err.message || 'Request failed');
+                }
+                document.getElementById('questionTitle').value = '';
+                document.getElementById('questionDesc').value = '';
+                window._editingQuestionId = null;
+                closeModal('questionModal');
+                await loadQuestions();
+            } catch (err) {
+                console.error('Failed to create/update question', err);
+                alert('Failed: ' + err.message);
+            }
+        }
+
+        async function deleteQuestion(id) {
+            if (!confirm('Permanently delete this question?')) return;
+            try {
+                const resp = await fetch(`${API_BASE}/department/questions/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (!resp.ok) throw new Error('Request failed');
+                await loadQuestions();
+            } catch (err) {
+                console.error('Failed to delete question', err);
+                alert('Delete failed: ' + (err.message || err));
+            }
+        }
+
+        async function editQuestion(id) {
+            try {
+                const resp = await fetch(`${API_BASE}/department/questions/${id}`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (!resp.ok) throw new Error('Request failed');
+                const data = await resp.json();
+                const question = (data.data && data.data.question) || data.question || {};
+                document.getElementById('questionTitle').value = question.title || '';
+                document.getElementById('questionDesc').value = question.description || '';
+                document.getElementById('questionTopic').value = question.topic_id || '';
+                document.getElementById('questionBatch').value = question.batch_id || '';
+                document.getElementById('questionLanguage').value = question.language || '';
+                document.getElementById('sampleInput').value = question.sample_input || '';
+                document.getElementById('sampleOutput').value = question.sample_output || '';
+                window._editingQuestionId = id;
+                openModal('questionModal');
+            } catch (err) {
+                console.error('Failed to load question', err);
+                alert('Failed to load question: ' + (err.message || err));
+            }
+        }
+
+
+        async function loadNotes() {
+            try {
+                const resp = await fetch(`${API_BASE}/department/notes`, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                if (!resp.ok) {
+                    document.getElementById('notesList').innerHTML = '<div class="text-secondary">Failed to load notes</div>';
+                    return;
+                }
+                const data = await resp.json();
+                const notes = (data.data && data.data.notes) || data.notes || [];
+                const notesList = document.getElementById('notesList');
+                if (!notes || notes.length === 0) {
+                    notesList.innerHTML = '<div class="text-secondary">No notes found</div>';
+                    return;
+                }
+                notesList.innerHTML = '';
+                notes.forEach(n => {
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.innerHTML = `
+                        <div class="flex-between">
+                            <div>
+                                <h4 style="margin-bottom:4px">${escapeHtml(n.title)}</h4>
+                                <p><a href="${escapeHtml(n.google_drive_link)}" target="_blank">Open Link</a></p>
+                            </div>
+                            <div class="flex-gap">
+                                <button class="btn btn-sm btn-secondary" onclick="editNote('${n.id}')">Edit</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteNote('${n.id}')">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    notesList.appendChild(div);
+                });
+            } catch (err) {
+                console.error('Failed to load notes', err);
+                document.getElementById('notesList').innerHTML = '<div class="text-secondary">Error loading notes</div>';
+            }
+        }
+
+        async function addNote(event) {
+            event.preventDefault();
+            const topicId = document.getElementById('noteTopic').value;
+            const title = document.getElementById('noteTitle').value.trim();
+            const link = document.getElementById('noteLink').value.trim();
+            if (!topicId || !title || !link) return alert('Please fill all fields');
+
+            try {
+                let url = `${API_BASE}/department/notes`;
+                let method = 'POST';
+                
+                if (window._editingNoteId) {
+                    url = `${API_BASE}/department/notes/${window._editingNoteId}`;
+                    method = 'PUT';
+                }
+
+                const resp = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentToken}` },
+                    body: JSON.stringify({ topic_id: topicId, title, google_drive_link: link })
+                });
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    throw new Error(err.message || 'Request failed');
+                }
+                document.getElementById('noteTitle').value = '';
+                document.getElementById('noteLink').value = '';
+                window._editingNoteId = null;
+                closeModal('noteModal');
+                await loadNotes();
+            } catch (err) {
+                console.error('Failed to create/update note', err);
+                alert('Failed: ' + err.message);
+            }
+        }
+
+        async function deleteNote(id) {
+            if (!confirm('Permanently delete this note?')) return;
+            try {
+                const resp = await fetch(`${API_BASE}/department/notes/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (!resp.ok) throw new Error('Request failed');
+                await loadNotes();
+            } catch (err) {
+                console.error('Failed to delete note', err);
+                alert('Delete failed: ' + (err.message || err));
+            }
+        }
+
+        async function editNote(id) {
+            try {
+                const resp = await fetch(`${API_BASE}/department/notes/${id}`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                if (!resp.ok) throw new Error('Request failed');
+                const data = await resp.json();
+                const note = (data.data && data.data.note) || data.note || {};
+                document.getElementById('noteTopic').value = note.topic_id || '';
+                document.getElementById('noteTitle').value = note.title || '';
+                document.getElementById('noteLink').value = note.google_drive_link || '';
+                window._editingNoteId = id;
+                openModal('noteModal');
+            } catch (err) {
+                console.error('Failed to load note', err);
+                alert('Failed to load note: ' + (err.message || err));
+            }
+        }
+
+
+        async function loadStudent() {
+            try {
+                const response = await fetch(`${API_BASE}/student/questions`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                const data = await response.json();
+                // Populate questions
+            } catch (error) {
+                console.error('Error loading student:', error);
+            }
+        }
+
+        // Form Handlers
+        async function addCollege(event) {
+            event.preventDefault();
+            const name = document.getElementById('collegeName').value.trim();
+            const email = document.getElementById('collegeEmail').value.trim();
+            const password = document.getElementById('collegePassword').value || '';
+
+            if (!name || !email) {
+                alert('Please fill name and email');
+                return;
+            }
+
+            // Password required when creating a new college
+            if (!editingCollegeId && (!password || password.length < 6)) {
+                alert('Please set a password (min 6 chars)');
+                return;
+            }
+
+            try {
+                const payload = { name, email };
+                if (!editingCollegeId) payload.password = password;
+
+                let url = `${API_BASE}/admin/colleges`;
+                let method = 'POST';
+                if (editingCollegeId) {
+                    url = `${API_BASE}/admin/colleges/${editingCollegeId}`;
+                    method = 'PUT';
+                }
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    // Reset and reload
+                    editingCollegeId = null;
+                    document.querySelector('#collegeModal .modal-header h3').innerText = 'Add College';
+                    document.querySelector('#collegeModal button[type="submit"]').innerText = 'Create College';
+                    document.getElementById('collegeName').value = '';
+                    document.getElementById('collegeEmail').value = '';
+                    document.getElementById('collegePassword').value = '';
+                    closeModal('collegeModal');
+                    await loadAdmin();
+                } else {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.message || 'Request failed');
+                }
+            } catch (error) {
+                console.error('Failed to add/update college', error);
+                alert('Failed: ' + (error.message || error));
+            }
+        }
+
+        async function submitCode() {
+            const questionId = document.getElementById('questionsList').dataset.selectedId;
+            const code = document.getElementById('codeEditor').value;
+            const language = document.getElementById('codeLanguage').value;
+
+            if (!code) {
+                alert('Please write some code');
+                return;
+            }
+
+            document.getElementById('submitBtnText').innerHTML = '<span class="loading"></span> Submitting...';
+
+            try {
+                const response = await fetch(`${API_BASE}/student/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`
+                    },
+                    body: JSON.stringify({ question_id: questionId, code, language })
+                });
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                console.error('Error submitting code:', error);
+            } finally {
+                document.getElementById('submitBtnText').innerHTML = 'Submit Code';
+            }
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('executionResults');
+            let html = '';
+
+            if (data.status === 'correct') {
+                html = `
+                    <div class="alert alert-success">
+                        <strong>✓ Correct!</strong> Your solution is correct.
+                    </div>
+                `;
+                if (data.efficiency_feedback) {
+                    html += `
+                        <div class="mt-3">
+                            <h4>Efficiency Analysis:</h4>
+                            <p><strong>Time Complexity:</strong> ${data.efficiency_feedback.time_complexity}</p>
+                            <p><strong>Space Complexity:</strong> ${data.efficiency_feedback.space_complexity}</p>
+                            <p><strong>Suggestions:</strong> ${data.efficiency_feedback.improvement_suggestions}</p>
+                        </div>
+                    `;
+                }
+            } else {
+                html = `<div class="alert alert-error"><strong>✗ Incorrect</strong> ${data.error || ''}</div>`;
+            }
+
+            resultsDiv.innerHTML = html;
+        }}
+    </script>
+</body>
+
+</html>

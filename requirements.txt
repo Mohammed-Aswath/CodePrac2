@@ -1,0 +1,11 @@
+Flask==2.3.3
+python-dotenv==1.0.0
+firebase-admin==6.1.0
+PyJWT==2.10.1
+google-cloud-firestore==2.21.0
+Werkzeug==2.3.7
+flask-cors==4.0.0
+Requests==2.31.0
+
+
+# if that dosen't work run this pip install Flask python-dotenv firebase-admin PyJWT google-cloud-firestore Werkzeug flask-cors Requests
