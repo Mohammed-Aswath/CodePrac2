@@ -12,6 +12,7 @@ from routes.department import department_bp
 from routes.batch import batch_bp
 from routes.student import student_bp
 import logging
+import os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -104,4 +105,5 @@ app = create_app()
 
 if __name__ == "__main__":
     # For development only
-    app.run(host="0.0.0.0", port=5000, debug=DEBUG)
+    port = int(os.getenv('PORT', 5000))
+    app.run(host="0.0.0.0", port=port, debug=DEBUG)
