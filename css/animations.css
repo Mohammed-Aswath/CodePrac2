@@ -1,0 +1,134 @@
+/* 
+   CODEPRAC 2.0 - Animations & Transitions 
+   Physics-based motion to emulate Framer Motion
+*/
+
+:root {
+    /* Timing Functions */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    /* Smooth, quick start, long tail */
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-elastic: cubic-bezier(0.34, 1.56, 0.64, 1);
+    /* Bouncy */
+
+    /* Durations */
+    --duration-fast: 150ms;
+    --duration-normal: 300ms;
+    --duration-slow: 500ms;
+}
+
+/* ----------------------------------------------------
+   UTILITY CLASSES FOR JS TRIGGERING
+   ---------------------------------------------------- */
+
+.animate-fade-in {
+    animation: fadeIn var(--duration-normal) var(--ease-out) forwards;
+}
+
+.animate-slide-up {
+    animation: slideUp var(--duration-normal) var(--ease-out) forwards;
+}
+
+.animate-scale-in {
+    animation: scaleIn var(--duration-normal) var(--ease-out) forwards;
+}
+
+.animate-pop {
+    animation: popIn var(--duration-fast) var(--ease-elastic) forwards;
+}
+
+/* ----------------------------------------------------
+   KEYFRAMES
+   ---------------------------------------------------- */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes popIn {
+    0% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    70% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes shimmery {
+    0% {
+        background-position: -200% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
+}
+
+/* ----------------------------------------------------
+   MICRO-INTERACTIONS
+   ---------------------------------------------------- */
+
+.hover-lift {
+    transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.hover-glow {
+    transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.hover-glow:hover {
+    box-shadow: var(--primary-glow);
+    border-color: var(--primary-500);
+}
+
+/* Loading Skeleton Shimmer */
+.skeleton {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.03) 25%,
+            rgba(255, 255, 255, 0.08) 50%,
+            rgba(255, 255, 255, 0.03) 75%);
+    background-size: 200% 100%;
+    animation: shimmery 2s infinite linear;
+}

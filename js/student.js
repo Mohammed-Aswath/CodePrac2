@@ -989,23 +989,27 @@ int main() {
     showPhase(phase) {
         this.currentPhase = phase;
 
-        // Get panel elements
-        const topicsPhasePanel = document.getElementById('topicsPhasePanel');
-        const questionsPhasePanel = document.getElementById('questionsPhasePanel');
-        const editorPhasePanel = document.getElementById('editorPhasePanel');
+        const panels = {
+            'topics': document.getElementById('topicsPhasePanel'),
+            'questions': document.getElementById('questionsPhasePanel'),
+            'editor': document.getElementById('editorPhasePanel')
+        };
 
         // Hide all panels first
-        if (topicsPhasePanel) topicsPhasePanel.style.display = 'none';
-        if (questionsPhasePanel) questionsPhasePanel.style.display = 'none';
-        if (editorPhasePanel) editorPhasePanel.style.display = 'none';
+        Object.values(panels).forEach(panel => {
+            if (panel) {
+                panel.style.display = 'none';
+                panel.classList.remove('animate-fade-in');
+            }
+        });
 
-        // Show selected phase
-        if (phase === 'topics') {
-            if (topicsPhasePanel) topicsPhasePanel.style.display = 'flex';
-        } else if (phase === 'questions') {
-            if (questionsPhasePanel) questionsPhasePanel.style.display = 'flex';
-        } else if (phase === 'editor') {
-            if (editorPhasePanel) editorPhasePanel.style.display = 'flex';
+        // Show selected phase with animation
+        const activePanel = panels[phase];
+        if (activePanel) {
+            activePanel.style.display = 'flex';
+            // Force reflow
+            void activePanel.offsetWidth;
+            activePanel.classList.add('animate-fade-in');
         }
     },
 
