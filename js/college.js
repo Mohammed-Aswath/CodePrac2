@@ -8,7 +8,7 @@ const College = {
     batches: [],
     students: [],
     performance: [],
-    
+
     activeTab: 'departments',
     editingDepartmentId: null,
     editingBatchId: null,
@@ -110,18 +110,18 @@ const College = {
         const successRate = this.performance.success_rate || 0;
 
         container.innerHTML = `
-            <div class="grid grid-cols-3">
-                <div class="card">
-                    <p class="text-secondary">Total Questions</p>
-                    <h2>${totalQuestions}</h2>
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <h3>Total Questions</h3>
+                    <div class="value">${totalQuestions}</div>
                 </div>
-                <div class="card">
-                    <p class="text-secondary">Average Score</p>
-                    <h2>${Math.round(avgScore)}%</h2>
+                <div class="stat-card">
+                    <h3>Average Score</h3>
+                    <div class="value" style="color: var(--primary);">${Math.round(avgScore)}%</div>
                 </div>
-                <div class="card">
-                    <p class="text-secondary">Success Rate</p>
-                    <h2>${Math.round(successRate)}%</h2>
+                <div class="stat-card">
+                    <h3>Success Rate</h3>
+                    <div class="value" style="color: var(--success);">${Math.round(successRate)}%</div>
                 </div>
             </div>
         `;
@@ -158,6 +158,7 @@ const College = {
 
         container.innerHTML = `
             <button class="btn btn-primary" onclick="College.openAddDepartmentModal()" style="margin-bottom: 1rem;">+ Add Department</button>
+            <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
@@ -173,23 +174,24 @@ const College = {
                             <td>${Utils.escapeHtml(d.name)}</td>
                             <td>${Utils.escapeHtml(d.email)}</td>
                             <td>
-                                ${!d.is_disabled ? 
-                                    '<span class="badge badge-success">Enabled</span>' : 
-                                    '<span class="badge badge-secondary">Disabled</span>'
-                                }
+                                ${!d.is_disabled ?
+                '<span class="badge badge-success">Enabled</span>' :
+                '<span class="badge badge-secondary">Disabled</span>'
+            }
                             </td>
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="College.editDepartment('${d.id}')">Edit</button>
-                                ${!d.is_disabled ? 
-                                    `<button class="btn btn-sm btn-warning" onclick="College.disableDepartment('${d.id}')">Disable</button>` : 
-                                    `<button class="btn btn-sm btn-success" onclick="College.enableDepartment('${d.id}')">Enable</button>`
-                                }
+                                ${!d.is_disabled ?
+                `<button class="btn btn-sm btn-warning" onclick="College.disableDepartment('${d.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-success" onclick="College.enableDepartment('${d.id}')">Enable</button>`
+            }
                                 <button class="btn btn-sm btn-danger" onclick="College.deleteDepartment('${d.id}')">Delete</button>
                             </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
+            </div>
         `;
     },
 
@@ -295,10 +297,10 @@ const College = {
 
         try {
             const payload = { name, email, password };
-            const url = this.editingDepartmentId 
+            const url = this.editingDepartmentId
                 ? `/college/departments/${this.editingDepartmentId}`
                 : '/college/departments';
-            
+
             const method = this.editingDepartmentId ? 'PUT' : 'POST';
 
             await Utils.apiRequest(url, {
@@ -308,8 +310,8 @@ const College = {
 
             this.loadDepartments();
             UI.closeModal('collegeDepartmentModal');
-            Utils.showMessage('collegeMessage', 
-                this.editingDepartmentId ? 'Department updated' : 'Department created', 
+            Utils.showMessage('collegeMessage',
+                this.editingDepartmentId ? 'Department updated' : 'Department created',
                 'success');
         } catch (error) {
             Utils.showMessage('collegeMessage', 'Save failed: ' + error.message, 'error');
@@ -359,6 +361,7 @@ const College = {
 
         container.innerHTML = `
             <button class="btn btn-primary" onclick="College.openAddBatchModal()" style="margin-bottom: 1rem;">+ Add Batch</button>
+            <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
@@ -376,23 +379,24 @@ const College = {
                             <td>${Utils.escapeHtml(this.findDepartmentNameById(b.department_id))}</td>
                             <td>${Utils.escapeHtml(b.email)}</td>
                             <td>
-                                ${!b.is_disabled ? 
-                                    '<span class="badge badge-success">Enabled</span>' : 
-                                    '<span class="badge badge-secondary">Disabled</span>'
-                                }
+                                ${!b.is_disabled ?
+                '<span class="badge badge-success">Enabled</span>' :
+                '<span class="badge badge-secondary">Disabled</span>'
+            }
                             </td>
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="College.editBatch('${b.id}')">Edit</button>
-                                ${!b.is_disabled ? 
-                                    `<button class="btn btn-sm btn-warning" onclick="College.disableBatch('${b.id}')">Disable</button>` : 
-                                    `<button class="btn btn-sm btn-success" onclick="College.enableBatch('${b.id}')">Enable</button>`
-                                }
+                                ${!b.is_disabled ?
+                `<button class="btn btn-sm btn-warning" onclick="College.disableBatch('${b.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-success" onclick="College.enableBatch('${b.id}')">Enable</button>`
+            }
                                 <button class="btn btn-sm btn-danger" onclick="College.deleteBatch('${b.id}')">Delete</button>
                             </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
+            </div>
         `;
     },
 
@@ -535,17 +539,16 @@ const College = {
         }
 
         try {
-            const payload = { 
-                batch_name: name, 
+            const payload = {
+                batch_name: name,
                 department_id: departmentId,
-                college_id: department.college_id,
-                email, 
-                password 
+                email,
+                password
             };
-            const url = this.editingBatchId 
+            const url = this.editingBatchId
                 ? `/college/batches/${this.editingBatchId}`
                 : '/college/batches';
-            
+
             const method = this.editingBatchId ? 'PUT' : 'POST';
 
             await Utils.apiRequest(url, {
@@ -555,8 +558,8 @@ const College = {
 
             this.loadBatches();
             UI.closeModal('collegeBatchModal');
-            Utils.showMessage('collegeMessage', 
-                this.editingBatchId ? 'Batch updated' : 'Batch created', 
+            Utils.showMessage('collegeMessage',
+                this.editingBatchId ? 'Batch updated' : 'Batch created',
                 'success');
         } catch (error) {
             Utils.showMessage('collegeMessage', 'Save failed: ' + error.message, 'error');
@@ -608,6 +611,7 @@ const College = {
 
         container.innerHTML = `
             <button class="btn btn-primary" onclick="College.openAddStudentModal()" style="margin-bottom: 1rem;">+ Add Student</button>
+            <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
@@ -627,23 +631,24 @@ const College = {
                             <td>${Utils.escapeHtml(this.findDepartmentNameById(s.department_id))}</td>
                             <td>${Utils.escapeHtml(this.findBatchNameById(s.batch_id))}</td>
                             <td>
-                                ${!s.is_disabled ? 
-                                    '<span class="badge badge-success">Enabled</span>' : 
-                                    '<span class="badge badge-secondary">Disabled</span>'
-                                }
+                                ${!s.is_disabled ?
+                '<span class="badge badge-success">Enabled</span>' :
+                '<span class="badge badge-secondary">Disabled</span>'
+            }
                             </td>
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="College.editStudent('${s.id}')">Edit</button>
-                                ${!s.is_disabled ? 
-                                    `<button class="btn btn-sm btn-warning" onclick="College.disableStudent('${s.id}')">Disable</button>` : 
-                                    `<button class="btn btn-sm btn-success" onclick="College.enableStudent('${s.id}')">Enable</button>`
-                                }
+                                ${!s.is_disabled ?
+                `<button class="btn btn-sm btn-warning" onclick="College.disableStudent('${s.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-success" onclick="College.enableStudent('${s.id}')">Enable</button>`
+            }
                                 <button class="btn btn-sm btn-danger" onclick="College.deleteStudent('${s.id}')">Delete</button>
                             </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
+            </div>
         `;
     },
 
@@ -686,7 +691,7 @@ const College = {
 
             document.getElementById('collegeStudentDepartment').value = student.department_id || '';
             this.onCollegeStudentDepartmentChange();
-            
+
             setTimeout(() => {
                 document.getElementById('collegeStudentBatch').value = student.batch_id || '';
             }, 10);
@@ -829,22 +834,21 @@ const College = {
         }
 
         try {
-            const payload = { 
-                username, 
-                email, 
+            const payload = {
+                username,
+                email,
                 batch_id: batchId,
-                department_id: departmentId,
-                college_id: batch.college_id
+                department_id: departmentId
             };
             // Only include password if provided (mirror of Admin panel logic)
             if (password) {
                 payload.password = password;
             }
 
-            const url = this.editingStudentId 
+            const url = this.editingStudentId
                 ? `/college/students/${this.editingStudentId}`
                 : '/college/students';
-            
+
             const method = this.editingStudentId ? 'PUT' : 'POST';
 
             const response = await Utils.apiRequest(url, {
@@ -859,8 +863,8 @@ const College = {
 
             this.loadStudents();
             UI.closeModal('collegeStudentModal');
-            Utils.showMessage('collegeMessage', 
-                this.editingStudentId ? 'Student updated' : 'Student created', 
+            Utils.showMessage('collegeMessage',
+                this.editingStudentId ? 'Student updated' : 'Student created',
                 'success');
         } catch (error) {
             Utils.showMessage('collegeMessage', 'Save failed: ' + error.message, 'error');

@@ -76,7 +76,7 @@ const Questions = {
         try {
             let url = '/student/questions';
             const user = Auth.getCurrentUser();
-            
+
             if (user.role === 'admin') {
                 url = '/admin/questions';
                 await this.loadHierarchyData();
@@ -123,7 +123,7 @@ const Questions = {
      */
     render() {
         const isAdminPanel = !!document.getElementById('adminQuestionFormPanel');
-        
+
         if (isAdminPanel) {
             this.renderAdminList();
         } else {
@@ -144,26 +144,26 @@ const Questions = {
         }
 
         let html = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
-        
+
         const self = this;
         this.questions.forEach(q => {
             const collegeNm = self.findCollegeNameById(q.college_id);
             const deptName = self.findDepartmentNameById(q.department_id);
             const isSelected = self.editingId === q.id;
             const bgColor = isSelected ? 'background-color: #e7f3ff; border-left: 3px solid #007bff;' : 'border-left: 3px solid transparent;';
-            
+
             html += '<div style="padding: 0.75rem; background: white; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; ' + bgColor + '" data-qid="' + q.id + '" class="qitem">';
             html += '<div style="font-weight: bold; margin-bottom: 0.25rem; color: #333;">' + Utils.escapeHtml(q.title) + '</div>';
             html += '<div style="font-size: 0.75rem; color: #666; margin-bottom: 0.25rem;">' + Utils.escapeHtml(collegeNm) + ' > ' + Utils.escapeHtml(deptName) + '</div>';
             html += '<div style="font-size: 0.75rem; color: #999;">' + Utils.escapeHtml(q.difficulty || 'Medium') + '</div>';
             html += '</div>';
         });
-        
+
         html += '</div>';
         container.innerHTML = html;
-        
+
         container.querySelectorAll('.qitem').forEach(item => {
-            item.addEventListener('click', function() {
+            item.addEventListener('click', function () {
                 const qid = this.getAttribute('data-qid');
                 self.selectForEdit(qid);
             });
@@ -185,11 +185,11 @@ const Questions = {
         const user = Auth.getCurrentUser();
         const canManage = ['admin', 'college', 'department', 'batch'].includes(user.role);
 
-        let html = '<table class="table"><thead><tr>';
+        let html = '<div class="table-container"><table class="table"><thead><tr>';
         html += '<th>Title</th><th>College</th><th>Department</th><th>Batch</th><th>Topic</th><th>Difficulty</th>';
         if (canManage) html += '<th>Actions</th>';
         html += '</tr></thead><tbody>';
-        
+
         const self = this;
         this.questions.forEach(q => {
             html += '<tr>';
@@ -207,20 +207,20 @@ const Questions = {
             }
             html += '</tr>';
         });
-        
-        html += '</tbody></table>';
+
+        html += '</tbody></table></div>';
         container.innerHTML = html;
-        
+
         if (canManage) {
             container.querySelectorAll('.ebtn').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     const qid = this.getAttribute('data-qid');
                     self.edit(qid);
                 });
             });
-            
+
             container.querySelectorAll('.dbtn').forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', function () {
                     const qid = this.getAttribute('data-qid');
                     self.delete(qid);
                 });
@@ -254,7 +254,7 @@ const Questions = {
 
         let html = '<div style="background: white; padding: 1rem; border: 1px solid #ddd; border-radius: 4px;">';
         html += '<input type="hidden" id="adminQEditId" value="' + question.id + '" />';
-        
+
         if (isAdmin) {
             html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.9rem; font-weight: bold;">College:</label>';
             html += '<select id="adminQEditCollege" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">';
@@ -318,12 +318,12 @@ const Questions = {
 
         container.innerHTML = html;
 
-        document.getElementById('qsave').addEventListener('click', function() { self.saveAdminQuestionInline(); });
-        document.getElementById('qdel').addEventListener('click', function() { self.deleteConfirmAdminPanel(); });
+        document.getElementById('qsave').addEventListener('click', function () { self.saveAdminQuestionInline(); });
+        document.getElementById('qdel').addEventListener('click', function () { self.deleteConfirmAdminPanel(); });
 
         if (isAdmin) {
-            document.getElementById('adminQEditCollege').addEventListener('change', function() { self.onAdminQEditCollegeChange(); });
-            document.getElementById('adminQEditDept').addEventListener('change', function() { self.onAdminQEditDeptChange(); });
+            document.getElementById('adminQEditCollege').addEventListener('change', function () { self.onAdminQEditCollegeChange(); });
+            document.getElementById('adminQEditDept').addEventListener('change', function () { self.onAdminQEditDeptChange(); });
         }
     },
 
@@ -339,7 +339,7 @@ const Questions = {
         const self = this;
 
         let html = '<div style="padding: 0; background: white; border-radius: 4px; max-height: 600px; overflow-y: auto;">';
-        
+
         // Header
         html += '<div style="padding: 1rem;"><h4 style="margin: 0 0 0.75rem 0; color: #333;">' + Utils.escapeHtml(question.title) + '</h4>';
         html += '<div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">';
@@ -392,23 +392,23 @@ const Questions = {
         container.innerHTML = html;
 
         // Event listeners
-        document.getElementById('qtestgen').addEventListener('click', function() {
+        document.getElementById('qtestgen').addEventListener('click', function () {
             self.generateTestCasesForAdmin(question.id);
         });
 
-        document.getElementById('qaddtest').addEventListener('click', function() {
+        document.getElementById('qaddtest').addEventListener('click', function () {
             self.showAddTestCaseForm(question.id, hiddenTestcases.length);
         });
 
         document.querySelectorAll('.qtcedit').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const idx = parseInt(this.getAttribute('data-tcidx'));
                 self.showEditTestCaseForm(question.id, idx, hiddenTestcases[idx]);
             });
         });
 
         document.querySelectorAll('.qtcdel').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const idx = parseInt(this.getAttribute('data-tcidx'));
                 self.deleteTestCase(question.id, idx);
             });
@@ -437,11 +437,11 @@ const Questions = {
         panel.innerHTML = html;
         panel.style.display = 'block';
 
-        document.getElementById('qsavenewtc').addEventListener('click', function() {
+        document.getElementById('qsavenewtc').addEventListener('click', function () {
             self.saveNewTestCase(questionId);
         });
 
-        document.getElementById('qcancnewtc').addEventListener('click', function() {
+        document.getElementById('qcancnewtc').addEventListener('click', function () {
             panel.style.display = 'none';
         });
     },
@@ -468,11 +468,11 @@ const Questions = {
         panel.innerHTML = html;
         panel.style.display = 'block';
 
-        document.getElementById('qsaveedittc').addEventListener('click', function() {
+        document.getElementById('qsaveedittc').addEventListener('click', function () {
             self.saveEditTestCase(questionId, tcIdx);
         });
 
-        document.getElementById('qcancedittc').addEventListener('click', function() {
+        document.getElementById('qcancedittc').addEventListener('click', function () {
             panel.style.display = 'none';
         });
     },
@@ -498,7 +498,7 @@ const Questions = {
         try {
             const user = Auth.getCurrentUser();
             const endpoint = user.role === 'admin' ? '/admin/questions/' : '/batch/questions/';
-            
+
             const response = await fetch(CONFIG.API_BASE_URL + endpoint + questionId, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
@@ -538,7 +538,7 @@ const Questions = {
         try {
             const user = Auth.getCurrentUser();
             const endpoint = user.role === 'admin' ? '/admin/questions/' : '/batch/questions/';
-            
+
             const response = await fetch(CONFIG.API_BASE_URL + endpoint + questionId, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
@@ -570,7 +570,7 @@ const Questions = {
         try {
             const user = Auth.getCurrentUser();
             const endpoint = user.role === 'admin' ? '/admin/questions/' : '/batch/questions/';
-            
+
             const response = await fetch(CONFIG.API_BASE_URL + endpoint + questionId, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
@@ -592,7 +592,7 @@ const Questions = {
     async saveAdminQuestionInline() {
         const questionId = document.getElementById('adminQEditId').value;
         const user = Auth.getCurrentUser();
-        
+
         const payload = {
             title: document.getElementById('adminQEditTitle').value.trim(),
             description: document.getElementById('adminQEditDesc').value.trim(),
@@ -643,7 +643,7 @@ const Questions = {
 
             const user = Auth.getCurrentUser();
             const endpoint = user.role === 'admin' ? '/admin/generate-testcases' : '/batch/generate-testcases';
-            
+
             const response = await fetch(CONFIG.API_BASE_URL + endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
@@ -675,7 +675,7 @@ const Questions = {
         let html = '<div style="padding: 1rem; background: #f0f8ff; border-radius: 4px; border-left: 4px solid #28a745;">';
         html += '<h5 style="margin: 0 0 1rem 0; color: #155724;">Generated Test Cases (' + testcases.length + ')</h5>';
         html += '<div style="display: grid; gap: 0.75rem; max-height: 250px; overflow-y: auto; margin-bottom: 1rem;">';
-        
+
         testcases.forEach((tc, idx) => {
             html += '<div style="padding: 0.75rem; background: white; border: 1px solid #dee2e6; border-radius: 4px;"><div style="font-weight: 500; margin-bottom: 0.5rem;">Test ' + (idx + 1) + '</div>';
             html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.85rem;">';
@@ -683,14 +683,14 @@ const Questions = {
             html += '<div><span style="color: #666; font-size: 0.8rem;">Output:</span><div style="font-family: monospace; background: #f9f9f9; padding: 0.5rem; border-radius: 3px; word-break: break-all;">' + Utils.escapeHtml((tc.expected_output || '').substring(0, 60)) + '</div></div>';
             html += '</div></div>';
         });
-        
+
         html += '</div><button id="qsavtest" style="padding: 0.75rem 1rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; width: 100%;">Save Test Cases</button></div>';
 
         container.innerHTML = html;
         container.style.display = 'block';
         this.pendingTestCases = { questionId, testcases };
 
-        document.getElementById('qsavtest').addEventListener('click', function() {
+        document.getElementById('qsavtest').addEventListener('click', function () {
             self.saveTestCasesAdmin(questionId);
         });
     },
@@ -704,7 +704,7 @@ const Questions = {
         try {
             const user = Auth.getCurrentUser();
             const endpoint = user.role === 'admin' ? '/admin/questions/' : '/batch/questions/';
-            
+
             const response = await fetch(CONFIG.API_BASE_URL + endpoint + questionId, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
@@ -729,9 +729,22 @@ const Questions = {
     onAdminQEditCollegeChange() {
         const collegeId = document.getElementById('adminQEditCollege').value;
         const deptSelect = document.getElementById('adminQEditDept');
+        const batchSelect = document.getElementById('adminQEditBatch');
+
         if (!deptSelect) return;
 
+        // Reset Department
         deptSelect.innerHTML = '<option value="">-- Select --</option>';
+        deptSelect.disabled = !collegeId;
+
+        // Reset Batch
+        if (batchSelect) {
+            batchSelect.innerHTML = '<option value="">-- Select --</option>';
+            batchSelect.disabled = true;
+        }
+
+        if (!collegeId) return;
+
         this.departments.filter(d => d.college_id === collegeId).forEach(d => {
             const option = document.createElement('option');
             option.value = d.id;
@@ -764,7 +777,7 @@ const Questions = {
         try {
             let url = '/student/questions/' + id;
             const user = Auth.getCurrentUser();
-            
+
             if (user.role === 'admin') {
                 url = '/admin/questions/' + id;
             } else if (user.role === 'college') {
@@ -786,12 +799,12 @@ const Questions = {
             document.getElementById('questionTopic').value = question.topic_id || '';
 
             this.editingId = id;
-            
+
             const headerEl = document.querySelector('#questionModal .modal-header h3');
             if (headerEl) headerEl.textContent = 'Edit Question';
             const submitBtn = document.querySelector('#questionModal [type="submit"]');
             if (submitBtn) submitBtn.textContent = 'Update Question';
-            
+
             UI.openModal('questionModal');
         } catch (error) {
             Utils.alert('Failed to load question: ' + error.message);
@@ -807,7 +820,7 @@ const Questions = {
         try {
             let url = '/student/questions/' + id;
             const user = Auth.getCurrentUser();
-            
+
             if (user.role === 'admin') {
                 url = '/admin/questions/' + id;
             } else if (user.role === 'college') {
@@ -824,6 +837,164 @@ const Questions = {
         } catch (error) {
             Utils.showMessage('questionsMessage', 'Delete failed: ' + error.message, 'error');
         }
+    },
+
+    /**
+     * Open Modal for adding a new question
+     */
+    async openModal() {
+        this.editingId = null;
+        document.getElementById('questionId').value = '';
+
+        // Reset Inputs
+        const inputs = ['questionTitle', 'questionDescription', 'questionSampleInput', 'questionSampleOutput'];
+        inputs.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+
+        const diffEl = document.getElementById('questionDifficulty');
+        if (diffEl) diffEl.value = 'Medium';
+
+        // Reset Headers/Buttons
+        const headerEl = document.querySelector('#questionModal .modal-header h3');
+        if (headerEl) headerEl.textContent = 'Add Question';
+
+        const saveBtn = document.querySelector('#questionModal button[onclick="Questions.save()"]');
+        if (saveBtn) saveBtn.textContent = 'Create Question';
+
+        // hierarchy Logic
+        const user = Auth.getCurrentUser();
+        const hierarchyStep = document.getElementById('questionHierarchyStep');
+        const detailsStep = document.getElementById('questionDetailsStep');
+
+        if (user.role === 'admin') {
+            if (hierarchyStep) hierarchyStep.style.display = 'block';
+            if (detailsStep) detailsStep.style.display = 'none';
+
+            // Ensure data is loaded
+            await this.loadHierarchyData();
+
+            this.populateColleges();
+            this.resetSelect('questionDepartment', 'Department');
+            this.resetSelect('questionBatch', 'Batch');
+            this.resetSelect('questionTopic', 'Topic');
+        } else {
+            // For non-admins, strict hierarchy might not apply or is pre-filled, 
+            // but for now let's show details directly as commonly desired
+            if (hierarchyStep) hierarchyStep.style.display = 'none';
+            if (detailsStep) detailsStep.style.display = 'block';
+
+            // If they need to select a topic, ensure it's loaded
+            // (Assuming non-admins have a simpler topic selection if needed)
+            // For now, simpler flow:
+            this.loadTopicsForRole();
+        }
+
+        UI.openModal('questionModal');
+    },
+
+    resetSelect(id, label) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = `<option value="">-- Select ${label} --</option>`;
+    },
+
+    populateColleges() {
+        const select = document.getElementById('questionCollege');
+        if (!select) return;
+        this.resetSelect('questionCollege', 'College');
+        this.colleges.forEach(c => {
+            const option = document.createElement('option');
+            option.value = c.id;
+            option.textContent = c.college_name || c.name;
+            select.appendChild(option);
+        });
+    },
+
+    loadDepartments(collegeId) {
+        const select = document.getElementById('questionDepartment');
+        if (!select) return;
+        this.resetSelect('questionDepartment', 'Department');
+        this.resetSelect('questionBatch', 'Batch');
+        this.resetSelect('questionTopic', 'Topic');
+
+        if (!collegeId) return;
+
+        this.departments.filter(d => d.college_id === collegeId).forEach(d => {
+            const option = document.createElement('option');
+            option.value = d.id;
+            option.textContent = d.department_name || d.name;
+            select.appendChild(option);
+        });
+    },
+
+    loadBatches(deptId) {
+        const select = document.getElementById('questionBatch');
+        if (!select) return;
+        this.resetSelect('questionBatch', 'Batch');
+        this.resetSelect('questionTopic', 'Topic');
+
+        if (!deptId) return;
+
+        this.batches.filter(b => b.department_id === deptId).forEach(b => {
+            const option = document.createElement('option');
+            option.value = b.id;
+            option.textContent = b.batch_name;
+            select.appendChild(option);
+        });
+    },
+
+    loadTopics(batchId) {
+        const select = document.getElementById('questionTopic');
+        if (!select) return;
+        this.resetSelect('questionTopic', 'Topic');
+
+        if (!batchId) return;
+
+        // Topics might be global or departmental? 
+        // Based on other files, topics seem to be filtered by batch or department?
+        // Let's check Utils or just filter generic.
+        // Looking at 'admin-topics.js', topics have batch_id.
+
+        this.topics.filter(t => t.batch_id === batchId).forEach(t => {
+            const option = document.createElement('option');
+            option.value = t.id;
+            option.textContent = t.topic_name || t.name;
+            select.appendChild(option);
+        });
+    },
+
+    loadTopicsForRole() {
+        const select = document.getElementById('questionTopic');
+        if (!select) return;
+        // Just load all available topics for the current user's scope
+        this.resetSelect('questionTopic', 'Topic');
+        this.topics.forEach(t => {
+            const option = document.createElement('option');
+            option.value = t.id;
+            option.textContent = t.topic_name || t.name;
+            select.appendChild(option);
+        });
+    },
+
+    proceedToQuestionDetails() {
+        const college = document.getElementById('questionCollege').value;
+        const dept = document.getElementById('questionDepartment').value;
+        const batch = document.getElementById('questionBatch').value;
+        const topic = document.getElementById('questionTopic').value;
+
+        if (!college || !dept || !batch || !topic) {
+            alert('Please select all hierarchy fields.');
+            return;
+        }
+
+        document.getElementById('questionHierarchyStep').style.display = 'none';
+        document.getElementById('questionDetailsStep').style.display = 'block';
+    },
+
+    backToHierarchy() {
+        document.getElementById('questionHierarchyStep').style.display = 'block';
+        document.getElementById('questionDetailsStep').style.display = 'none';
     },
 
     /**
@@ -867,12 +1038,12 @@ const Questions = {
                 const departmentId = document.getElementById('questionDepartment').value.trim();
                 const batchId = document.getElementById('questionBatch').value.trim();
                 const topicId = document.getElementById('questionTopic').value.trim();
-                
+
                 if (!collegeId || !departmentId || !batchId || !topicId) {
                     Utils.showMessage('questionsMessage', 'Please select College, Department, Batch, and Topic', 'error');
                     return;
                 }
-                
+
                 payload.college_id = collegeId;
                 payload.department_id = departmentId;
                 payload.batch_id = batchId;
@@ -901,8 +1072,8 @@ const Questions = {
 
             this.loadQuestions();
             UI.closeModal('questionModal');
-            Utils.showMessage('questionsMessage', 
-                this.editingId ? 'Question updated' : 'Question created', 
+            Utils.showMessage('questionsMessage',
+                this.editingId ? 'Question updated' : 'Question created',
                 'success');
         } catch (error) {
             Utils.showMessage('questionsMessage', 'Save failed: ' + error.message, 'error');

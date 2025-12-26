@@ -7,7 +7,7 @@ const Admin = {
     departments: [],
     batches: [],
     students: [],
-    
+
     activeTab: 'colleges',
     editingCollegeId: null,
     editingDepartmentId: null,
@@ -157,6 +157,7 @@ const Admin = {
         }
 
         container.innerHTML = `
+            <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
@@ -172,23 +173,24 @@ const Admin = {
                             <td>${Utils.escapeHtml(c.name)}</td>
                             <td>${Utils.escapeHtml(c.email)}</td>
                             <td>
-                                ${!c.is_disabled ? 
-                                    '<span class="badge badge-success">Enabled</span>' : 
-                                    '<span class="badge badge-secondary">Disabled</span>'
-                                }
+                                ${!c.is_disabled ?
+                '<span class="badge badge-success">Enabled</span>' :
+                '<span class="badge badge-secondary">Disabled</span>'
+            }
                             </td>
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Admin.editCollege('${c.id}')">Edit</button>
-                                ${!c.is_disabled ? 
-                                    `<button class="btn btn-sm btn-warning" onclick="Admin.disableCollege('${c.id}')">Disable</button>` : 
-                                    `<button class="btn btn-sm btn-success" onclick="Admin.enableCollege('${c.id}')">Enable</button>`
-                                }
+                                ${!c.is_disabled ?
+                `<button class="btn btn-sm btn-warning" onclick="Admin.disableCollege('${c.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-success" onclick="Admin.enableCollege('${c.id}')">Enable</button>`
+            }
                                 <button class="btn btn-sm btn-danger" onclick="Admin.deleteCollege('${c.id}')">Delete</button>
                             </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
+            </div>
         `;
     },
 
@@ -253,10 +255,10 @@ const Admin = {
 
         try {
             const payload = { name, email, password };
-            const url = this.editingCollegeId 
+            const url = this.editingCollegeId
                 ? `/admin/colleges/${this.editingCollegeId}`
                 : '/admin/colleges';
-            
+
             const method = this.editingCollegeId ? 'PUT' : 'POST';
 
             await Utils.apiRequest(url, {
@@ -266,8 +268,8 @@ const Admin = {
 
             this.loadColleges();
             UI.closeModal('collegeModal');
-            Utils.showMessage('adminMessage', 
-                this.editingCollegeId ? 'College updated' : 'College created', 
+            Utils.showMessage('adminMessage',
+                this.editingCollegeId ? 'College updated' : 'College created',
                 'success');
         } catch (error) {
             Utils.showMessage('adminMessage', 'Save failed: ' + error.message, 'error');
@@ -351,6 +353,7 @@ const Admin = {
         }
 
         container.innerHTML = `
+            <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
@@ -368,23 +371,24 @@ const Admin = {
                             <td>${Utils.escapeHtml(this.findCollegeNameById(d.college_id) || 'N/A')}</td>
                             <td>${Utils.escapeHtml(d.email || 'N/A')}</td>
                             <td>
-                                ${!d.is_disabled ? 
-                                    '<span class="badge badge-success">Enabled</span>' : 
-                                    '<span class="badge badge-secondary">Disabled</span>'
-                                }
+                                ${!d.is_disabled ?
+                '<span class="badge badge-success">Enabled</span>' :
+                '<span class="badge badge-secondary">Disabled</span>'
+            }
                             </td>
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Admin.editDepartment('${d.id}')">Edit</button>
-                                ${!d.is_disabled ? 
-                                    `<button class="btn btn-sm btn-warning" onclick="Admin.disableDepartment('${d.id}')">Disable</button>` : 
-                                    `<button class="btn btn-sm btn-success" onclick="Admin.enableDepartment('${d.id}')">Enable</button>`
-                                }
+                                ${!d.is_disabled ?
+                `<button class="btn btn-sm btn-warning" onclick="Admin.disableDepartment('${d.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-success" onclick="Admin.enableDepartment('${d.id}')">Enable</button>`
+            }
                                 <button class="btn btn-sm btn-danger" onclick="Admin.deleteDepartment('${d.id}')">Delete</button>
                             </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
+            </div>
         `;
     },
 
@@ -460,10 +464,10 @@ const Admin = {
 
         try {
             const payload = { name, college_id: collegeId, email, password };
-            const url = this.editingDepartmentId 
+            const url = this.editingDepartmentId
                 ? `/admin/departments/${this.editingDepartmentId}`
                 : '/admin/departments';
-            
+
             const method = this.editingDepartmentId ? 'PUT' : 'POST';
 
             await Utils.apiRequest(url, {
@@ -473,8 +477,8 @@ const Admin = {
 
             this.loadDepartments();
             UI.closeModal('departmentModal');
-            Utils.showMessage('adminMessage', 
-                this.editingDepartmentId ? 'Department updated' : 'Department created', 
+            Utils.showMessage('adminMessage',
+                this.editingDepartmentId ? 'Department updated' : 'Department created',
                 'success');
         } catch (error) {
             Utils.showMessage('adminMessage', 'Save failed: ' + error.message, 'error');
@@ -507,6 +511,7 @@ const Admin = {
         }
 
         container.innerHTML = `
+            <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
@@ -526,23 +531,24 @@ const Admin = {
                             <td>${Utils.escapeHtml(this.findDepartmentNameById(b.department_id) || 'N/A')}</td>
                             <td>${Utils.escapeHtml(b.email || 'N/A')}</td>
                             <td>
-                                ${!b.is_disabled ? 
-                                    '<span class="badge badge-success">Enabled</span>' : 
-                                    '<span class="badge badge-secondary">Disabled</span>'
-                                }
+                                ${!b.is_disabled ?
+                '<span class="badge badge-success">Enabled</span>' :
+                '<span class="badge badge-secondary">Disabled</span>'
+            }
                             </td>
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Admin.editBatch('${b.id}')">Edit</button>
-                                ${!b.is_disabled ? 
-                                    `<button class="btn btn-sm btn-warning" onclick="Admin.disableBatch('${b.id}')">Disable</button>` : 
-                                    `<button class="btn btn-sm btn-success" onclick="Admin.enableBatch('${b.id}')">Enable</button>`
-                                }
+                                ${!b.is_disabled ?
+                `<button class="btn btn-sm btn-warning" onclick="Admin.disableBatch('${b.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-success" onclick="Admin.enableBatch('${b.id}')">Enable</button>`
+            }
                                 <button class="btn btn-sm btn-danger" onclick="Admin.deleteBatch('${b.id}')">Delete</button>
                             </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
+            </div>
         `;
     },
 
@@ -561,7 +567,7 @@ const Admin = {
             // Set college value and trigger department filter
             document.getElementById('batchCollege').value = batch.college_id || '';
             this.onBatchCollegeChange();
-            
+
             // Now set department value
             setTimeout(() => {
                 document.getElementById('batchDepartment').value = batch.department_id || '';
@@ -638,17 +644,17 @@ const Admin = {
         }
 
         try {
-            const payload = { 
-                batch_name: name, 
+            const payload = {
+                batch_name: name,
                 department_id: departmentId,
                 college_id: department.college_id,
-                email, 
-                password 
+                email,
+                password
             };
-            const url = this.editingBatchId 
+            const url = this.editingBatchId
                 ? `/admin/batches/${this.editingBatchId}`
                 : '/admin/batches';
-            
+
             const method = this.editingBatchId ? 'PUT' : 'POST';
 
             await Utils.apiRequest(url, {
@@ -658,8 +664,8 @@ const Admin = {
 
             this.loadBatches();
             UI.closeModal('batchModal');
-            Utils.showMessage('adminMessage', 
-                this.editingBatchId ? 'Batch updated' : 'Batch created', 
+            Utils.showMessage('adminMessage',
+                this.editingBatchId ? 'Batch updated' : 'Batch created',
                 'success');
         } catch (error) {
             Utils.showMessage('adminMessage', 'Save failed: ' + error.message, 'error');
@@ -692,6 +698,7 @@ const Admin = {
         }
 
         container.innerHTML = `
+            <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
@@ -713,23 +720,24 @@ const Admin = {
                             <td>${Utils.escapeHtml(this.findDepartmentNameById(s.department_id) || 'N/A')}</td>
                             <td>${Utils.escapeHtml(this.findBatchNameById(s.batch_id) || 'N/A')}</td>
                             <td>
-                                ${!s.is_disabled ? 
-                                    '<span class="badge badge-success">Enabled</span>' : 
-                                    '<span class="badge badge-secondary">Disabled</span>'
-                                }
+                                ${!s.is_disabled ?
+                '<span class="badge badge-success">Enabled</span>' :
+                '<span class="badge badge-secondary">Disabled</span>'
+            }
                             </td>
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Admin.editStudent('${s.id}')">Edit</button>
-                                ${!s.is_disabled ? 
-                                    '<button class="btn btn-sm btn-warning" onclick="Admin.disableStudent(\'' + s.id + '\')">Disable</button>' : 
-                                    '<button class="btn btn-sm btn-success" onclick="Admin.enableStudent(\'' + s.id + '\')">Enable</button>'
-                                }
+                                ${!s.is_disabled ?
+                '<button class="btn btn-sm btn-warning" onclick="Admin.disableStudent(\'' + s.id + '\')">Disable</button>' :
+                '<button class="btn btn-sm btn-success" onclick="Admin.enableStudent(\'' + s.id + '\')">Enable</button>'
+            }
                                 <button class="btn btn-sm btn-danger" onclick="Admin.deleteStudent('${s.id}')">Delete</button>
                             </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
+            </div>
         `;
     },
 
@@ -749,12 +757,12 @@ const Admin = {
             // Set college value and trigger department filter
             document.getElementById('studentCollege').value = student.college_id || '';
             this.onStudentCollegeChange();
-            
+
             // Set department value and trigger batch filter
             setTimeout(() => {
                 document.getElementById('studentDepartment').value = student.department_id || '';
                 this.onStudentDepartmentChange();
-                
+
                 // Now set batch value
                 setTimeout(() => {
                     document.getElementById('studentBatch').value = student.batch_id || '';
@@ -876,9 +884,9 @@ const Admin = {
         }
 
         try {
-            const payload = { 
-                username, 
-                email, 
+            const payload = {
+                username,
+                email,
                 batch_id: batchId,
                 department_id: departmentId,
                 college_id: collegeId
@@ -887,10 +895,10 @@ const Admin = {
                 payload.password = password;
             }
 
-            const url = this.editingStudentId 
+            const url = this.editingStudentId
                 ? `/admin/students/${this.editingStudentId}`
                 : '/admin/students';
-            
+
             const method = this.editingStudentId ? 'PUT' : 'POST';
 
             const response = await Utils.apiRequest(url, {
@@ -905,8 +913,8 @@ const Admin = {
 
             this.loadStudents();
             UI.closeModal('studentModal');
-            Utils.showMessage('adminMessage', 
-                this.editingStudentId ? 'Student updated' : 'Student created', 
+            Utils.showMessage('adminMessage',
+                this.editingStudentId ? 'Student updated' : 'Student created',
                 'success');
         } catch (error) {
             Utils.showMessage('adminMessage', 'Save failed: ' + error.message, 'error');
@@ -924,7 +932,7 @@ const Admin = {
         if (!select) return;
 
         select.innerHTML = '<option value="">Select College</option>';
-        
+
         if (!this.colleges || this.colleges.length === 0) {
             const option = document.createElement('option');
             option.value = '';
@@ -952,7 +960,7 @@ const Admin = {
         if (!select) return;
 
         select.innerHTML = '<option value="">Select Department</option>';
-        
+
         if (!this.departments || this.departments.length === 0) {
             const option = document.createElement('option');
             option.value = '';
@@ -978,7 +986,7 @@ const Admin = {
     onBatchCollegeChange() {
         const collegeId = document.getElementById('batchCollege').value;
         const departmentSelect = document.getElementById('batchDepartment');
-        
+
         if (!collegeId) {
             departmentSelect.innerHTML = '<option value="">Select College First</option>';
             departmentSelect.disabled = true;
@@ -987,11 +995,11 @@ const Admin = {
 
         departmentSelect.disabled = false;
         departmentSelect.innerHTML = '<option value="">Select Department</option>';
-        
-        const filteredDepts = this.departments.filter(d => 
+
+        const filteredDepts = this.departments.filter(d =>
             d.college_id === collegeId && !d.is_disabled
         );
-        
+
         if (filteredDepts.length === 0) {
             const option = document.createElement('option');
             option.value = '';
@@ -1016,7 +1024,7 @@ const Admin = {
         const collegeId = document.getElementById('studentCollege').value;
         const departmentSelect = document.getElementById('studentDepartment');
         const batchSelect = document.getElementById('studentBatch');
-        
+
         if (!collegeId) {
             departmentSelect.innerHTML = '<option value="">Select College First</option>';
             departmentSelect.disabled = true;
@@ -1029,11 +1037,11 @@ const Admin = {
         departmentSelect.innerHTML = '<option value="">Select Department</option>';
         batchSelect.innerHTML = '<option value="">Select Department First</option>';
         batchSelect.disabled = true;
-        
-        const filteredDepts = this.departments.filter(d => 
+
+        const filteredDepts = this.departments.filter(d =>
             d.college_id === collegeId && !d.is_disabled
         );
-        
+
         if (filteredDepts.length === 0) {
             const option = document.createElement('option');
             option.value = '';
@@ -1057,7 +1065,7 @@ const Admin = {
     onStudentDepartmentChange() {
         const departmentId = document.getElementById('studentDepartment').value;
         const batchSelect = document.getElementById('studentBatch');
-        
+
         if (!departmentId) {
             batchSelect.innerHTML = '<option value="">Select Department First</option>';
             batchSelect.disabled = true;
@@ -1066,11 +1074,11 @@ const Admin = {
 
         batchSelect.disabled = false;
         batchSelect.innerHTML = '<option value="">Select Batch</option>';
-        
-        const filteredBatches = this.batches.filter(b => 
+
+        const filteredBatches = this.batches.filter(b =>
             b.department_id === departmentId && !b.is_disabled
         );
-        
+
         if (filteredBatches.length === 0) {
             const option = document.createElement('option');
             option.value = '';
@@ -1096,7 +1104,7 @@ const Admin = {
         if (!select) return;
 
         select.innerHTML = '<option value="">Select Batch</option>';
-        
+
         if (!this.batches || this.batches.length === 0) {
             const option = document.createElement('option');
             option.value = '';

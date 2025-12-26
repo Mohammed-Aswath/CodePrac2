@@ -13,11 +13,11 @@ const AdminNotes = {
   /**
    * Open modal for creating/editing note
    */
-  openModal: function(noteId = null) {
+  openModal: function (noteId = null) {
     this.editingId = noteId;
     const modal = document.querySelector('#adminNoteModal .modal-header h3');
     const submit = document.querySelector('#adminNoteModal [type=submit]');
-    
+
     if (noteId) {
       modal.textContent = 'Edit Note';
       submit.textContent = 'Update Note';
@@ -33,14 +33,14 @@ const AdminNotes = {
       submit.textContent = 'Create Note';
       this.loadColleges();
     }
-    
+
     UI.openModal('adminNoteModal');
   },
 
   /**
    * Load colleges for dropdown
    */
-  loadColleges: async function() {
+  loadColleges: async function () {
     try {
       const response = await fetch(`${CONFIG.API_BASE_URL}/admin/colleges`, {
         method: 'GET',
@@ -60,7 +60,7 @@ const AdminNotes = {
   /**
    * Populate college select
    */
-  populateCollegeSelect: function() {
+  populateCollegeSelect: function () {
     const select = document.getElementById('adminNoteCollege');
     select.innerHTML = '<option value="">Select College</option>';
     this.colleges.forEach(college => {
@@ -76,11 +76,20 @@ const AdminNotes = {
   /**
    * Load departments for selected college
    */
-  loadDepartments: async function(collegeId) {
+  loadDepartments: async function (collegeId) {
     if (!collegeId) {
       document.getElementById('adminNoteDepartment').innerHTML = '<option value="">Select Department</option>';
+      document.getElementById('adminNoteDepartment').disabled = true;
+      document.getElementById('adminNoteBatch').innerHTML = '<option value="">Select Batch</option>';
+      document.getElementById('adminNoteBatch').disabled = true;
       return;
     }
+
+    // Enable department select
+    document.getElementById('adminNoteDepartment').disabled = false;
+    // Clear and disable batch select until department is selected
+    document.getElementById('adminNoteBatch').innerHTML = '<option value="">Select Batch</option>';
+    document.getElementById('adminNoteBatch').disabled = true;
 
     try {
       const response = await fetch(`${CONFIG.API_BASE_URL}/admin/departments`, {
@@ -102,7 +111,7 @@ const AdminNotes = {
   /**
    * Populate department select
    */
-  populateDepartmentSelect: function() {
+  populateDepartmentSelect: function () {
     const select = document.getElementById('adminNoteDepartment');
     select.innerHTML = '<option value="">Select Department</option>';
     this.departments.forEach(dept => {
@@ -116,11 +125,13 @@ const AdminNotes = {
   /**
    * Load batches for selected department
    */
-  loadBatches: async function(departmentId) {
+  loadBatches: async function (departmentId) {
     if (!departmentId) {
       document.getElementById('adminNoteBatch').innerHTML = '<option value="">Select Batch</option>';
+      document.getElementById('adminNoteBatch').disabled = true;
       return;
     }
+    document.getElementById('adminNoteBatch').disabled = false;
 
     try {
       const response = await fetch(`${CONFIG.API_BASE_URL}/admin/batches`, {
@@ -142,7 +153,7 @@ const AdminNotes = {
   /**
    * Populate batch select
    */
-  populateBatchSelect: function() {
+  populateBatchSelect: function () {
     const select = document.getElementById('adminNoteBatch');
     select.innerHTML = '<option value="">Select Batch</option>';
     this.batches.forEach(batch => {
@@ -156,7 +167,7 @@ const AdminNotes = {
   /**
    * Load note details for editing
    */
-  loadNoteForEdit: async function(noteId) {
+  loadNoteForEdit: async function (noteId) {
     try {
       const response = await fetch(`${this.apiEndpoint}/${noteId}`, {
         method: 'GET',
@@ -172,7 +183,7 @@ const AdminNotes = {
         document.getElementById('adminNoteCollege').value = note.college_id || '';
         document.getElementById('adminNoteDepartment').value = note.department_id || '';
         document.getElementById('adminNoteBatch').value = note.batch_id || '';
-        
+
         // Load dropdowns in sequence
         await this.loadColleges();
         if (note.college_id) {
@@ -193,7 +204,7 @@ const AdminNotes = {
   /**
    * Save note (create or update)
    */
-  save: async function() {
+  save: async function () {
     const noteId = document.getElementById('adminNoteId').value;
     const title = document.getElementById('adminNoteTitle').value.trim();
     const driveLink = document.getElementById('adminNoteLink').value.trim();
@@ -263,7 +274,7 @@ const AdminNotes = {
   /**
    * Load all notes
    */
-  loadNotes: async function() {
+  loadNotes: async function () {
     try {
       const response = await fetch(this.apiEndpoint, {
         method: 'GET',
@@ -285,7 +296,7 @@ const AdminNotes = {
   /**
    * Display notes in a table
    */
-  displayNotes: function(notes) {
+  displayNotes: function (notes) {
     const container = document.getElementById('adminNotesList');
 
     if (!notes || notes.length === 0) {
@@ -293,37 +304,37 @@ const AdminNotes = {
       return;
     }
 
-    let html = '<table style="width: 100%; border-collapse: collapse;">';
-    html += '<thead><tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">';
-    html += '<th style="padding: 0.75rem; text-align: left;">Title</th>';
-    html += '<th style="padding: 0.75rem; text-align: left;">Drive Link</th>';
-    html += '<th style="padding: 0.75rem; text-align: left;">Batch</th>';
-    html += '<th style="padding: 0.75rem; text-align: center; width: 150px;">Actions</th>';
+    let html = '<div class="table-container"><table class="table">';
+    html += '<thead><tr>';
+    html += '<th>Title</th>';
+    html += '<th>Drive Link</th>';
+    html += '<th>Batch</th>';
+    html += '<th style="text-align: center; width: 150px;">Actions</th>';
     html += '</tr></thead><tbody>';
 
     notes.forEach(note => {
       if (note.is_disabled) return;
 
       const linkDisplay = note.drive_link.substring(0, 40) + (note.drive_link.length > 40 ? '...' : '');
-      html += `<tr style="border-bottom: 1px solid #eee;">`;
-      html += `<td style="padding: 0.75rem;">${this.escapeHtml(note.title)}</td>`;
-      html += `<td style="padding: 0.75rem;"><a href="${this.escapeHtml(note.drive_link)}" target="_blank" style="color: #007bff; text-decoration: none;">${linkDisplay}</a></td>`;
-      html += `<td style="padding: 0.75rem;">${this.escapeHtml(note.batch_id)}</td>`;
-      html += `<td style="padding: 0.75rem; text-align: center;">`;
+      html += `<tr>`;
+      html += `<td>${this.escapeHtml(note.title)}</td>`;
+      html += `<td><a href="${this.escapeHtml(note.drive_link)}" target="_blank" style="color: var(--primary); text-decoration: none;">${linkDisplay}</a></td>`;
+      html += `<td>${this.escapeHtml(note.batch_id)}</td>`;
+      html += `<td class="flex-gap" style="justify-content: center;">`;
       html += `<button class="btn btn-sm btn-info" onclick="AdminNotes.openModal('${note.id}')">Edit</button>`;
       html += `<button class="btn btn-sm btn-danger" onclick="AdminNotes.deleteConfirm('${note.id}')">Delete</button>`;
       html += `</td>`;
       html += `</tr>`;
     });
 
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     container.innerHTML = html;
   },
 
   /**
    * Delete note with confirmation
    */
-  deleteConfirm: function(noteId) {
+  deleteConfirm: function (noteId) {
     if (confirm('Are you sure you want to delete this note?')) {
       this.delete(noteId);
     }
@@ -332,7 +343,7 @@ const AdminNotes = {
   /**
    * Delete a note
    */
-  delete: async function(noteId) {
+  delete: async function (noteId) {
     try {
       const response = await fetch(`${this.apiEndpoint}/${noteId}`, {
         method: 'DELETE',
@@ -355,11 +366,11 @@ const AdminNotes = {
   /**
    * Validate URL format
    */
-  isValidUrl: function(url) {
+  isValidUrl: function (url) {
     try {
       const urlObj = new URL(url);
-      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:' || 
-             url.includes('drive.google.com');
+      return urlObj.protocol === 'http:' || urlObj.protocol === 'https:' ||
+        url.includes('drive.google.com');
     } catch (e) {
       return false;
     }
@@ -368,7 +379,7 @@ const AdminNotes = {
   /**
    * Escape HTML to prevent XSS
    */
-  escapeHtml: function(text) {
+  escapeHtml: function (text) {
     const map = {
       '&': '&amp;',
       '<': '&lt;',

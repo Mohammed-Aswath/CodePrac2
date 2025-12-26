@@ -85,3 +85,4 @@ logs/
 local.properties
 
 .env.example
+.firebase-key-base64.txt

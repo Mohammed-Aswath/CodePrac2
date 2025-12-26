@@ -114,6 +114,7 @@ const Department = {
         }
 
         container.innerHTML = `
+            <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
@@ -135,6 +136,7 @@ const Department = {
                     `).join('')}
                 </tbody>
             </table>
+            </div>
         `;
     },
 
@@ -199,10 +201,10 @@ const Department = {
 
         try {
             const payload = { name, description };
-            const url = this.editingTopicId 
+            const url = this.editingTopicId
                 ? `/department/topics/${this.editingTopicId}`
                 : '/department/topics';
-            
+
             const method = this.editingTopicId ? 'PUT' : 'POST';
 
             await Utils.apiRequest(url, {
@@ -212,8 +214,8 @@ const Department = {
 
             this.loadTopics();
             UI.closeModal('topicModal');
-            Utils.showMessage('departmentMessage', 
-                this.editingTopicId ? 'Topic updated' : 'Topic created', 
+            Utils.showMessage('departmentMessage',
+                this.editingTopicId ? 'Topic updated' : 'Topic created',
                 'success');
         } catch (error) {
             Utils.showMessage('departmentMessage', 'Save failed: ' + error.message, 'error');
@@ -247,6 +249,7 @@ const Department = {
 
         container.innerHTML = `
             <button class="btn btn-primary" onclick="Department.openAddBatchModal()" style="margin-bottom: 1rem;">+ Add Batch</button>
+            <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
@@ -262,23 +265,24 @@ const Department = {
                             <td>${Utils.escapeHtml(b.batch_name)}</td>
                             <td>${Utils.escapeHtml(b.email)}</td>
                             <td>
-                                ${!b.is_disabled ? 
-                                    '<span class="badge badge-success">Enabled</span>' : 
-                                    '<span class="badge badge-secondary">Disabled</span>'
-                                }
+                                ${!b.is_disabled ?
+                '<span class="badge badge-success">Enabled</span>' :
+                '<span class="badge badge-secondary">Disabled</span>'
+            }
                             </td>
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Department.editBatch('${b.id}')">Edit</button>
-                                ${!b.is_disabled ? 
-                                    `<button class="btn btn-sm btn-warning" onclick="Department.disableBatch('${b.id}')">Disable</button>` : 
-                                    `<button class="btn btn-sm btn-success" onclick="Department.enableBatch('${b.id}')">Enable</button>`
-                                }
+                                ${!b.is_disabled ?
+                `<button class="btn btn-sm btn-warning" onclick="Department.disableBatch('${b.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-success" onclick="Department.enableBatch('${b.id}')">Enable</button>`
+            }
                                 <button class="btn btn-sm btn-danger" onclick="Department.deleteBatch('${b.id}')">Delete</button>
                             </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
+            </div>
         `;
     },
 
@@ -384,10 +388,10 @@ const Department = {
 
         try {
             const payload = { batch_name: name, email, password };
-            const url = this.editingBatchId 
+            const url = this.editingBatchId
                 ? `/department/batches/${this.editingBatchId}`
                 : '/department/batches';
-            
+
             const method = this.editingBatchId ? 'PUT' : 'POST';
 
             await Utils.apiRequest(url, {
@@ -397,8 +401,8 @@ const Department = {
 
             this.loadBatches();
             UI.closeModal('departmentBatchModal');
-            Utils.showMessage('departmentMessage', 
-                this.editingBatchId ? 'Batch updated' : 'Batch created', 
+            Utils.showMessage('departmentMessage',
+                this.editingBatchId ? 'Batch updated' : 'Batch created',
                 'success');
         } catch (error) {
             Utils.showMessage('departmentMessage', 'Save failed: ' + error.message, 'error');
@@ -441,6 +445,7 @@ const Department = {
 
         container.innerHTML = `
             <button class="btn btn-primary" onclick="Department.openAddStudentModal()" style="margin-bottom: 1rem;">+ Add Student</button>
+            <div class="table-container">
             <table class="table">
                 <thead>
                     <tr>
@@ -458,23 +463,24 @@ const Department = {
                             <td>${Utils.escapeHtml(s.email)}</td>
                             <td>${Utils.escapeHtml(this.findBatchNameById(s.batch_id))}</td>
                             <td>
-                                ${!s.is_disabled ? 
-                                    '<span class="badge badge-success">Enabled</span>' : 
-                                    '<span class="badge badge-secondary">Disabled</span>'
-                                }
+                                ${!s.is_disabled ?
+                '<span class="badge badge-success">Enabled</span>' :
+                '<span class="badge badge-secondary">Disabled</span>'
+            }
                             </td>
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Department.editStudent('${s.id}')">Edit</button>
-                                ${!s.is_disabled ? 
-                                    `<button class="btn btn-sm btn-warning" onclick="Department.disableStudent('${s.id}')">Disable</button>` : 
-                                    `<button class="btn btn-sm btn-success" onclick="Department.enableStudent('${s.id}')">Enable</button>`
-                                }
+                                ${!s.is_disabled ?
+                `<button class="btn btn-sm btn-warning" onclick="Department.disableStudent('${s.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-success" onclick="Department.enableStudent('${s.id}')">Enable</button>`
+            }
                                 <button class="btn btn-sm btn-danger" onclick="Department.deleteStudent('${s.id}')">Delete</button>
                             </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
+            </div>
         `;
     },
 
@@ -611,10 +617,10 @@ const Department = {
 
         try {
             const payload = { username, email, batch_id: batchId, password };
-            const url = this.editingStudentId 
+            const url = this.editingStudentId
                 ? `/department/students/${this.editingStudentId}`
                 : '/department/students';
-            
+
             const method = this.editingStudentId ? 'PUT' : 'POST';
 
             await Utils.apiRequest(url, {
@@ -624,8 +630,8 @@ const Department = {
 
             this.loadStudents();
             UI.closeModal('departmentStudentModal');
-            Utils.showMessage('departmentMessage', 
-                this.editingStudentId ? 'Student updated' : 'Student created', 
+            Utils.showMessage('departmentMessage',
+                this.editingStudentId ? 'Student updated' : 'Student created',
                 'success');
         } catch (error) {
             Utils.showMessage('departmentMessage', 'Save failed: ' + error.message, 'error');

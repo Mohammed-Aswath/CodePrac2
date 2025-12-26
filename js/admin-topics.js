@@ -13,11 +13,11 @@ const AdminTopics = {
   /**
    * Open modal for creating/editing topic
    */
-  openModal: function(topicId = null) {
+  openModal: function (topicId = null) {
     this.editingId = topicId;
     const modal = document.querySelector('#adminTopicModal .modal-header h3');
     const submit = document.querySelector('#adminTopicModal [type=submit]');
-    
+
     if (topicId) {
       modal.textContent = 'Edit Topic';
       submit.textContent = 'Update Topic';
@@ -32,14 +32,14 @@ const AdminTopics = {
       submit.textContent = 'Create Topic';
       this.loadColleges();
     }
-    
+
     UI.openModal('adminTopicModal');
   },
 
   /**
    * Load colleges for dropdown
    */
-  loadColleges: async function() {
+  loadColleges: async function () {
     try {
       const response = await fetch(`${CONFIG.API_BASE_URL}/admin/colleges`, {
         method: 'GET',
@@ -59,7 +59,7 @@ const AdminTopics = {
   /**
    * Populate college select
    */
-  populateCollegeSelect: function() {
+  populateCollegeSelect: function () {
     const select = document.getElementById('adminTopicCollege');
     select.innerHTML = '<option value="">Select College</option>';
     this.colleges.forEach(college => {
@@ -75,11 +75,20 @@ const AdminTopics = {
   /**
    * Load departments for selected college
    */
-  loadDepartments: async function(collegeId) {
+  loadDepartments: async function (collegeId) {
     if (!collegeId) {
       document.getElementById('adminTopicDepartment').innerHTML = '<option value="">Select Department</option>';
+      document.getElementById('adminTopicDepartment').disabled = true;
+      document.getElementById('adminTopicBatch').innerHTML = '<option value="">Select Batch</option>';
+      document.getElementById('adminTopicBatch').disabled = true;
       return;
     }
+
+    // Enable department select
+    document.getElementById('adminTopicDepartment').disabled = false;
+    // Clear and disable batch select until department is selected
+    document.getElementById('adminTopicBatch').innerHTML = '<option value="">Select Batch</option>';
+    document.getElementById('adminTopicBatch').disabled = true;
 
     try {
       const response = await fetch(`${CONFIG.API_BASE_URL}/admin/departments`, {
@@ -101,7 +110,7 @@ const AdminTopics = {
   /**
    * Populate department select
    */
-  populateDepartmentSelect: function() {
+  populateDepartmentSelect: function () {
     const select = document.getElementById('adminTopicDepartment');
     select.innerHTML = '<option value="">Select Department</option>';
     this.departments.forEach(dept => {
@@ -115,11 +124,13 @@ const AdminTopics = {
   /**
    * Load batches for selected department
    */
-  loadBatches: async function(departmentId) {
+  loadBatches: async function (departmentId) {
     if (!departmentId) {
       document.getElementById('adminTopicBatch').innerHTML = '<option value="">Select Batch</option>';
+      document.getElementById('adminTopicBatch').disabled = true;
       return;
     }
+    document.getElementById('adminTopicBatch').disabled = false;
 
     try {
       const response = await fetch(`${CONFIG.API_BASE_URL}/admin/batches`, {
@@ -141,7 +152,7 @@ const AdminTopics = {
   /**
    * Populate batch select
    */
-  populateBatchSelect: function() {
+  populateBatchSelect: function () {
     const select = document.getElementById('adminTopicBatch');
     select.innerHTML = '<option value="">Select Batch</option>';
     this.batches.forEach(batch => {
@@ -155,7 +166,7 @@ const AdminTopics = {
   /**
    * Load topic details for editing
    */
-  loadTopicForEdit: async function(topicId) {
+  loadTopicForEdit: async function (topicId) {
     try {
       const response = await fetch(`${this.apiEndpoint}/${topicId}`, {
         method: 'GET',
@@ -170,7 +181,7 @@ const AdminTopics = {
         document.getElementById('adminTopicCollege').value = topic.college_id || '';
         document.getElementById('adminTopicDepartment').value = topic.department_id || '';
         document.getElementById('adminTopicBatch').value = topic.batch_id || '';
-        
+
         // Load dropdowns in sequence
         await this.loadColleges();
         if (topic.college_id) {
@@ -191,7 +202,7 @@ const AdminTopics = {
   /**
    * Save topic (create or update)
    */
-  save: async function() {
+  save: async function () {
     const topicId = document.getElementById('adminTopicId').value;
     const topicName = document.getElementById('adminTopicName').value.trim();
     const collegeId = document.getElementById('adminTopicCollege').value;
@@ -254,7 +265,7 @@ const AdminTopics = {
   /**
    * Load all topics
    */
-  loadTopics: async function() {
+  loadTopics: async function () {
     try {
       const response = await fetch(this.apiEndpoint, {
         method: 'GET',
@@ -276,7 +287,7 @@ const AdminTopics = {
   /**
    * Display topics in a table
    */
-  displayTopics: function(topics) {
+  displayTopics: function (topics) {
     const container = document.getElementById('adminTopicsList');
 
     if (!topics || topics.length === 0) {
@@ -284,34 +295,34 @@ const AdminTopics = {
       return;
     }
 
-    let html = '<table style="width: 100%; border-collapse: collapse;">';
-    html += '<thead><tr style="background: #f5f5f5; border-bottom: 2px solid #ddd;">';
-    html += '<th style="padding: 0.75rem; text-align: left;">Topic Name</th>';
-    html += '<th style="padding: 0.75rem; text-align: left;">Batch</th>';
-    html += '<th style="padding: 0.75rem; text-align: center; width: 150px;">Actions</th>';
+    let html = '<div class="table-container"><table class="table">';
+    html += '<thead><tr>';
+    html += '<th>Topic Name</th>';
+    html += '<th>Batch</th>';
+    html += '<th style="text-align: center; width: 150px;">Actions</th>';
     html += '</tr></thead><tbody>';
 
     topics.forEach(topic => {
       if (topic.is_disabled) return;
 
-      html += `<tr style="border-bottom: 1px solid #eee;">`;
-      html += `<td style="padding: 0.75rem;">${this.escapeHtml(topic.topic_name)}</td>`;
-      html += `<td style="padding: 0.75rem;">${this.escapeHtml(topic.batch_id)}</td>`;
-      html += `<td style="padding: 0.75rem; text-align: center;">`;
+      html += `<tr>`;
+      html += `<td>${this.escapeHtml(topic.topic_name)}</td>`;
+      html += `<td>${this.escapeHtml(topic.batch_id)}</td>`;
+      html += `<td class="flex-gap" style="justify-content: center;">`;
       html += `<button class="btn btn-sm btn-info" onclick="AdminTopics.openModal('${topic.id}')">Edit</button>`;
       html += `<button class="btn btn-sm btn-danger" onclick="AdminTopics.deleteConfirm('${topic.id}')">Delete</button>`;
       html += `</td>`;
       html += `</tr>`;
     });
 
-    html += '</tbody></table>';
+    html += '</tbody></table></div>';
     container.innerHTML = html;
   },
 
   /**
    * Delete topic with confirmation
    */
-  deleteConfirm: function(topicId) {
+  deleteConfirm: function (topicId) {
     if (confirm('Are you sure you want to delete this topic?')) {
       this.delete(topicId);
     }
@@ -320,7 +331,7 @@ const AdminTopics = {
   /**
    * Delete a topic
    */
-  delete: async function(topicId) {
+  delete: async function (topicId) {
     try {
       const response = await fetch(`${this.apiEndpoint}/${topicId}`, {
         method: 'DELETE',
@@ -343,7 +354,7 @@ const AdminTopics = {
   /**
    * Escape HTML to prevent XSS
    */
-  escapeHtml: function(text) {
+  escapeHtml: function (text) {
     const map = {
       '&': '&amp;',
       '<': '&lt;',

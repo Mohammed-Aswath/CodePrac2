@@ -91,22 +91,8 @@ const StudentPractice = {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log('Response data:', data);
-                console.log('Response data type:', typeof data);
-                console.log('Response data keys:', Object.keys(data));
-                console.log('data.error:', data.error);
-                console.log('data.message:', data.message);
-                console.log('data.data:', data.data);
-                console.log('data.data?.topics:', data.data?.topics);
-                console.log('data.topics:', data.topics);
-
                 this.topics = data.data?.topics || data.topics || [];
-                console.log('After assignment, this.topics:', this.topics);
-                console.log('Topics loaded:', this.topics.length);
-                console.log('Topics array:', this.topics);
-                console.log('About to call renderTopics()...');
                 this.renderTopics();
-                console.log('renderTopics() call completed');
             } else {
                 const errorData = await response.json();
                 console.error('Load topics error:', response.status, errorData);
@@ -175,15 +161,7 @@ const StudentPractice = {
      * Render topics in left sidebar (Phase 1)
      */
     renderTopics() {
-        console.log('🎨 renderTopics called');
-        console.log('this:', this);
-        console.log('this.topics:', this.topics);
-        console.log('typeof this.topics:', typeof this.topics);
-        console.log('Array.isArray(this.topics):', Array.isArray(this.topics));
-
         const container = document.getElementById('studentTopicsList');
-        console.log('Container element:', container);
-        console.log('Container found:', !!container);
 
         if (!container) {
             console.error('ERROR: studentTopicsList container not found!');
@@ -195,25 +173,23 @@ const StudentPractice = {
             console.log('Topics count:', this.topics?.length || 0);
 
             if (!this.topics || this.topics.length === 0) {
-                console.log('No topics to display, showing empty message');
                 container.innerHTML = '<div style="padding: 1rem; color: #999; text-align: center;">No topics available</div>';
                 return;
             }
 
-            console.log('Rendering', this.topics.length, 'topics');
-            const html = this.topics.map(topic => {
+            const html = `<div class="topic-grid">` + this.topics.map(topic => {
                 const topicName = topic.topic_name || topic.name || 'Untitled Topic';
-                console.log('Processing topic:', topicName, 'ID:', topic.id);
+                // Active state styling if selected
+                const isActive = this.selectedTopic?.id === topic.id;
+                const activeStyle = isActive ? 'border-color: var(--primary); transform: translateY(-5px); box-shadow: var(--shadow-xl);' : '';
+
                 return `
-                    <div class="card" style="cursor: pointer; margin-bottom: 0.5rem; padding: 0.75rem; ${this.selectedTopic?.id === topic.id ? 'background: #e8f4f8; border: 2px solid #007bff;' : 'border: 1px solid #ddd;'}" 
-                         onclick="StudentPractice.selectTopic('${topic.id}')">
-                        <h4 style="margin: 0; margin-bottom: 0.25rem; color: #333;">${Utils.escapeHtml(topicName)}</h4>
-                        <p style="margin: 0; font-size: 0.85rem; color: #666;">
-                            Click to view questions
-                        </p>
+                    <div class="topic-card" style="${activeStyle}" onclick="StudentPractice.selectTopic('${topic.id}')">
+                        <h4>${Utils.escapeHtml(topicName)}</h4>
+                        <p>Click to view questions</p>
                     </div>
                 `;
-            }).join('');
+            }).join('') + `</div>`;
             container.innerHTML = html;
             console.log('Topics rendered successfully');
         } catch (error) {
@@ -277,22 +253,19 @@ const StudentPractice = {
             return;
         }
 
-        container.innerHTML = this.questions.map(question => `
-            <div class="card" style="cursor: pointer; margin-bottom: 0.5rem; padding: 0.75rem; ${this.selectedQuestion?.id === question.id ? 'background: #e8f4f8; border: 2px solid #007bff;' : 'border: 1px solid #ddd;'}"
-                 onclick="StudentPractice.selectQuestion('${question.id}')">
-                <h4 style="margin: 0; margin-bottom: 0.25rem; color: #333;">
-                    ${Utils.escapeHtml(question.title || question.question_title)}
-                </h4>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 0.85rem; color: #666;">
-                        Difficulty: <strong>${question.difficulty || 'Medium'}</strong>
-                    </span>
-                    <span class="badge" style="background: ${this.getDifficultyColor(question.difficulty)}; color: white; padding: 0.25rem 0.5rem; border-radius: 3px; font-size: 0.75rem;">
+        container.innerHTML = `<div class="question-list">` + this.questions.map(question => `
+            <div class="question-card" onclick="StudentPractice.selectQuestion('${question.id}')">
+                <div>
+                    <h4 style="margin: 0; margin-bottom: 0.5rem; font-size: 1.1rem; color: var(--text-main);">${Utils.escapeHtml(question.title || question.question_title)}</h4>
+                    <span class="badge" style="background: ${this.getDifficultyColor(question.difficulty)}; color: white;">
                         ${question.difficulty || 'Medium'}
                     </span>
                 </div>
+                <div style="color: var(--primary);">
+                    Solve &rarr;
+                </div>
             </div>
-        `).join('');
+        `).join('') + `</div>`;
     },
 
     /**
@@ -341,7 +314,7 @@ const StudentPractice = {
             const runBtn = document.getElementById('runBtn');
             const submitBtn = document.getElementById('submitBtn');
             const analyzeEfficiencyBtn = document.getElementById('analyzeEfficiencyBtn');
-            
+
             if (runBtn) runBtn.style.display = 'inline-block';
             if (submitBtn) submitBtn.style.display = 'inline-block';
             if (analyzeEfficiencyBtn) analyzeEfficiencyBtn.style.display = 'none';  // Hidden until correct submission
@@ -408,8 +381,13 @@ const StudentPractice = {
     changeLanguage(language) {
         this.currentLanguage = language;
         const editor = document.getElementById('codeEditor');
-        if (editor && !editor.value.trim()) {
+        if (editor) {
+            // Confirm data loss if code exists and is not default
+            // For now, just simplistic check or force update if user changes language
+            // Better UX: Don't check for trimming, just update if it's vastly different or if user wants to.
+            // But to keep it simple as requested:
             editor.value = this.getDefaultTemplate(language, this.selectedQuestion?.function_name);
+            this.code = editor.value; // Sync state
         }
     },
 
@@ -434,6 +412,18 @@ const StudentPractice = {
     }
 }
 `,
+            c: `#include <stdio.h>
+#include <string.h>
+
+char* ${functionName}(char* input_str) {
+    // Write your solution here
+    return "";
+}
+
+int main() {
+    return 0;
+}
+`,
             cpp: `#include <bits/stdc++.h>
 using namespace std;
 
@@ -451,22 +441,67 @@ int main() {
     },
 
     /**
+     * Switch Console Tabs (Testcase vs Result)
+     */
+    switchConsoleTab(tabName) {
+        const tabTestcase = document.getElementById('tabTestcase');
+        const tabResult = document.getElementById('tabResult');
+        const viewTestcase = document.getElementById('viewTestcase');
+        const viewResult = document.getElementById('viewResult');
+
+        if (!tabTestcase || !tabResult || !viewTestcase || !viewResult) return;
+
+        if (tabName === 'testcase') {
+            tabTestcase.classList.add('active');
+            tabResult.classList.remove('active');
+            viewTestcase.style.display = 'block';
+            viewResult.style.display = 'none';
+        } else {
+            tabTestcase.classList.remove('active');
+            tabResult.classList.add('active');
+            viewTestcase.style.display = 'none';
+            viewResult.style.display = 'block';
+        }
+    },
+
+    /**
+     * Switch Problem Tabs (Description vs Submissions)
+     */
+    switchProblemTab(tabName) {
+        const tabDescription = document.getElementById('tabDescription');
+        const tabSubmissions = document.getElementById('tabSubmissions');
+        const descriptionContent = document.getElementById('descriptionContent');
+        const submissionsContent = document.getElementById('submissionsContent');
+
+        if (!tabDescription || !tabSubmissions || !descriptionContent || !submissionsContent) return;
+
+        if (tabName === 'description') {
+            tabDescription.classList.add('active');
+            tabSubmissions.classList.remove('active');
+            descriptionContent.style.display = 'block';
+            submissionsContent.style.display = 'none';
+        } else {
+            tabDescription.classList.remove('active');
+            tabSubmissions.classList.add('active');
+            descriptionContent.style.display = 'none';
+            submissionsContent.style.display = 'block';
+        }
+    },
+
+    /**
      * Add a custom test case
      */
     addCustomTestCase() {
         const customInput = document.getElementById('customInput');
         const customOutput = document.getElementById('customOutput');
 
-        if (!customInput || !customOutput) {
-            Utils.showMessage('practiceMessage', 'Input/output fields not found', 'error');
-            return;
-        }
-
+        // ... validation ...
+        if (!customInput || !customOutput) return;
         const input = customInput.value.trim();
         const output = customOutput.value.trim();
 
-        if (!input || !output) {
-            Utils.showMessage('practiceMessage', 'Please enter both input and expected output', 'error');
+        if (!input) { // Output is optional for simple run
+            Utils.showMessage('practiceMessage', 'Input is required', 'error');
             return;
         }
 
@@ -479,15 +514,7 @@ int main() {
 
         // Render custom test cases list
         this.renderCustomTestCases();
-        Utils.showMessage('practiceMessage', 'Test case added successfully', 'success');
-    },
-
-    /**
-     * Remove a custom test case
-     */
-    removeCustomTestCase(index) {
-        this.customTestCases.splice(index, 1);
-        this.renderCustomTestCases();
+        Utils.showMessage('practiceMessage', 'Test case added', 'success');
     },
 
     /**
@@ -503,59 +530,54 @@ int main() {
         }
 
         container.style.display = 'block';
-        let html = '<div style="font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: bold;">Added Test Cases:</div>';
+        let html = '';
 
         this.customTestCases.forEach((tc, index) => {
-            html += `
-                <div style="background: #fff; padding: 0.5rem; margin-bottom: 0.5rem; border-radius: 4px; border: 1px solid #ddd;">
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                        <div style="flex: 1;">
-                            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem;">
-                                <strong>Input:</strong> <code style="background: #f0f0f0; padding: 2px 4px; border-radius: 2px;">${Utils.escapeHtml(tc.input)}</code>
-                            </div>
-                            <div style="font-size: 0.85rem; color: #666;">
-                                <strong>Expected:</strong> <code style="background: #f0f0f0; padding: 2px 4px; border-radius: 2px;">${Utils.escapeHtml(tc.output)}</code>
-                            </div>
-                        </div>
-                        <button class="btn btn-sm btn-danger" onclick="StudentPractice.removeCustomTestCase(${index})" style="margin-left: 0.5rem;">Remove</button>
-                    </div>
+            html += `<div style="background: #2d2d2d; padding: 0.5rem; border-radius: 4px; border: 1px solid #444; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 0.8rem; color: #ccc;">
+                    <span style="color: #888;">Input:</span> ${Utils.escapeHtml(tc.input).substring(0, 20)}...
                 </div>
-            `;
+                <button onclick="StudentPractice.removeCustomTestCase(${index})" style="background: none; border: none; color: #f87171; cursor: pointer; font-size: 0.8rem;">✕</button>
+            </div>`;
         });
 
         container.innerHTML = html;
     },
 
     /**
+     * Remove a custom test case
+     */
+    removeCustomTestCase(index) {
+        this.customTestCases.splice(index, 1);
+        this.renderCustomTestCases();
+    },
+
+    /**
      * Run code with sample test case (Compiler Agent)
      */
     async runCode() {
+        this.switchConsoleTab('result'); // Auto-switch to result tab
+
         const editor = document.getElementById('codeEditor');
-        if (!editor) {
-            Utils.showMessage('practiceMessage', 'Code editor not found', 'error');
-            return;
-        }
+        if (!editor) return;
 
         this.code = editor.value;
         if (!this.code.trim()) {
-            Utils.showMessage('practiceMessage', 'Please write some code first', 'error');
+            document.getElementById('testResults').innerHTML = '<div style="padding: 2rem; text-align: center; color: #f87171;">Please write some code first</div>';
             return;
         }
 
-        if (!this.selectedQuestion) {
-            Utils.showMessage('practiceMessage', 'No question selected', 'error');
-            return;
-        }
+        if (!this.selectedQuestion) return;
 
         try {
             const runBtn = document.getElementById('runBtn');
             if (runBtn) runBtn.disabled = true;
 
-            Utils.showMessage('practiceMessage', 'Compiling and running code...', 'info');
+            document.getElementById('testResults').innerHTML = '<div style="padding: 2rem; text-align: center; color: #aaa;">Running code...</div>';
 
             // Collect all test cases (sample + custom)
             const testCases = [];
-            
+
             // Add sample test case
             if (this.selectedQuestion.sample_input) {
                 testCases.push({
@@ -625,16 +647,9 @@ int main() {
 
             this.renderResults();
 
-            const hasErrors = results.some(r => r.error);
-            if (!hasErrors) {
-                Utils.showMessage('practiceMessage', `Code executed successfully for all ${results.length} test case(s)`, 'success');
-            } else {
-                Utils.showMessage('practiceMessage', 'Some test cases had errors', 'error');
-            }
-
         } catch (error) {
             console.error('Run code error:', error);
-            Utils.showMessage('practiceMessage', 'Execution failed: ' + error.message, 'error');
+            document.getElementById('testResults').innerHTML = `<div style="padding: 1rem; color: #f87171;">Execution failed: ${error.message}</div>`;
         } finally {
             const runBtn = document.getElementById('runBtn');
             if (runBtn) runBtn.disabled = false;
@@ -779,15 +794,18 @@ int main() {
      * Render test results in results section - matching prototype design
      */
     renderResults() {
-        const container = document.getElementById('testResults');
-        if (!container || !this.results) return;
+        const testResultsContainer = document.getElementById('testResults');
+        const submissionsContainer = document.getElementById('submissionsContent');
+
+        if (!this.results) return;
 
         const r = this.results;
-        
         let html = '';
 
-        // For RUN type: Show only output for all test cases (no status)
+        // For RUN type: Show only output in RIGHT panel (Test Results)
         if (r.type === 'run') {
+            if (!testResultsContainer) return;
+
             if (!r.test_results || r.test_results.length === 0) {
                 html = '<div style="color: #ccc;">No test results available</div>';
             } else {
@@ -837,108 +855,106 @@ int main() {
                     `;
                 });
             }
-        } 
-        // For SUBMIT type: Show status and test breakdown
+            testResultsContainer.innerHTML = html;
+        }
+        // For SUBMIT type: Show status/efficiency in LEFT panel (Submissions Tab)
         else if (r.type === 'submit') {
+            if (!submissionsContainer) return;
+
+            // Switch to Submissions tab
+            this.switchProblemTab('submissions');
+
             // Determine status
             let statusClass = 'incorrect';
             let statusText = 'Incorrect';
-            
+            let statusColor = '#facc15'; // default yellow for unknown/partial
+
             if (r.is_correct || r.status === 'correct') {
                 statusClass = 'correct';
-                statusText = 'Correct';
+                statusText = 'Accepted';
+                statusColor = '#4ade80'; // Green
             } else if (r.status === 'execution_error' || r.error) {
                 statusClass = 'error';
-                statusText = 'Execution Error';
+                statusText = 'Error';
+                statusColor = '#f87171'; // Red
             }
 
             html = `
-                <div style="background: #1e1e1e; color: #fff; padding: 1.5rem; border-radius: 8px; font-family: monospace;">
-                    <div style="margin-bottom: 1rem;">
-                        <strong>Status:</strong> <span style="color: ${statusClass === 'correct' ? '#4ade80' : statusClass === 'error' ? '#f87171' : '#facc15'};">${statusText}</span>
+                <div style="padding: 1rem;">
+                    <div style="margin-bottom: 1.5rem;">
+                        <h2 style="color: ${statusColor}; margin: 0 0 0.5rem 0;">${statusText}</h2>
+                        <div style="color: #aaa; font-size: 0.9rem;">Passed: ${r.test_results && r.test_results.is_correct ? 'All test cases' : 'Some test cases'}</div>
                     </div>
             `;
 
-            // Show reason if available
+            // Reason / Error
             if (r.test_results && r.test_results.reason) {
-                html += `<div style="margin-bottom: 1rem; color: #ccc;">Reason: ${Utils.escapeHtml(r.test_results.reason)}</div>`;
+                html += `<div style="background: rgba(255, 255, 255, 0.05); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; color: #e0e0e0;">
+                    ${Utils.escapeHtml(r.test_results.reason)}
+                </div>`;
             }
-
-            // Show execution error
             if (r.error) {
-                html += `
-                    <div style="margin-bottom: 1rem; padding: 0.75rem; background: rgba(248, 113, 113, 0.1); border-left: 3px solid #f87171; border-radius: 4px;">
-                        <strong>Error:</strong><br>
-                        <span style="color: #fca5a5; font-size: 0.9rem;">${Utils.escapeHtml(r.error)}</span>
-                    </div>
-                `;
+                html += `<div style="background: rgba(248, 113, 113, 0.1); padding: 1rem; border-radius: 6px; margin-bottom: 1.5rem; color: #fca5a5; border-left: 3px solid #f87171;">
+                    ${Utils.escapeHtml(r.error)}
+                </div>`;
             }
 
-            // Show test results breakdown
-            if (r.test_results) {
-                const tr = r.test_results;
-                if (tr.is_correct !== undefined) {
-                    html += `
-                        <div style="margin-bottom: 1.5rem; padding-top: 1rem; border-top: 1px solid #444;">
-                            <strong>Test Results:</strong><br>
-                            <div style="margin-top: 0.5rem; color: #ccc;">
-                                <div>Total Passed: <strong style="color: #4ade80;">${tr.is_correct ? 'All' : 'Some'} tests passed</strong></div>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-
-            // Show efficiency feedback if available
+            // Efficiency Feedback (repurposing logic)
             if (r.efficiency_feedback) {
                 const eff = r.efficiency_feedback;
                 html += `
-                    <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #444;">
-                        <strong>Efficiency Analysis:</strong><br>
-                        <div style="margin-top: 0.75rem; color: #ccc;">
+                    <div style="background: #333; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                        <h4 style="margin: 0 0 1rem 0; color: #fff;">Efficiency Analysis</h4>
                 `;
 
                 if (eff.time_complexity) {
-                    html += `<div style="margin-bottom: 0.5rem;">
-                        <span style="color: #a0aec0;">Time Complexity:</span> <strong>${Utils.escapeHtml(eff.time_complexity)}</strong>
+                    html += `<div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid #444;">
+                        <span style="color: #aaa;">Time Complexity</span>
+                        <strong style="color: #fff;">${Utils.escapeHtml(eff.time_complexity)}</strong>
                     </div>`;
                 }
-
                 if (eff.space_complexity) {
-                    html += `<div style="margin-bottom: 0.5rem;">
-                        <span style="color: #a0aec0;">Space Complexity:</span> <strong>${Utils.escapeHtml(eff.space_complexity)}</strong>
+                    html += `<div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; padding-bottom: 0.5rem; border-bottom: 1px solid #444;">
+                        <span style="color: #aaa;">Space Complexity</span>
+                        <strong style="color: #fff;">${Utils.escapeHtml(eff.space_complexity)}</strong>
                     </div>`;
                 }
 
-                if (eff.approach_summary) {
-                    html += `<div style="margin-bottom: 0.5rem;">
-                        <span style="color: #a0aec0;">Approach:</span> ${Utils.escapeHtml(eff.approach_summary)}
-                    </div>`;
-                }
+                html += `</div>`; // End metrics card
 
-                if (eff.improvement_suggestions) {
-                    html += `<div style="margin-bottom: 0.5rem;">
-                        <span style="color: #a0aec0;">Suggestions:</span> ${Utils.escapeHtml(eff.improvement_suggestions)}
-                    </div>`;
-                }
+                if (eff.approach_summary || eff.improvement_suggestions || eff.optimal_method) {
+                    html += `<div style="background: #333; border-radius: 8px; padding: 1rem;">
+                        <h4 style="margin: 0 0 1rem 0; color: #fff;">Insights</h4>
+                     `;
 
-                if (eff.optimal_method) {
-                    html += `<div>
-                        <span style="color: #a0aec0;">Optimal Method:</span> ${Utils.escapeHtml(eff.optimal_method)}
-                    </div>`;
-                }
+                    if (eff.approach_summary) {
+                        html += `<div style="margin-bottom: 1rem;">
+                            <div style="color: #aaa; font-size: 0.85rem; margin-bottom: 0.25rem;">Your Approach</div>
+                            <div style="color: #e0e0e0;">${Utils.escapeHtml(eff.approach_summary)}</div>
+                        </div>`;
+                    }
 
-                html += `
-                        </div>
-                    </div>
-                `;
+                    if (eff.improvement_suggestions) {
+                        html += `<div style="margin-bottom: 1rem;">
+                            <div style="color: #aaa; font-size: 0.85rem; margin-bottom: 0.25rem;">Suggestions</div>
+                            <div style="color: #e0e0e0;">${Utils.escapeHtml(eff.improvement_suggestions)}</div>
+                        </div>`;
+                    }
+
+                    if (eff.optimal_method) {
+                        html += `<div>
+                            <div style="color: #aaa; font-size: 0.85rem; margin-bottom: 0.25rem;">Optimal Method</div>
+                            <div style="color: #e0e0e0;">${Utils.escapeHtml(eff.optimal_method)}</div>
+                        </div>`;
+                    }
+
+                    html += `</div>`; // End insights card
+                }
             }
 
             html += `</div>`;
+            submissionsContainer.innerHTML = html;
         }
-
-        container.innerHTML = html;
-        document.getElementById('resultsSection').style.display = 'block';
     },
 
     /**
@@ -1042,7 +1058,7 @@ int main() {
     toggleCustomTestCasesPanel() {
         const panel = document.getElementById('customTestCasesPanel');
         const toggle = document.getElementById('customTestCasesToggle');
-        
+
         if (panel && toggle) {
             if (panel.style.display === 'none') {
                 panel.style.display = 'block';
@@ -1060,7 +1076,7 @@ int main() {
     toggleResultsPanel() {
         const resultsSection = document.getElementById('resultsSection');
         const testResults = document.getElementById('testResults');
-        
+
         if (resultsSection && testResults) {
             if (testResults.style.display === 'none') {
                 testResults.style.display = 'block';

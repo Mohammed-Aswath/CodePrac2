@@ -9,7 +9,7 @@ const Dashboard = {
     async load() {
         try {
             const user = Auth.getCurrentUser();
-            
+
             if (user.role === 'student') {
                 await this.loadStudentDashboard();
             } else {
@@ -38,22 +38,22 @@ const Dashboard = {
             const dashboardContent = document.getElementById('dashboardContent');
             if (dashboardContent) {
                 dashboardContent.innerHTML = `
-                    <div class="grid grid-cols-4" style="margin-bottom: 2rem;">
-                        <div class="card" style="text-align: center;">
-                            <p class="text-secondary" style="margin-bottom: 0.5rem;">Total Submissions</p>
-                            <h2 style="margin: 0; color: #007bff;">${totalSubmissions}</h2>
+                    <div class="dashboard-grid">
+                        <div class="stat-card">
+                            <h3>Total Submissions</h3>
+                            <div class="value">${totalSubmissions}</div>
                         </div>
-                        <div class="card" style="text-align: center;">
-                            <p class="text-secondary" style="margin-bottom: 0.5rem;">Questions Solved</p>
-                            <h2 style="margin: 0; color: #28a745;">${correctSubmissions}</h2>
+                        <div class="stat-card">
+                            <h3>Questions Solved</h3>
+                            <div class="value" style="color: var(--success);">${correctSubmissions}</div>
                         </div>
-                        <div class="card" style="text-align: center;">
-                            <p class="text-secondary" style="margin-bottom: 0.5rem;">Unique Questions Attempted</p>
-                            <h2 style="margin: 0; color: #ffc107;">${uniqueQuestions}</h2>
+                        <div class="stat-card">
+                            <h3>Unique Questions</h3>
+                            <div class="value" style="color: var(--warning);">${uniqueQuestions}</div>
                         </div>
-                        <div class="card" style="text-align: center;">
-                            <p class="text-secondary" style="margin-bottom: 0.5rem;">Success Rate</p>
-                            <h2 style="margin: 0; color: #17a2b8;">${successRate}%</h2>
+                        <div class="stat-card">
+                            <h3>Success Rate</h3>
+                            <div class="value" style="color: var(--info);">${successRate}%</div>
                         </div>
                     </div>
                 `;
@@ -102,29 +102,31 @@ const Dashboard = {
 
             activitySection.innerHTML = `
                 <div class="card">
-                    <h2>Recent Activity</h2>
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Question ID</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${recentSubmissions.map(submission => `
+                    <div class="card-header">Recent Activity</div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
                                 <tr>
-                                    <td>${Utils.escapeHtml(submission.question_id || 'Unknown')}</td>
-                                    <td>
-                                        <span class="badge ${submission.status === 'correct' ? 'badge-success' : submission.status === 'execution_error' ? 'badge-danger' : 'badge-warning'}">
-                                            ${submission.status || 'pending'}
-                                        </span>
-                                    </td>
-                                    <td>${Utils.formatDate(submission.submitted_at || new Date().toISOString())}</td>
+                                    <th>Question ID</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                ${recentSubmissions.map(submission => `
+                                    <tr>
+                                        <td>${Utils.escapeHtml(submission.question_id || 'Unknown')}</td>
+                                        <td>
+                                            <span class="badge ${submission.status === 'correct' ? 'badge-success' : submission.status === 'execution_error' ? 'badge-danger' : 'badge-warning'}">
+                                                ${submission.status || 'pending'}
+                                            </span>
+                                        </td>
+                                        <td>${Utils.formatDate(submission.submitted_at || new Date().toISOString())}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             `;
         } catch (error) {
