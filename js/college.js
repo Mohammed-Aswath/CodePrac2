@@ -626,7 +626,7 @@ const College = {
                 <tbody>
                     ${this.students.map(s => `
                         <tr>
-                            <td>${Utils.escapeHtml(s.username || s.name || 'N/A')}</td>
+                            <td><a href="#" onclick="StudentProfileViewer.open('${s.id}'); return false;" style="color: #3b82f6; text-decoration: none; font-weight: 500;">${Utils.escapeHtml(s.username || s.name || 'N/A')}</a></td>
                             <td>${Utils.escapeHtml(s.email)}</td>
                             <td>${Utils.escapeHtml(this.findDepartmentNameById(s.department_id))}</td>
                             <td>${Utils.escapeHtml(this.findBatchNameById(s.batch_id))}</td>

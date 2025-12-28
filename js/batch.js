@@ -125,13 +125,13 @@ const Batch = {
                 <tbody>
                     ${this.students.map(s => `
                         <tr>
-                            <td>${Utils.escapeHtml(s.username || s.name || 'N/A')}</td>
+                            <td><a href="#" onclick="StudentProfileViewer.open('${s.id}'); return false;" style="color: #3b82f6; text-decoration: none; font-weight: 500;">${Utils.escapeHtml(s.username || s.name || 'N/A')}</a></td>
                             <td>${Utils.escapeHtml(s.email)}</td>
                             <td>
-                                ${s.is_active ? 
-                                    '<span class="badge badge-success">Active</span>' : 
-                                    '<span class="badge badge-secondary">Inactive</span>'
-                                }
+                                ${s.is_active ?
+                '<span class="badge badge-success">Active</span>' :
+                '<span class="badge badge-secondary">Inactive</span>'
+            }
                             </td>
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Batch.editStudent('${s.id}')">Edit</button>
@@ -253,8 +253,8 @@ const Batch = {
 
             UI.closeModal('batchStudentModal');
             this.loadStudents();
-            Utils.showMessage('batchMessage', 
-                this.editingStudentId ? 'Student updated successfully' : 'Student created successfully', 
+            Utils.showMessage('batchMessage',
+                this.editingStudentId ? 'Student updated successfully' : 'Student created successfully',
                 'success');
         } catch (error) {
             Utils.showMessage('batchStudentsMessage', 'Save failed: ' + error.message, 'error');
@@ -275,8 +275,8 @@ const Batch = {
             });
 
             this.loadStudents();
-            Utils.showMessage('batchMessage', 
-                newStatus ? 'Student enabled' : 'Student disabled', 
+            Utils.showMessage('batchMessage',
+                newStatus ? 'Student enabled' : 'Student disabled',
                 'success');
         } catch (error) {
             Utils.showMessage('batchMessage', 'Toggle failed: ' + error.message, 'error');
@@ -387,8 +387,8 @@ const Batch = {
 
             UI.closeModal('csvModal');
             this.loadStudents();
-            Utils.showMessage('batchMessage', 
-                `Successfully added ${response.data?.count || students.length} students from CSV`, 
+            Utils.showMessage('batchMessage',
+                `Successfully added ${response.data?.count || students.length} students from CSV`,
                 'success');
         } catch (error) {
             this.hideUploadProgress();
@@ -435,11 +435,11 @@ const Batch = {
     updateUploadProgress(count) {
         this.uploadedStudents = count;
         const percentage = Math.round((count / this.totalStudents) * 100);
-        
+
         const progressBar = document.getElementById('progressBar');
         const progressPercent = document.getElementById('progressPercent');
         const progressCount = document.getElementById('progressCount');
-        
+
         if (progressBar) {
             progressBar.style.width = percentage + '%';
             progressBar.textContent = percentage + '%';

@@ -714,7 +714,7 @@ const Admin = {
                 <tbody>
                     ${this.students.map(s => `
                         <tr>
-                            <td>${Utils.escapeHtml(s.username || s.name || 'N/A')}</td>
+                            <td><a href="#" onclick="StudentProfileViewer.open('${s.id}'); return false;" style="color: #3b82f6; text-decoration: none; font-weight: 500;">${Utils.escapeHtml(s.username || s.name || 'N/A')}</a></td>
                             <td>${Utils.escapeHtml(s.email || 'N/A')}</td>
                             <td>${Utils.escapeHtml(this.findCollegeNameById(s.college_id) || 'N/A')}</td>
                             <td>${Utils.escapeHtml(this.findDepartmentNameById(s.department_id) || 'N/A')}</td>

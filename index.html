@@ -325,34 +325,13 @@
                 <div id="departmentMessage"></div>
 
                 <div class="tabs">
-                    <button data-dept-tab="topics" class="tab-btn active">Topics</button>
-                    <button data-dept-tab="questions" class="tab-btn">Questions</button>
-                    <button data-dept-tab="notes" class="tab-btn">Notes</button>
-                    <button data-dept-tab="batches" class="tab-btn">Batches</button>
+                    <button data-dept-tab="batches" class="tab-btn active">Batches</button>
                     <button data-dept-tab="students" class="tab-btn">Students</button>
                 </div>
 
                 <div style="margin-top: 1.5rem;">
-                    <!-- Topics -->
-                    <div data-dept-content="topics" style="display: block;">
-                        <button class="btn btn-primary" onclick="Department.openTopicModal();">Add Topic</button>
-                        <div id="topicsList" style="margin-top: 1rem;"></div>
-                    </div>
-
-                    <!-- Questions -->
-                    <div data-dept-content="questions" style="display: none;">
-                        <button class="btn btn-primary" onclick="Questions.openModal();">Add Question</button>
-                        <div id="questionsList" style="margin-top: 1rem;"></div>
-                    </div>
-
-                    <!-- Notes -->
-                    <div data-dept-content="notes" style="display: none;">
-                        <button class="btn btn-primary" onclick="Notes.openModal();">Add Note</button>
-                        <div id="notesList" style="margin-top: 1rem;"></div>
-                    </div>
-
                     <!-- Batches -->
-                    <div data-dept-content="batches" style="display: none;">
+                    <div data-dept-content="batches" style="display: block;">
                         <div id="departmentBatchesList"></div>
                     </div>
 
@@ -1441,6 +1420,7 @@ Jane Smith,jane@example.com,password456</pre>
     <script src="js/questions-rbac.js"></script>
     <script src="js/notes.js"></script>
     <script src="js/students.js"></script>
+    <script src="js/student-profile.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/admin-topics.js"></script>
     <script src="js/admin-notes.js"></script>

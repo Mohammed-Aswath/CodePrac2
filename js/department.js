@@ -4,11 +4,11 @@
  */
 
 const Department = {
-    topics: [],
+
     batches: [],
     students: [],
-    activeTab: 'topics',
-    editingTopicId: null,
+    activeTab: 'batches',
+
     editingBatchId: null,
     editingStudentId: null,
 
@@ -17,8 +17,8 @@ const Department = {
      */
     async load() {
         try {
-            this.activeTab = 'topics';
-            this.loadTopics();
+            this.activeTab = 'batches';
+            this.loadBatches();
             this.setupTabHandlers();
         } catch (error) {
             console.error('Department load error:', error);
@@ -70,15 +70,7 @@ const Department = {
 
         // Load data for tab
         switch (tabName) {
-            case 'topics':
-                this.loadTopics();
-                break;
-            case 'questions':
-                Questions.load();
-                break;
-            case 'notes':
-                Notes.load();
-                break;
+
             case 'batches':
                 this.loadBatches();
                 break;
@@ -88,139 +80,7 @@ const Department = {
         }
     },
 
-    /**
-     * Load topics
-     */
-    async loadTopics() {
-        try {
-            const response = await Utils.apiRequest('/department/topics');
-            this.topics = response.data?.topics || response.topics || [];
-            this.renderTopics();
-        } catch (error) {
-            Utils.showMessage('departmentMessage', 'Failed to load topics', 'error');
-        }
-    },
 
-    /**
-     * Render topics
-     */
-    renderTopics() {
-        const container = document.getElementById('topicsList');
-        if (!container) return;
-
-        if (!this.topics || this.topics.length === 0) {
-            container.innerHTML = '<div class="text-center text-secondary">No topics found</div>';
-            return;
-        }
-
-        container.innerHTML = `
-            <div class="table-container">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Description</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${this.topics.map(t => `
-                        <tr>
-                            <td>${Utils.escapeHtml(t.name)}</td>
-                            <td>${Utils.escapeHtml((t.description || '').substring(0, 100))}</td>
-                            <td class="flex-gap">
-                                <button class="btn btn-sm btn-secondary" onclick="Department.editTopic('${t.id}')">Edit</button>
-                                <button class="btn btn-sm btn-danger" onclick="Department.deleteTopic('${t.id}')">Delete</button>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
-            </div>
-        `;
-    },
-
-    /**
-     * Open create topic modal
-     */
-    openTopicModal() {
-        this.editingTopicId = null;
-        document.getElementById('topicName').value = '';
-        document.getElementById('topicDescription').value = '';
-        document.querySelector('#topicModal .modal-header h3').textContent = 'Add Topic';
-        document.querySelector('#topicModal [type="submit"]').textContent = 'Create Topic';
-        UI.openModal('topicModal');
-    },
-
-    /**
-     * Edit topic
-     */
-    async editTopic(id) {
-        try {
-            const response = await Utils.apiRequest(`/department/topics/${id}`);
-            const topic = response.data?.topic || response.topic || {};
-
-            document.getElementById('topicName').value = topic.name || '';
-            document.getElementById('topicDescription').value = topic.description || '';
-
-            this.editingTopicId = id;
-            document.querySelector('#topicModal .modal-header h3').textContent = 'Edit Topic';
-            document.querySelector('#topicModal [type="submit"]').textContent = 'Update Topic';
-            UI.openModal('topicModal');
-        } catch (error) {
-            Utils.alert('Failed to load topic: ' + error.message);
-        }
-    },
-
-    /**
-     * Delete topic
-     */
-    async deleteTopic(id) {
-        if (!Utils.confirm('Delete this topic and all related data?')) return;
-
-        try {
-            await Utils.apiRequest(`/department/topics/${id}`, { method: 'DELETE' });
-            this.loadTopics();
-            Utils.showMessage('departmentMessage', 'Topic deleted', 'success');
-        } catch (error) {
-            Utils.showMessage('departmentMessage', 'Delete failed: ' + error.message, 'error');
-        }
-    },
-
-    /**
-     * Save topic
-     */
-    async saveTopic() {
-        const name = document.getElementById('topicName').value.trim();
-        const description = document.getElementById('topicDescription').value.trim();
-
-        if (!name) {
-            Utils.alert('Topic name is required');
-            return;
-        }
-
-        try {
-            const payload = { name, description };
-            const url = this.editingTopicId
-                ? `/department/topics/${this.editingTopicId}`
-                : '/department/topics';
-
-            const method = this.editingTopicId ? 'PUT' : 'POST';
-
-            await Utils.apiRequest(url, {
-                method,
-                body: JSON.stringify(payload)
-            });
-
-            this.loadTopics();
-            UI.closeModal('topicModal');
-            Utils.showMessage('departmentMessage',
-                this.editingTopicId ? 'Topic updated' : 'Topic created',
-                'success');
-        } catch (error) {
-            Utils.showMessage('departmentMessage', 'Save failed: ' + error.message, 'error');
-        }
-    },
 
     /**
      * Load batches
@@ -459,7 +319,7 @@ const Department = {
                 <tbody>
                     ${this.students.map(s => `
                         <tr>
-                            <td>${Utils.escapeHtml(s.username || s.name || 'N/A')}</td>
+                            <td><a href="#" onclick="StudentProfileViewer.open('${s.id}'); return false;" style="color: #3b82f6; text-decoration: none; font-weight: 500;">${Utils.escapeHtml(s.username || s.name || 'N/A')}</a></td>
                             <td>${Utils.escapeHtml(s.email)}</td>
                             <td>${Utils.escapeHtml(this.findBatchNameById(s.batch_id))}</td>
                             <td>

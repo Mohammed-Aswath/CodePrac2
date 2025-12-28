@@ -1,0 +1,489 @@
+/**
+ * Student Profile Viewer Module
+ * Provides a unified view of student details for all admin roles
+ */
+
+const StudentProfileViewer = {
+    // State
+    currentStudentId: null,
+    currentStudentData: null,
+
+    // Modal Elements reference
+    modal: null,
+
+    /**
+     * Initialize the module
+     */
+    init() {
+        // Create modal if it doesn't exist
+        if (!document.getElementById('studentProfileModal')) {
+            this.createModal();
+        }
+
+        this.modal = document.getElementById('studentProfileModal');
+
+        // Event listeners
+        const closeBtn = this.modal.querySelector('.nexus-modal-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.close());
+        }
+
+        // Close on outside click
+        this.modal.addEventListener('click', (e) => {
+            if (e.target === this.modal) {
+                this.close();
+            }
+        });
+
+        // Tab switching
+        const tabs = this.modal.querySelectorAll('.profile-tab-btn');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Deactivate all
+                tabs.forEach(t => t.classList.remove('active'));
+                this.modal.querySelectorAll('.profile-tab-content').forEach(c => c.style.display = 'none');
+
+                // Activate clicked
+                tab.classList.add('active');
+                const targetId = tab.getAttribute('data-target');
+                document.getElementById(targetId).style.display = 'block';
+            });
+        });
+    },
+
+    /**
+     * Create the modal structure in the DOM
+     */
+    createModal() {
+        const modalHtml = `
+            <div id="studentProfileModal" class="nexus-modal hidden" style="z-index: 2000;">
+                <div class="nexus-modal-content" style="max-width: 900px; max-height: 90vh; display: flex; flex-direction: column;">
+                    <div class="nexus-modal-header">
+                        <h2 class="nexus-modal-title">Student Profile</h2>
+                        <button class="nexus-modal-close">&times;</button>
+                    </div>
+                    
+                    <div class="profile-tabs" style="display: flex; border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0 1.5rem;">
+                        <button class="profile-tab-btn active" data-target="tab-overview" style="background: none; border: none; color: #a0aec0; padding: 1rem 1.5rem; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 500;">Overview</button>
+                        <button class="profile-tab-btn" data-target="tab-activity" style="background: none; border: none; color: #a0aec0; padding: 1rem 1.5rem; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 500;">Activity & Stats</button>
+                    </div>
+                    
+                    <div class="nexus-modal-body" style="flex: 1; overflow-y: auto; padding: 1.5rem;">
+                        <!-- Overview Tab -->
+                        <div id="tab-overview" class="profile-tab-content">
+                            <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                                <!-- Identity Card -->
+                                <div style="flex: 1; min-width: 300px; background: rgba(255,255,255,0.03); border-radius: 8px; padding: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
+                                    <div style="text-align: center; margin-bottom: 1.5rem;">
+                                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; margin: 0 auto 1rem; color: white;" id="sp-avatar">
+                                            U
+                                        </div>
+                                        <h3 id="sp-name" style="margin: 0; color: white;">Student Name</h3>
+                                        <p id="sp-username" style="color: #a0aec0; margin: 0.25rem 0;">@username</p>
+                                        <div id="sp-status" style="margin-top: 0.5rem;"></div>
+                                    </div>
+                                    
+                                    <div style="display: grid; gap: 1rem;">
+                                        <div>
+                                            <div style="font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em;">Email</div>
+                                            <div id="sp-email" style="color: #e2e8f0;">-</div>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em;">Phone</div>
+                                            <div id="sp-phone" style="color: #e2e8f0;">-</div>
+                                        </div>
+                                        <div>
+                                            <div style="font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em;">Roll Number</div>
+                                            <div id="sp-urn" style="color: #e2e8f0;">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Academic Info -->
+                                <div style="flex: 1; min-width: 300px;">
+                                    <h4 style="color: #e2e8f0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; margin-top: 0;">Academic Details</h4>
+                                    <div style="display: grid; gap: 1rem;">
+                                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px;">
+                                            <div style="font-size: 0.8rem; color: #718096;">College</div>
+                                            <div id="sp-college" style="font-weight: 500; color: #e2e8f0;">-</div>
+                                        </div>
+                                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px;">
+                                            <div style="font-size: 0.8rem; color: #718096;">Department</div>
+                                            <div id="sp-dept" style="font-weight: 500; color: #e2e8f0;">-</div>
+                                        </div>
+                                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px;">
+                                            <div style="font-size: 0.8rem; color: #718096;">Batch</div>
+                                            <div id="sp-batch" style="font-weight: 500; color: #e2e8f0;">-</div>
+                                        </div>
+                                        <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px;">
+                                            <div style="font-size: 0.8rem; color: #718096;">Registration Date</div>
+                                            <div id="sp-date" style="font-weight: 500; color: #e2e8f0;">-</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Activity Tab -->
+                        <div id="tab-activity" class="profile-tab-content" style="display: none;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                                <div class="stat-card" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05)); border: 1px solid rgba(59, 130, 246, 0.2); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 2.5rem; font-weight: bold; color: #60a5fa;" id="stat-total">0</div>
+                                    <div style="color: #93c5fd; font-size: 0.9rem;">Total Attempts</div>
+                                </div>
+                                <div class="stat-card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05)); border: 1px solid rgba(16, 185, 129, 0.2); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 2.5rem; font-weight: bold; color: #34d399;" id="stat-solved">0</div>
+                                    <div style="color: #6ee7b7; font-size: 0.9rem;">Problems Solved</div>
+                                </div>
+                                <div class="stat-card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05)); border: 1px solid rgba(245, 158, 11, 0.2); padding: 1.5rem; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 2.5rem; font-weight: bold; color: #fbbf24;" id="stat-accuracy">0%</div>
+                                    <div style="color: #fcd34d; font-size: 0.9rem;">Accuracy</div>
+                                </div>
+                            </div>
+                            
+                            <h3 style="color: #e2e8f0; font-size: 1.1rem; margin-bottom: 1rem;">Code Submissions</h3>
+                            <div id="sp-submissions-list">
+                                <div style="text-align: center; color: #718096; padding: 2rem;">Loading submissions...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <style>
+                .profile-tab-btn.active {
+                    color: #fff !important;
+                    border-bottom-color: #3b82f6 !important;
+                }
+                
+                /* Nexus Modal Styles - Self Contained */
+                .nexus-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.75);
+                    backdrop-filter: blur(8px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 2000;
+                    opacity: 1;
+                    transition: opacity 0.3s ease;
+                }
+                
+                .nexus-modal.hidden {
+                    display: none;
+                    opacity: 0;
+                    pointer-events: none;
+                }
+                
+                .nexus-modal-content {
+                    background: #111827; /* Dark background */
+                    color: #ecf0f1;
+                    border-radius: 12px;
+                    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    width: 90%;
+                    max-width: 900px;
+                    max-height: 90vh;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    animation: nexusModalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                
+                .nexus-modal-header {
+                    padding: 1.5rem;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    background: rgba(255, 255, 255, 0.02);
+                }
+                
+                .nexus-modal-title {
+                    margin: 0;
+                    font-size: 1.25rem;
+                    font-weight: 600;
+                    color: #fff;
+                    letter-spacing: -0.025em;
+                }
+                
+                .nexus-modal-close {
+                    background: transparent;
+                    border: none;
+                    color: #9ca3af;
+                    font-size: 1.5rem;
+                    cursor: pointer;
+                    line-height: 1;
+                    padding: 0.5rem;
+                    border-radius: 4px;
+                    transition: all 0.2s;
+                }
+                
+                .nexus-modal-close:hover {
+                    color: #fff;
+                    background: rgba(255, 255, 255, 0.1);
+                }
+                
+                .nexus-modal-body {
+                    padding: 0; /* Reset generic padding if any */
+                }
+                
+                @keyframes nexusModalSlideUp {
+                    from { transform: translateY(20px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
+                }
+            </style>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    },
+
+    /**
+     * Open the student profile
+     * @param {string} studentId 
+     */
+    async open(studentId) {
+        this.init();
+        this.currentStudentId = studentId;
+        this.modal.classList.remove('hidden');
+
+        // Reset View
+        this.resetView();
+
+        // Load Data
+        await this.loadProfile(studentId);
+        await this.loadStats(studentId);
+    },
+
+    /**
+     * Close the modal
+     */
+    close() {
+        if (this.modal) {
+            this.modal.classList.add('hidden');
+        }
+    },
+
+    /**
+     * Reset the view to loading state
+     */
+    resetView() {
+        document.getElementById('sp-name').textContent = 'Loading...';
+        document.getElementById('sp-username').textContent = '';
+        document.getElementById('sp-email').textContent = '...';
+        document.getElementById('sp-college').textContent = '...';
+        document.getElementById('sp-dept').textContent = '...';
+        document.getElementById('sp-batch').textContent = '...';
+        document.getElementById('sp-avatar').textContent = '';
+        document.getElementById('sp-submissions-list').innerHTML = '<div style="text-align: center; color: #718096; padding: 2rem;">Loading details...</div>';
+
+        // Reset stats
+        document.getElementById('stat-total').textContent = '0';
+        document.getElementById('stat-solved').textContent = '0';
+        document.getElementById('stat-accuracy').textContent = '0%';
+
+        // Switch to first tab
+        const firstTab = this.modal.querySelector('.profile-tab-btn');
+        if (firstTab) firstTab.click();
+    },
+
+    /**
+     * Load Basic Profile Data
+     */
+    async loadProfile(studentId) {
+        try {
+            const baseUrl = this.getApiBaseUrl();
+            // Try to find student in loaded lists first to save API call if possible, 
+            // but for full details we might need a specific endpoint. 
+            // Since there isn't a dedicated "get single student" endpoint documented yet for all roles,
+            // we will try to fetch from the list endpoint and filter, or use a specific one if implemented.
+            // For now, let's assume we can fetch: /api/{role}/students/{id} or we fallback to list.
+
+            // Strategy: Try direct fetch first (best practice), fallback to finding in current loaded lists
+            let student = null;
+
+            try {
+                const response = await Utils.apiRequest(`${baseUrl}/students/${studentId}`);
+                student = response.data?.student || response.student;
+            } catch (e) {
+                // If specific endpoint fails, try to find in common global lists if available
+                console.warn('Direct fetch failed, checking loaded lists', e);
+                // Fallback logic could go here if we had access to current state of other modules
+            }
+
+            if (student) {
+                this.renderProfile(student);
+            } else {
+                // Fallback: If we can't fetch, show error
+                document.getElementById('sp-name').textContent = 'Student Not Found';
+            }
+
+        } catch (error) {
+            console.error('Profile load error:', error);
+            document.getElementById('sp-name').textContent = 'Error loading profile';
+        }
+    },
+
+    /**
+     * Load Statistics and Activity
+     * NOTE: Since exact endpoints for stats might not exist, we will try to fetch submissions/performance
+     */
+    async loadStats(studentId) {
+        try {
+            const baseUrl = this.getApiBaseUrl();
+            // Attempt to fetch performance/stats
+            // Assuming endpoint: /api/{role}/students/{id}/performance (as per plan)
+
+            // NOTE: If this 404s, we handle gracefully
+            const response = await Utils.apiRequest(`${baseUrl}/students/${studentId}/performance`);
+            const stats = response.data || {};
+
+            this.renderStats(stats);
+
+        } catch (error) {
+            console.log('Stats not available or error:', error);
+            // Render empty stats or "No Data"
+            document.getElementById('sp-submissions-list').innerHTML =
+                '<div style="text-align: center; color: #718096; padding: 2rem;">No activity data available.</div>';
+        }
+    },
+
+    /**
+     * Render the profile data
+     */
+    renderProfile(student) {
+        // Basic Info
+        document.getElementById('sp-name').textContent = student.name || student.username || 'Unknown';
+        document.getElementById('sp-username').textContent = '@' + (student.username || '');
+        document.getElementById('sp-email').textContent = student.email || 'N/A';
+        document.getElementById('sp-phone').textContent = student.phone_number || 'N/A';
+        document.getElementById('sp-urn').textContent = student.urn || 'N/A';
+        document.getElementById('sp-date').textContent = student.created_at ? new Date(student.created_at).toLocaleDateString() : 'N/A';
+
+        // Avatar
+        const initial = (student.name || student.username || 'U')[0].toUpperCase();
+        document.getElementById('sp-avatar').textContent = initial;
+
+        // Status
+        const statusEl = document.getElementById('sp-status');
+        if (student.is_disabled) {
+            statusEl.innerHTML = '<span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem;">Disabled</span>';
+        } else {
+            statusEl.innerHTML = '<span style="background: rgba(16,185,129,0.2); color: #34d399; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem;">Active</span>';
+        }
+
+        // Hierarchy Names
+        // We use the helper methods from other modules if available on window/global, otherwise valid IDs
+        const collegeName = this.resolveName('College', student.college_id);
+        const deptName = this.resolveName('Department', student.department_id);
+        const batchName = this.resolveName('Batch', student.batch_id);
+
+        document.getElementById('sp-college').textContent = collegeName;
+        document.getElementById('sp-dept').textContent = deptName;
+        document.getElementById('sp-batch').textContent = batchName;
+    },
+
+    /**
+     * Render Stats
+     */
+    renderStats(data) {
+        const stats = data.stats || {};
+        const submissions = data.submissions || [];
+
+        document.getElementById('stat-total').textContent = stats.total_attempts || 0;
+        document.getElementById('stat-solved').textContent = stats.problems_solved || 0;
+
+        const accuracy = stats.total_attempts > 0
+            ? Math.round((stats.problems_solved / stats.total_attempts) * 100)
+            : 0;
+        document.getElementById('stat-accuracy').textContent = accuracy + '%';
+
+        // Render Submissions List
+        const listContainer = document.getElementById('sp-submissions-list');
+        if (submissions.length === 0) {
+            listContainer.innerHTML = '<div style="text-align: center; color: #718096; padding: 2rem;">No submissions yet.</div>';
+            return;
+        }
+
+        let html = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+        submissions.forEach(sub => {
+            const isSuccess = sub.status === 'correct' || sub.status === 'Accepted';
+            const color = isSuccess ? '#34d399' : '#f87171';
+            const date = new Date(sub.submitted_at).toLocaleDateString();
+
+            html += `
+                <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ${color};">
+                    <div>
+                        <div style="font-weight: 500; color: #e2e8f0;">${Utils.escapeHtml(sub.question_title || 'Unknown Question')}</div>
+                        <div style="font-size: 0.8rem; color: #718096;">${date} • ${Utils.escapeHtml(sub.language)}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="color: ${color}; font-size: 0.9rem; font-weight: 500;">${Utils.escapeHtml(sub.status)}</span>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+        listContainer.innerHTML = html;
+    },
+
+    /**
+     * Helper: Get API base URL for current user
+     */
+    getApiBaseUrl() {
+        const user = Auth.getCurrentUser();
+        if (user.role === 'admin') return '/admin';
+        if (user.role === 'college') return '/college';
+        if (user.role === 'department') return '/department';
+        if (user.role === 'batch') return '/batch';
+        return '';
+    },
+
+    /**
+     * Helper: Resolve names using loaded modules if possible
+     */
+    resolveName(type, id) {
+        if (!id) return 'N/A';
+
+        // Try to access global modules if they have data
+        try {
+            if (type === 'College' && window.Admin && window.Admin.colleges) {
+                const c = window.Admin.colleges.find(x => x.id === id);
+                if (c) return c.college_name || c.name;
+            }
+            if (type === 'Department') {
+                if (window.Admin && window.Admin.departments) {
+                    const d = window.Admin.departments.find(x => x.id === id);
+                    if (d) return d.department_name || d.name;
+                }
+                if (window.College && window.College.departments) {
+                    const d = window.College.departments.find(x => x.id === id);
+                    if (d) return d.department_name || d.name;
+                }
+            }
+            if (type === 'Batch') {
+                // Check Admin or College or Department
+                if (window.Admin && window.Admin.batches) {
+                    const b = window.Admin.batches.find(x => x.id === id);
+                    if (b) return b.batch_name;
+                }
+                if (window.College && window.College.batches) {
+                    const b = window.College.batches.find(x => x.id === id);
+                    if (b) return b.batch_name;
+                }
+                if (window.Department && window.Department.batches) {
+                    const b = window.Department.batches.find(x => x.id === id);
+                    if (b) return b.batch_name;
+                }
+            }
+        } catch (e) {
+            // Ignore access errors
+        }
+
+        return id; // Fallback to ID
+    }
+};
