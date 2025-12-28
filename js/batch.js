@@ -76,12 +76,14 @@ const Batch = {
      * Load students for this batch
      */
     async loadStudents() {
+        Utils.showLoading('batchStudentsList');
         try {
             const response = await Utils.apiRequest('/batch/students');
             this.students = response.data?.students || response.students || [];
             this.renderStudents();
         } catch (error) {
             console.error('Load students error:', error);
+            Utils.showError('batchStudentsList', 'Failed to load students. ' + error.message, () => this.loadStudents());
             Utils.showMessage('batchMessage', 'Failed to load students', 'error');
         }
     },
@@ -90,12 +92,14 @@ const Batch = {
      * Load questions for this batch
      */
     async loadQuestions() {
+        Utils.showLoading('batchQuestionsList');
         try {
             const response = await Utils.apiRequest('/batch/questions');
             this.questions = response.data?.questions || response.questions || [];
             this.renderQuestions();
         } catch (error) {
             console.error('Load questions error:', error);
+            Utils.showError('batchQuestionsList', 'Failed to load questions. ' + error.message, () => this.loadQuestions());
             Utils.showMessage('batchMessage', 'Failed to load questions', 'error');
         }
     },

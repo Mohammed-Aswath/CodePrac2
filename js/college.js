@@ -135,11 +135,14 @@ const College = {
      * Load departments
      */
     async loadDepartments() {
+        Utils.showLoading('collegeDepartmentsList');
         try {
             const response = await Utils.apiRequest('/college/departments');
             this.departments = response.data?.departments || response.departments || [];
             this.renderDepartments();
         } catch (error) {
+            console.error('Failed to load departments:', error);
+            Utils.showError('collegeDepartmentsList', 'Failed to load departments. ' + error.message, () => this.loadDepartments());
             Utils.showMessage('collegeMessage', 'Failed to load departments', 'error');
         }
     },
@@ -326,6 +329,7 @@ const College = {
      * Load batches
      */
     async loadBatches() {
+        Utils.showLoading('collegeBatchesList');
         try {
             const response = await Utils.apiRequest('/college/batches');
             this.batches = response.data?.batches || response.batches || [];
@@ -333,6 +337,8 @@ const College = {
             await this.loadDepartmentsForDropdown();
             this.renderBatches();
         } catch (error) {
+            console.error('Failed to load batches:', error);
+            Utils.showError('collegeBatchesList', 'Failed to load batches. ' + error.message, () => this.loadBatches());
             Utils.showMessage('collegeMessage', 'Failed to load batches', 'error');
         }
     },
@@ -574,6 +580,7 @@ const College = {
      * Load students
      */
     async loadStudents() {
+        Utils.showLoading('collegeStudentsList');
         try {
             const response = await Utils.apiRequest('/college/students');
             this.students = response.data?.students || response.students || [];
@@ -583,6 +590,7 @@ const College = {
             this.renderStudents();
         } catch (error) {
             console.error('Load students error:', error);
+            Utils.showError('collegeStudentsList', 'Failed to load students. ' + error.message, () => this.loadStudents());
             Utils.showMessage('collegeMessage', 'Failed to load students', 'error');
         }
     },

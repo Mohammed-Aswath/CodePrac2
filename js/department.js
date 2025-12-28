@@ -86,11 +86,14 @@ const Department = {
      * Load batches
      */
     async loadBatches() {
+        Utils.showLoading('departmentBatchesList');
         try {
             const response = await Utils.apiRequest('/department/batches');
             this.batches = response.data?.batches || response.batches || [];
             this.renderBatches();
         } catch (error) {
+            console.error('Failed to load batches:', error);
+            Utils.showError('departmentBatchesList', 'Failed to load batches. ' + error.message, () => this.loadBatches());
             Utils.showMessage('departmentMessage', 'Failed to load batches', 'error');
         }
     },
@@ -277,16 +280,21 @@ const Department = {
      * Load students
      */
     async loadStudents() {
+        Utils.showLoading('departmentStudentsList');
         try {
             const response = await Utils.apiRequest('/department/students');
             this.students = response.data?.students || response.students || [];
-            // Ensure batches are loaded for dropdown
+
+            // Ensure batches are loaded for dropdown (required for filtering/displaying batch names)
             if (this.batches.length === 0) {
-                await this.loadBatches();
+                // We don't block render on this, but fire it off
+                this.loadBatches().catch(console.error);
             }
+
             this.renderStudents();
         } catch (error) {
             console.error('Load students error:', error);
+            Utils.showError('departmentStudentsList', 'Failed to load students. ' + error.message, () => this.loadStudents());
             Utils.showMessage('departmentMessage', 'Failed to load students', 'error');
         }
     },

@@ -88,14 +88,7 @@ const StudentProfileViewer = {
                                             <div style="font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em;">Email</div>
                                             <div id="sp-email" style="color: #e2e8f0;">-</div>
                                         </div>
-                                        <div>
-                                            <div style="font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em;">Phone</div>
-                                            <div id="sp-phone" style="color: #e2e8f0;">-</div>
-                                        </div>
-                                        <div>
-                                            <div style="font-size: 0.8rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em;">Roll Number</div>
-                                            <div id="sp-urn" style="color: #e2e8f0;">-</div>
-                                        </div>
+                                        <!-- Removed Phone and URN as they are not in schema -->
                                     </div>
                                 </div>
                                 
@@ -245,8 +238,9 @@ const StudentProfileViewer = {
     /**
      * Open the student profile
      * @param {string} studentId 
+     * @param {object} studentData (optional) Pre-loaded data
      */
-    async open(studentId) {
+    async open(studentId, studentData = null) {
         this.init();
         this.currentStudentId = studentId;
         this.modal.classList.remove('hidden');
@@ -255,7 +249,7 @@ const StudentProfileViewer = {
         this.resetView();
 
         // Load Data
-        await this.loadProfile(studentId);
+        await this.loadProfile(studentId, studentData);
         await this.loadStats(studentId);
     },
 
@@ -294,31 +288,27 @@ const StudentProfileViewer = {
     /**
      * Load Basic Profile Data
      */
-    async loadProfile(studentId) {
+    async loadProfile(studentId, preloadedData = null) {
         try {
-            const baseUrl = this.getApiBaseUrl();
-            // Try to find student in loaded lists first to save API call if possible, 
-            // but for full details we might need a specific endpoint. 
-            // Since there isn't a dedicated "get single student" endpoint documented yet for all roles,
-            // we will try to fetch from the list endpoint and filter, or use a specific one if implemented.
-            // For now, let's assume we can fetch: /api/{role}/students/{id} or we fallback to list.
+            if (preloadedData) {
+                this.renderProfile(preloadedData);
+                return;
+            }
 
-            // Strategy: Try direct fetch first (best practice), fallback to finding in current loaded lists
+            // We shouldn't need this if data is passed, but as fallback:
+            const baseUrl = this.getApiBaseUrl();
             let student = null;
 
             try {
                 const response = await Utils.apiRequest(`${baseUrl}/students/${studentId}`);
                 student = response.data?.student || response.student;
             } catch (e) {
-                // If specific endpoint fails, try to find in common global lists if available
-                console.warn('Direct fetch failed, checking loaded lists', e);
-                // Fallback logic could go here if we had access to current state of other modules
+                console.warn('Direct fetch failed', e);
             }
 
             if (student) {
                 this.renderProfile(student);
             } else {
-                // Fallback: If we can't fetch, show error
                 document.getElementById('sp-name').textContent = 'Student Not Found';
             }
 
@@ -330,25 +320,59 @@ const StudentProfileViewer = {
 
     /**
      * Load Statistics and Activity
-     * NOTE: Since exact endpoints for stats might not exist, we will try to fetch submissions/performance
      */
     async loadStats(studentId) {
+        // Show loading state
+        document.getElementById('stat-total').textContent = '-';
+        document.getElementById('stat-solved').textContent = '-';
+        document.getElementById('stat-accuracy').textContent = '-';
+        document.getElementById('sp-submissions-list').innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3rem; gap: 1rem; color: #94a3b8;">
+                <div class="spinner"></div>
+                <div style="font-size: 0.9rem;">Loading activity...</div>
+            </div>
+        `;
+
         try {
             const baseUrl = this.getApiBaseUrl();
-            // Attempt to fetch performance/stats
-            // Assuming endpoint: /api/{role}/students/{id}/performance (as per plan)
+            let endpoint = `${baseUrl}/students/${studentId}/performance`;
+
+            const user = Auth.getCurrentUser();
+
+            // Admin and hierarchical roles have specific filter endpoints
+            if (['admin', 'college', 'department', 'batch'].includes(user.role)) {
+                endpoint = `/${user.role}/performance?student_id=${studentId}`;
+            }
 
             // NOTE: If this 404s, we handle gracefully
-            const response = await Utils.apiRequest(`${baseUrl}/students/${studentId}/performance`);
-            const stats = response.data || {};
+            const response = await Utils.apiRequest(endpoint, { silent: true });
 
-            this.renderStats(stats);
+            // The admin endpoint returns { performance: [...] }, while the hypothetical one returned { stats:..., submissions:... }
+            // We need to normalize the data structure for renderStats
+            let data = response.data || response;
 
+            if (['admin', 'college', 'department', 'batch'].includes(user.role) && Array.isArray(data.performance)) {
+                // We need to calculate stats manually if the endpoint returns raw list
+                const submissions = data.performance;
+                const total = submissions.length;
+                const solved = submissions.filter(s => s.status === 'correct' || s.status === 'Accepted').length;
+                data = {
+                    stats: {
+                        total_attempts: total,
+                        problems_solved: solved
+                    },
+                    submissions: submissions
+                };
+            }
+
+            this.renderStats(data);
         } catch (error) {
-            console.log('Stats not available or error:', error);
-            // Render empty stats or "No Data"
+            // Silently handle 404 or other errors as "No Data" 
+            // This prevents the console error spam the user complained about
+            console.log('Stats not available (expected if no endpoint)');
+
             document.getElementById('sp-submissions-list').innerHTML =
-                '<div style="text-align: center; color: #718096; padding: 2rem;">No activity data available.</div>';
+                '<div style="text-align: center; color: #718096; padding: 2rem;">Detailed activity stats are not currently available for this view.</div>';
         }
     },
 
@@ -360,8 +384,7 @@ const StudentProfileViewer = {
         document.getElementById('sp-name').textContent = student.name || student.username || 'Unknown';
         document.getElementById('sp-username').textContent = '@' + (student.username || '');
         document.getElementById('sp-email').textContent = student.email || 'N/A';
-        document.getElementById('sp-phone').textContent = student.phone_number || 'N/A';
-        document.getElementById('sp-urn').textContent = student.urn || 'N/A';
+        // Removed Phone and URN display
         document.getElementById('sp-date').textContent = student.created_at ? new Date(student.created_at).toLocaleDateString() : 'N/A';
 
         // Avatar
@@ -377,7 +400,6 @@ const StudentProfileViewer = {
         }
 
         // Hierarchy Names
-        // We use the helper methods from other modules if available on window/global, otherwise valid IDs
         const collegeName = this.resolveName('College', student.college_id);
         const deptName = this.resolveName('Department', student.department_id);
         const batchName = this.resolveName('Batch', student.batch_id);
@@ -419,7 +441,9 @@ const StudentProfileViewer = {
                 <div style="background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ${color};">
                     <div>
                         <div style="font-weight: 500; color: #e2e8f0;">${Utils.escapeHtml(sub.question_title || 'Unknown Question')}</div>
-                        <div style="font-size: 0.8rem; color: #718096;">${date} • ${Utils.escapeHtml(sub.language)}</div>
+                        <div style="font-size: 0.8rem; color: #718096;">
+                            ${date} • ${Utils.escapeHtml(sub.topic_name || 'Unknown Topic')} • ${Utils.escapeHtml(sub.language)}
+                        </div>
                     </div>
                     <div style="text-align: right;">
                         <span style="color: ${color}; font-size: 0.9rem; font-weight: 500;">${Utils.escapeHtml(sub.status)}</span>
@@ -449,7 +473,23 @@ const StudentProfileViewer = {
     resolveName(type, id) {
         if (!id) return 'N/A';
 
-        // Try to access global modules if they have data
+        // Priority 1: Check Dashboard Hierarchy (loaded for Admin Dashboard)
+        if (window.Dashboard && window.Dashboard.hierarchy) {
+            if (type === 'College') {
+                const item = window.Dashboard.hierarchy.colleges.find(x => x.id === id);
+                if (item) return item.college_name || item.name;
+            }
+            if (type === 'Department') {
+                const item = window.Dashboard.hierarchy.departments.find(x => x.id === id);
+                if (item) return item.department_name || item.name;
+            }
+            if (type === 'Batch') {
+                const item = window.Dashboard.hierarchy.batches.find(x => x.id === id);
+                if (item) return item.batch_name;
+            }
+        }
+
+        // Priority 2: Check standard globals (legacy/other pages)
         try {
             if (type === 'College' && window.Admin && window.Admin.colleges) {
                 const c = window.Admin.colleges.find(x => x.id === id);
@@ -466,7 +506,6 @@ const StudentProfileViewer = {
                 }
             }
             if (type === 'Batch') {
-                // Check Admin or College or Department
                 if (window.Admin && window.Admin.batches) {
                     const b = window.Admin.batches.find(x => x.id === id);
                     if (b) return b.batch_name;

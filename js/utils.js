@@ -41,10 +41,10 @@ const Utils = {
     showMessage(elementId, message, type = 'info') {
         const element = document.getElementById(elementId);
         if (!element) return;
-        
+
         const alertClass = type === 'error' ? 'alert-error' : type === 'success' ? 'alert-success' : 'alert-info';
         element.innerHTML = `<div class="alert ${alertClass}">${message}</div>`;
-        
+
         // Auto-clear after 5 seconds
         setTimeout(() => {
             if (element.innerHTML.includes(message)) {
@@ -90,7 +90,7 @@ const Utils = {
     async apiRequest(endpoint, options = {}) {
         const url = `${Config.API_BASE}${endpoint}`;
         const token = this.getToken();
-        
+
         const headers = {
             'Content-Type': 'application/json',
             ...options.headers
@@ -114,7 +114,9 @@ const Utils = {
 
             return data;
         } catch (error) {
-            console.error(`API Error [${endpoint}]:`, error);
+            if (!options.silent) {
+                console.error(`API Error [${endpoint}]:`, error);
+            }
             throw error;
         }
     },
@@ -155,5 +157,69 @@ const Utils = {
      */
     alert(message) {
         window.alert(message);
+    },
+
+    /**
+     * Show loading state in a container
+     */
+    showLoading(containerId, message = 'Loading...') {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = `
+            <div class="loading-state">
+                <div class="spinner"></div>
+                ${message ? `<div class="loading-message">${message}</div>` : ''}
+            </div>
+        `;
+    },
+
+    /**
+     * Show full screen loading overlay
+     */
+    showLoadingOverlay(message = 'processing...') {
+        let overlay = document.getElementById('global-loading-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'global-loading-overlay';
+            overlay.className = 'loading-overlay';
+            document.body.appendChild(overlay);
+        }
+        overlay.innerHTML = `
+            <div class="loading-content">
+                <div class="spinner-large"></div>
+                <div class="loading-text">${message}</div>
+            </div>
+        `;
+        overlay.style.display = 'flex';
+    },
+
+    /**
+     * Hide full screen loading overlay
+     */
+    hideLoadingOverlay() {
+        const overlay = document.getElementById('global-loading-overlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    },
+
+    /**
+     * Show error state in a container
+     */
+    showError(containerId, message, retryCallback) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="error-state">
+                <div class="error-icon">!</div>
+                <div class="error-message">${this.escapeHtml(message || 'Something went wrong')}</div>
+                ${retryCallback ? `<button class="btn btn-secondary btn-sm mt-3 retry-btn">Try Again</button>` : ''}
+            </div>
+        `;
+
+        if (retryCallback) {
+            container.querySelector('.retry-btn').onclick = retryCallback;
+        }
     }
 };

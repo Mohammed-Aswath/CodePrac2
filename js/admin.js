@@ -135,11 +135,14 @@ const Admin = {
      * Load colleges
      */
     async loadColleges() {
+        Utils.showLoading('collegesList');
         try {
             const response = await Utils.apiRequest('/admin/colleges');
             this.colleges = response.data?.colleges || response.colleges || [];
             this.renderColleges();
         } catch (error) {
+            console.error('Failed to load colleges:', error);
+            Utils.showError('collegesList', 'Failed to load colleges. ' + error.message, () => this.loadColleges());
             Utils.showMessage('adminMessage', 'Failed to load colleges', 'error');
         }
     },
@@ -331,11 +334,14 @@ const Admin = {
      * Load departments
      */
     async loadDepartments() {
+        Utils.showLoading('departmentsList');
         try {
             const response = await Utils.apiRequest('/admin/departments');
             this.departments = response.data?.departments || response.departments || [];
             this.renderDepartments();
         } catch (error) {
+            console.error('Failed to load departments:', error);
+            Utils.showError('departmentsList', 'Failed to load departments. ' + error.message, () => this.loadDepartments());
             Utils.showMessage('adminMessage', 'Failed to load departments', 'error');
         }
     },
@@ -489,11 +495,14 @@ const Admin = {
      * Load batches
      */
     async loadBatches() {
+        Utils.showLoading('batchesList');
         try {
             const response = await Utils.apiRequest('/admin/batches');
             this.batches = response.data?.batches || response.batches || [];
             this.renderBatches();
         } catch (error) {
+            console.error('Failed to load batches:', error);
+            Utils.showError('batchesList', 'Failed to load batches. ' + error.message, () => this.loadBatches());
             Utils.showMessage('adminMessage', 'Failed to load batches', 'error');
         }
     },
@@ -676,11 +685,14 @@ const Admin = {
      * Load students
      */
     async loadStudents() {
+        Utils.showLoading('adminStudentsList');
         try {
             const response = await Utils.apiRequest('/admin/students');
             this.students = response.data?.students || response.students || [];
             this.renderStudents();
         } catch (error) {
+            console.error('Failed to load students:', error);
+            Utils.showError('adminStudentsList', 'Failed to load students. ' + error.message, () => this.loadStudents());
             Utils.showMessage('adminMessage', 'Failed to load students', 'error');
         }
     },

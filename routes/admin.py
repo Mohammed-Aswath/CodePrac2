@@ -747,11 +747,74 @@ def get_performance():
         filters["department_id"] = dept_id
     if batch_id:
         filters["batch_id"] = batch_id
+    
+    # Special handling for student_id to support legacy/mismatched IDs
+    performance = []
+    
     if student_id:
+        # 1. Try querying by the provided student_id (UUID)
         filters["student_id"] = student_id
+        performance = PerformanceModel().query(**filters)
+        
+        # 2. Fallback: If no results found, check if records use Firebase UID
+        if not performance:
+            student = StudentModel().get(student_id)
+            if student and student.get("firebase_uid"):
+                filters["student_id"] = student.get("firebase_uid")
+                performance = PerformanceModel().query(**filters)
+    else:
+        # No specific student, just apply other filters
+        performance = PerformanceModel().query(**filters)
     
-    performance = PerformanceModel().query(**filters) if filters else PerformanceModel().query()
-    
+    # Enrich performance data with Question and Topic details
+    if performance:
+        # 1. Collect Question IDs
+        question_ids = list(set([p.get("question_id") for p in performance if p.get("question_id")]))
+        
+        # 2. Fetch Questions (Batch fetch would be ideal, but looping for now or using a helper if exists)
+        # Assuming no batch_get, so we loop or query. Optimizing by fetching all questions might be heavy if db is large.
+        # But for a single student profile, N is small.
+        # However, listing ALL performance (no student_id) could be huge.
+        # Admin usually filters.
+        
+        # Let's verify we have access to models
+        from models import QuestionModel, TopicModel
+        
+        questions_map = {}
+        # Optimization: If fetching for a single student, N is generic.
+        # If fetching for dashboard (many students), this loop is bad. 
+        # But this endpoint is mostly used with filters.
+        
+        for qid in question_ids:
+            q = QuestionModel().get(qid)
+            if q:
+                questions_map[qid] = q
+                
+        # 3. Collect Topic IDs
+        topic_ids = list(set([q.get("topic_id") for q in questions_map.values() if q.get("topic_id")]))
+        topics_map = {}
+        
+        for tid in topic_ids:
+            t = TopicModel().get(tid)
+            if t:
+                topics_map[tid] = t
+        
+        # 4. Enrich Records
+        for p in performance:
+            qid = p.get("question_id")
+            if qid in questions_map:
+                question = questions_map[qid]
+                p["question_title"] = question.get("title") or question.get("heading") or "Unknown Question"
+                
+                tid = question.get("topic_id")
+                if tid and tid in topics_map:
+                    p["topic_name"] = topics_map[tid].get("name") or topics_map[tid].get("topic_name")
+                else:
+                    p["topic_name"] = "Unknown Topic"
+            else:
+                p["question_title"] = "Unknown Question"
+                p["topic_name"] = "Unknown Topic"
+
     return success_response({"performance": performance})
 
 

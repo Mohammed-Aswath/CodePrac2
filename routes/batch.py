@@ -1,7 +1,7 @@
 """Batch API routes."""
 from flask import Blueprint, request, jsonify
 from auth import require_auth, register_user_firebase, disable_user_firebase, enable_user_firebase, get_token_from_request, decode_jwt_token
-from models import StudentModel, BatchModel, QuestionModel, TopicModel, NoteModel
+from models import StudentModel, BatchModel, QuestionModel, TopicModel, NoteModel, PerformanceModel
 from question_service import QuestionService
 from topic_service import TopicService
 from note_service import NoteService
@@ -601,4 +601,77 @@ def generate_testcases():
     
     except Exception as e:
         logger.error(f"Test case generation error: {str(e)}", exc_info=True)
-        return error_response("INTERNAL_ERROR", "Failed to generate test cases", status_code=500)
+# ============================================================================
+# PERFORMANCE ENDPOINTS
+# ============================================================================
+
+@batch_bp.route("/performance", methods=["GET"])
+@require_auth(allowed_roles=["batch"])
+def get_performance():
+    """Get performance data for students in this batch."""
+    batch_id = request.user.get("batch_id")
+    student_id = request.args.get("student_id")
+    
+    filters = {"batch_id": batch_id}
+    
+    performance = []
+    
+    if student_id:
+        # 1. Verify student belongs to this batch
+        student = StudentModel().get(student_id)
+        if not student or student.get("batch_id") != batch_id:
+             # If student doesn't belong to batch, return empty or error? 
+             # For performance stats, empty is safer/standard.
+             return success_response({"performance": []})
+             
+        # 2. Try querying by the provided student_id (UUID)
+        filters["student_id"] = student_id
+        performance = PerformanceModel().query(**filters)
+        
+        # 3. Fallback: If no results found, check if records use Firebase UID
+        if not performance:
+             if student.get("firebase_uid"):
+                filters["student_id"] = student.get("firebase_uid")
+                performance = PerformanceModel().query(**filters)
+    else:
+        # List all performance for batch
+        performance = PerformanceModel().query(**filters)
+        
+    # Enrich performance data with Question and Topic details
+    if performance:
+        # 1. Collect Question IDs
+        question_ids = list(set([p.get("question_id") for p in performance if p.get("question_id")]))
+        
+        # 2. Fetch Questions
+        questions_map = {}
+        for qid in question_ids:
+            q = QuestionModel().get(qid)
+            if q:
+                questions_map[qid] = q
+                
+        # 3. Collect Topic IDs
+        topic_ids = list(set([q.get("topic_id") for q in questions_map.values() if q.get("topic_id")]))
+        topics_map = {}
+        
+        for tid in topic_ids:
+            t = TopicModel().get(tid)
+            if t:
+                topics_map[tid] = t
+        
+        # 4. Enrich Records
+        for p in performance:
+            qid = p.get("question_id")
+            if qid in questions_map:
+                question = questions_map[qid]
+                p["question_title"] = question.get("title") or question.get("heading") or "Unknown Question"
+                
+                tid = question.get("topic_id")
+                if tid and tid in topics_map:
+                    p["topic_name"] = topics_map[tid].get("name") or topics_map[tid].get("topic_name")
+                else:
+                    p["topic_name"] = "Unknown Topic"
+            else:
+                p["question_title"] = "Unknown Question"
+                p["topic_name"] = "Unknown Topic"
+
+    return success_response({"performance": performance})

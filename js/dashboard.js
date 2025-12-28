@@ -3,6 +3,21 @@
  */
 
 const Dashboard = {
+    // State
+    students: [],
+    filteredStudents: [],
+    hierarchy: {
+        colleges: [],
+        departments: [],
+        batches: []
+    },
+    filters: {
+        search: '',
+        college: '',
+        department: '',
+        batch: ''
+    },
+
     /**
      * Load dashboard data
      */
@@ -10,13 +25,20 @@ const Dashboard = {
         try {
             const user = Auth.getCurrentUser();
 
+            // Clear previous content
+            const content = document.getElementById('dashboardContent');
+            if (content) content.innerHTML = '<div class="nexus-loader" style="position:static; margin: 2rem auto;"><div class="nexus-spinner-container"><div class="nexus-spinner-ring"></div></div></div>';
+
+            document.getElementById('activitySection').innerHTML = '';
+
             if (user.role === 'student') {
                 await this.loadStudentDashboard();
             } else {
-                await this.loadAdminDashboard();
+                await this.loadAdminDashboard(user.role);
             }
         } catch (error) {
             console.error('Dashboard load error:', error);
+            Utils.showMessage('dashboardMessage', 'Failed to load dashboard', 'error');
         }
     },
 
@@ -24,6 +46,10 @@ const Dashboard = {
      * Load student dashboard
      */
     async loadStudentDashboard() {
+        // Show loading state
+        const content = document.getElementById('dashboardContent');
+        if (content) Utils.showLoading('dashboardContent', 'Loading your stats...');
+
         try {
             const response = await Utils.apiRequest('/student/performance');
             const performance = response.data?.performance || response.performance || [];
@@ -35,9 +61,8 @@ const Dashboard = {
             const successRate = totalSubmissions > 0 ? Math.round((correctSubmissions / totalSubmissions) * 100) : 0;
 
             // Build dashboard HTML
-            const dashboardContent = document.getElementById('dashboardContent');
-            if (dashboardContent) {
-                dashboardContent.innerHTML = `
+            if (content) {
+                content.innerHTML = `
                     <div class="dashboard-grid">
                         <div class="stat-card">
                             <h3>Total Submissions</h3>
@@ -56,6 +81,7 @@ const Dashboard = {
                             <div class="value" style="color: var(--info);">${successRate}%</div>
                         </div>
                     </div>
+                    <div id="activitySection"></div>
                 `;
             }
 
@@ -63,24 +89,270 @@ const Dashboard = {
             await this.loadRecentActivity(performance);
         } catch (error) {
             console.error('Student dashboard error:', error);
+            Utils.showError('dashboardContent', 'Failed to load dashboard stats. ' + error.message, () => this.load());
             Utils.showMessage('dashboardMessage', 'Failed to load dashboard stats', 'error');
         }
     },
 
     /**
-     * Load admin dashboard
+     * Load Admin/College/Dept/Batch Dashboard
      */
-    async loadAdminDashboard() {
+    async loadAdminDashboard(role) {
+        // Show Loading
+        Utils.showLoading('dashboardContent', 'Loading dashboard data...');
+
         try {
-            // Could add admin-specific stats here
-            console.log('Admin dashboard loaded');
+            // 1. Fetch Students
+            let endpoint = '/admin/students';
+            if (role === 'college') endpoint = '/college/students';
+            else if (role === 'department') endpoint = '/department/students';
+            else if (role === 'batch') endpoint = '/batch/students';
+
+            const response = await Utils.apiRequest(endpoint);
+            this.students = response.data?.students || response.students || [];
+            this.filteredStudents = [...this.students];
+
+            // 2. Fetch Hierarchy for Filters (if applicable)
+            await this.loadHierarchyAPI(role);
+
+            // 3. Render Controls & List
+            this.renderAdminDashboard();
+
         } catch (error) {
             console.error('Admin dashboard error:', error);
+            Utils.showError('dashboardContent', 'Failed to load dashboard data. ' + error.message, () => this.load());
+            Utils.showMessage('dashboardMessage', 'Failed to load dashboard data', 'error');
         }
     },
 
     /**
-     * Load recent activity
+     * Helper to load hierarchy data for filters
+     */
+    async loadHierarchyAPI(role) {
+        // Only load what is necessary/accessible based on role
+        try {
+            if (role === 'admin') {
+                const [c, d, b] = await Promise.all([
+                    Utils.apiRequest('/admin/colleges'),
+                    Utils.apiRequest('/admin/departments'),
+                    Utils.apiRequest('/admin/batches')
+                ]);
+                this.hierarchy.colleges = c.data?.colleges || c.colleges || [];
+                this.hierarchy.departments = d.data?.departments || d.departments || [];
+                this.hierarchy.batches = b.data?.batches || b.batches || [];
+            } else if (role === 'college') {
+                const [d, b] = await Promise.all([
+                    Utils.apiRequest('/college/departments'),
+                    Utils.apiRequest('/college/batches')
+                ]);
+                this.hierarchy.departments = d.data?.departments || d.departments || [];
+                this.hierarchy.batches = b.data?.batches || b.batches || [];
+            } else if (role === 'department') {
+                const b = await Utils.apiRequest('/department/batches');
+                this.hierarchy.batches = b.data?.batches || b.batches || [];
+            }
+        } catch (e) {
+            console.warn('Failed to load hierarchy for filters', e);
+        }
+    },
+
+    /**
+     * Render the Admin Dashboard UI
+     */
+    renderAdminDashboard() {
+        const dashboardContent = document.getElementById('dashboardContent');
+        if (!dashboardContent) return;
+
+        const user = Auth.getCurrentUser();
+        const role = user.role;
+
+        let html = `
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                <h2 style="margin-top:0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem;">Student Overview</h2>
+                
+                <!-- Filters -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <input type="text" id="dashSearch" placeholder="Search students..." 
+                            style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px;">
+                    </div>
+        `;
+
+        // Role-based filters
+        if (role === 'admin') {
+            html += `
+                <div>
+                    <select id="dashFilterCollege" style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px;">
+                        <option value="">All Colleges</option>
+                        ${this.hierarchy.colleges.map(c => `<option value="${c.id}">${Utils.escapeHtml(c.college_name || c.name)}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+        }
+
+        if (['admin', 'college'].includes(role)) {
+            html += `
+                <div>
+                    <select id="dashFilterDept" style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px;">
+                        <option value="">All Departments</option>
+                        ${this.hierarchy.departments.map(d => `<option value="${d.id}">${Utils.escapeHtml(d.department_name || d.name)}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+        }
+
+        if (['admin', 'college', 'department'].includes(role)) {
+            html += `
+                <div>
+                    <select id="dashFilterBatch" style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px;">
+                        <option value="">All Batches</option>
+                        ${this.hierarchy.batches.map(b => `<option value="${b.id}">${Utils.escapeHtml(b.batch_name)}</option>`).join('')}
+                    </select>
+                </div>
+            `;
+        }
+
+        html += `
+                </div>
+                
+                <!-- Stats Row inside card -->
+                <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem; color: #a0aec0; font-size: 0.9rem;">
+                    <div>Total Students: <strong style="color: white;" id="dashTotalCount">${this.filteredStudents.length}</strong></div>
+                    <div>Active: <strong style="color: #34d399;" id="dashActiveCount">${this.filteredStudents.filter(s => !s.is_disabled).length}</strong></div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container" style="max-height: 500px; overflow-y: auto;">
+                    <table class="table" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                ${role === 'admin' ? '<th>College</th>' : ''}
+                                ${['admin', 'college'].includes(role) ? '<th>Department</th>' : ''}
+                                <th>Batch</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashStudentsBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        dashboardContent.innerHTML = html;
+
+        // Initial Render of rows
+        this.renderStudentRows();
+
+        // Attach Event Listeners
+        document.getElementById('dashSearch').addEventListener('input', (e) => this.handleFilterChange('search', e.target.value));
+
+        if (document.getElementById('dashFilterCollege'))
+            document.getElementById('dashFilterCollege').addEventListener('change', (e) => this.handleFilterChange('college', e.target.value));
+
+        if (document.getElementById('dashFilterDept'))
+            document.getElementById('dashFilterDept').addEventListener('change', (e) => this.handleFilterChange('department', e.target.value));
+
+        if (document.getElementById('dashFilterBatch'))
+            document.getElementById('dashFilterBatch').addEventListener('change', (e) => this.handleFilterChange('batch', e.target.value));
+    },
+
+    /**
+     * Handle Filter Changes
+     */
+    handleFilterChange(key, value) {
+        this.filters[key] = value.toLowerCase();
+
+        this.filteredStudents = this.students.filter(student => {
+            // Search Text
+            const matchSearch = !this.filters.search ||
+                (student.username && student.username.toLowerCase().includes(this.filters.search)) ||
+                (student.name && student.name.toLowerCase().includes(this.filters.search)) ||
+                (student.email && student.email.toLowerCase().includes(this.filters.search));
+
+            // Filters
+            const matchCollege = !this.filters.college || student.college_id === this.filters.college;
+            const matchDept = !this.filters.department || student.department_id === this.filters.department;
+            const matchBatch = !this.filters.batch || student.batch_id === this.filters.batch;
+
+            return matchSearch && matchCollege && matchDept && matchBatch;
+        });
+
+        // Update Counts
+        document.getElementById('dashTotalCount').textContent = this.filteredStudents.length;
+        document.getElementById('dashActiveCount').textContent = this.filteredStudents.filter(s => !s.is_disabled).length;
+
+        this.renderStudentRows();
+    },
+
+    /**
+     * Render just the table rows
+     */
+    renderStudentRows() {
+        const tbody = document.getElementById('dashStudentsBody');
+        if (!tbody) return;
+
+        if (this.filteredStudents.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #718096; padding: 2rem;">No students found matching your criteria.</td></tr>';
+            return;
+        }
+
+        const user = Auth.getCurrentUser();
+        const role = user.role;
+
+        tbody.innerHTML = this.filteredStudents.map(s => {
+            // Validate names using hierarchy or fallback to ID
+            const collegeName = role === 'admin' ? this.getName(s.college_id, 'colleges') : '';
+            const deptName = ['admin', 'college'].includes(role) ? this.getName(s.department_id, 'departments') : '';
+            const batchName = this.getName(s.batch_id, 'batches');
+
+            let html = `
+                <tr style="cursor: pointer; transition: background 0.1s;" onclick="StudentProfileViewer.open('${s.id}', ${JSON.stringify(s).replace(/"/g, '&quot;')})" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+                    <td>
+                        <div style="font-weight: 500; color: #e2e8f0;">${Utils.escapeHtml(s.username || s.name || 'Unknown')}</div>
+                    </td>
+                    <td style="color: #a0aec0;">${Utils.escapeHtml(s.email)}</td>
+            `;
+
+            if (role === 'admin') html += `<td style="color: #a0aec0; font-size: 0.9rem;">${Utils.escapeHtml(collegeName)}</td>`;
+            if (['admin', 'college'].includes(role)) html += `<td style="color: #a0aec0; font-size: 0.9rem;">${Utils.escapeHtml(deptName)}</td>`;
+
+            html += `
+                    <td style="color: #a0aec0; font-size: 0.9rem;">${Utils.escapeHtml(batchName)}</td>
+                    <td>
+                        ${!s.is_disabled
+                    ? '<span style="background: rgba(16,185,129,0.2); color: #34d399; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">Active</span>'
+                    : '<span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">Disabled</span>'}
+                    </td>
+                    <td style="text-align: right;">
+                        <button class="btn btn-sm btn-secondary" style="font-size: 0.8rem;">View Profile</button>
+                    </td>
+                </tr>
+            `;
+            return html;
+        }).join('');
+    },
+
+    /**
+     * Helper to get name from hierarchy
+     */
+    getName(id, type) {
+        if (!id) return '-';
+        const list = this.hierarchy[type] || [];
+        const item = list.find(x => x.id === id);
+
+        if (item) {
+            return item.college_name || item.department_name || item.batch_name || item.name || id;
+        }
+        return id.substring(0, 8) + '...'; // Fallback if not loaded
+    },
+
+    /**
+     * Load recent activity (kept from original)
      */
     async loadRecentActivity(performance) {
         try {
