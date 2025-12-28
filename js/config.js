@@ -3,9 +3,13 @@
  */
 
 const Config = {
-    API_BASE: 'http://localhost:5000/api',
-    API_BASE_URL: 'http://localhost:5000/api', // Alias for compatibility
-    
+    // Environment URLs
+    // Default to deployed backend
+    API_BASE: 'https://codeprac2.onrender.com/api',
+    // API_BASE: 'http://localhost:5000/api', // Uncomment for local development
+
+    API_BASE_URL: 'https://codeprac2.onrender.com/api', // Alias for compatibility
+
     ROLES: {
         ADMIN: 'admin',
         COLLEGE: 'college',
