@@ -63,6 +63,11 @@ const StudentPractice = {
             await this.loadTopics();
             await this.loadNotes();
             this.showPhase('topics');
+
+            // Handle window resize for Monaco
+            window.addEventListener('resize', () => {
+                if (this.monacoInstance) this.monacoInstance.layout();
+            });
         } catch (error) {
             console.error('Student practice load error:', error);
             Utils.showMessage('practiceMessage', 'Failed to load practice topics', 'error');
@@ -139,22 +144,31 @@ const StudentPractice = {
             return;
         }
 
+        container.style.marginTop = '2rem';
+
         container.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
                 ${this.notes.map(note => `
-                    <div class="card" style="padding: 1rem; border: 1px solid #ddd; border-radius: 4px;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <div style="flex: 1;">
-                                <h4 style="margin: 0 0 0.5rem 0; color: #333;">${this.escapeHtml(note.title)}</h4>
-                                <p style="margin: 0; font-size: 0.85rem; color: #666;">
-                                    ${note.drive_link ? `<a href="${this.escapeHtml(note.drive_link)}" target="_blank" style="color: #007bff; text-decoration: none;">Open Drive Link</a>` : 'No link provided'}
-                                </p>
+                    <div class="card" style="padding: 1.5rem; border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--bg-surface); transition: transform 0.2s, box-shadow 0.2s; box-shadow: var(--shadow-sm);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                            <div style="width: 40px; height: 40px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary-500);">
+                                <i class="fas fa-book"></i>
                             </div>
                         </div>
+                        <h4 style="margin: 0 0 0.5rem 0; color: var(--text-main); font-size: 1.1rem;">${this.escapeHtml(note.title)}</h4>
+                        <p style="margin: 0; font-size: 0.9rem; color: var(--text-muted); margin-top: auto;">
+                            ${note.drive_link ? `<a href="${this.escapeHtml(note.drive_link)}" target="_blank" class="btn btn-sm btn-outline" style="width: 100%; display: block; text-align: center;">Open Resource</a>` : '<span style="color: var(--text-subtle);">No link provided</span>'}
+                        </p>
                     </div>
                 `).join('')}
             </div>
         `;
+
+        // Add hover effects via JS or assume CSS handles .card hover
+        container.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', () => { card.style.transform = 'translateY(-4px)'; card.style.boxShadow = 'var(--shadow-md)'; });
+            card.addEventListener('mouseleave', () => { card.style.transform = 'translateY(0)'; card.style.boxShadow = 'var(--shadow-sm)'; });
+        });
     },
 
     /**
@@ -335,9 +349,12 @@ const StudentPractice = {
 
         // Update header
         document.getElementById('problemTitle').textContent = Utils.escapeHtml(q.title || q.question_title);
+        // Display Topic here as requested
+        const topicName = this.selectedTopic?.name || this.selectedTopic?.topic_name || this.selectedQuestion.topic_name || 'N/A';
+
         document.getElementById('problemDifficulty').innerHTML = `
-            Difficulty: <strong>${q.difficulty || 'Medium'}</strong> | 
-            Topic: <strong>${Utils.escapeHtml(this.selectedTopic?.name || this.selectedTopic?.topic_name || 'N/A')}</strong>
+            <span class="badge" style="background: ${this.getDifficultyColor(q.difficulty)}; color: white; margin-right: 10px;">${q.difficulty || 'Medium'}</span>
+            <span style="color: var(--text-muted); font-size: 0.9rem;">Topic: <strong style="color: var(--text-main);">${Utils.escapeHtml(topicName)}</strong></span>
         `;
 
         // Update problem statement (left panel)
@@ -356,15 +373,8 @@ const StudentPractice = {
             constraintsSection.style.display = 'none';
         }
 
-        // Update code editor
-        const editor = document.getElementById('codeEditor');
-        if (editor) {
-            if (!this.code) {
-                // Set default template based on language
-                this.code = this.getDefaultTemplate(this.currentLanguage, q.function_name);
-            }
-            editor.value = this.code;
-        }
+        // Initialize Monaco Editor
+        this.initMonacoEditor(q);
 
         // Show/hide Run and Submit buttons
         document.getElementById('runBtn').style.display = 'block';
@@ -373,6 +383,76 @@ const StudentPractice = {
         // Show problem and editor sections
         document.getElementById('problemSection').style.display = 'flex';
         document.getElementById('editorSection').style.display = 'flex';
+    },
+
+    /**
+     * Initialize Monaco Editor
+     */
+    initMonacoEditor(question) {
+        const container = document.getElementById('editorContainer');
+        if (!container) return;
+
+        // If code is empty, set default
+        if (!this.code) {
+            this.code = this.getDefaultTemplate(this.currentLanguage, question.function_name);
+        }
+
+        const init = () => {
+            // Hide textarea if it exists
+            const textarea = document.getElementById('codeEditor');
+            if (textarea) textarea.style.display = 'none';
+
+            // Create or update Monaco instance
+            let monacoDiv = document.getElementById('monacoEditor');
+            if (!monacoDiv) {
+                monacoDiv = document.createElement('div');
+                monacoDiv.id = 'monacoEditor';
+                monacoDiv.style.width = '100%';
+                monacoDiv.style.height = '100%'; // use 100% of container 
+                monacoDiv.style.minHeight = '500px';
+                monacoDiv.style.border = '1px solid var(--border-subtle)';
+                container.appendChild(monacoDiv);
+            }
+
+            if (this.monacoInstance) {
+                const model = this.monacoInstance.getModel();
+                this.monacoInstance.setValue(this.code);
+                monaco.editor.setModelLanguage(model, this.currentLanguage);
+            } else {
+                this.monacoInstance = monaco.editor.create(monacoDiv, {
+                    value: this.code,
+                    language: this.currentLanguage,
+                    theme: 'vs-dark',
+                    minimap: { enabled: false },
+                    automaticLayout: true,
+                    fontSize: 14,
+                    scrollBeyondLastLine: false,
+                    roundedSelection: false,
+                });
+
+                this.monacoInstance.onDidChangeModelContent(() => {
+                    this.code = this.monacoInstance.getValue();
+                    const ta = document.getElementById('codeEditor');
+                    if (ta) ta.value = this.code;
+                });
+            }
+        };
+
+        if (window.monaco) {
+            init();
+        } else if (window.require) {
+            console.log('Monaco not ready, waiting for require...');
+            window.require(['vs/editor/editor.main'], () => {
+                init();
+            });
+        } else {
+            // Fallback
+            const textarea = document.getElementById('codeEditor');
+            if (textarea) {
+                textarea.style.display = 'block';
+                textarea.value = this.code;
+            }
+        }
     },
 
     /**
@@ -963,23 +1043,32 @@ int main() {
     switchTab(tabName) {
         const practiceTab = document.getElementById('practiceTabContent');
         const notesTab = document.getElementById('notesTabContent');
+        // Button selectors mapping to what's in HTML
         const practiceBtn = document.querySelector('button[onclick="StudentPractice.switchTab(\'practice\')"]');
         const notesBtn = document.getElementById('notesTabBtn');
 
         if (tabName === 'practice') {
-            practiceTab.style.display = 'block';
-            notesTab.style.display = 'none';
-            practiceBtn.style.borderBottomColor = '#007bff';
-            practiceBtn.style.color = '#007bff';
-            notesBtn.style.borderBottomColor = 'transparent';
-            notesBtn.style.color = '#666';
+            if (practiceTab) practiceTab.style.display = 'block';
+            if (notesTab) notesTab.style.display = 'none';
+            if (practiceBtn) {
+                practiceBtn.style.borderBottomColor = '#007bff';
+                practiceBtn.style.color = '#007bff';
+            }
+            if (notesBtn) {
+                notesBtn.style.borderBottomColor = 'transparent';
+                notesBtn.style.color = '#666';
+            }
         } else if (tabName === 'notes') {
-            practiceTab.style.display = 'none';
-            notesTab.style.display = 'block';
-            practiceBtn.style.borderBottomColor = 'transparent';
-            practiceBtn.style.color = '#666';
-            notesBtn.style.borderBottomColor = '#007bff';
-            notesBtn.style.color = '#007bff';
+            if (practiceTab) practiceTab.style.display = 'none';
+            if (notesTab) notesTab.style.display = 'block';
+            if (practiceBtn) {
+                practiceBtn.style.borderBottomColor = 'transparent';
+                practiceBtn.style.color = '#666';
+            }
+            if (notesBtn) {
+                notesBtn.style.borderBottomColor = '#007bff';
+                notesBtn.style.color = '#007bff';
+            }
         }
     },
 

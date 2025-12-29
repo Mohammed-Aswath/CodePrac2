@@ -123,6 +123,7 @@ const Admin = {
                 AdminTopics.loadTopics();
                 break;
             case 'questions':
+                if (Questions.configure) Questions.configure('admin');
                 Questions.load();
                 break;
             case 'notes':

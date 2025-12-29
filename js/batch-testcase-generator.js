@@ -32,7 +32,7 @@ const BatchTestCaseGenerator = {
     async loadQuestions() {
         try {
             const token = localStorage.getItem('token');
-            
+
             const response = await fetch(this.questionsEndpoint, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -65,9 +65,12 @@ const BatchTestCaseGenerator = {
         }
 
         container.innerHTML = this.questions.map(q => `
-            <div style="padding: 0.75rem; border-bottom: 1px solid #eee; cursor: pointer; hover: background: #f9f9f9;" onclick="BatchTestCaseGenerator.selectQuestion('${q.id}')">
-                <div style="font-weight: 500; color: #333;">${this.escapeHtml(q.title || q.question_title)}</div>
-                <div style="font-size: 0.85rem; color: #999;">Sample Input: ${this.escapeHtml((q.sample_input || '').substring(0, 30))}</div>
+            <div style="padding: 0.75rem; border-bottom: 1px solid var(--border-subtle); cursor: pointer; transition: background 0.2s;" 
+                 onmouseover="this.style.background='var(--bg-elevated)'" 
+                 onmouseout="this.style.background='transparent'"
+                 onclick="BatchTestCaseGenerator.selectQuestion('${q.id}')">
+                <div style="font-weight: 500; color: var(--text-main);">${this.escapeHtml(q.title || q.question_title)}</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Sample: ${this.escapeHtml((q.sample_input || '').substring(0, 30))}</div>
             </div>
         `).join('');
     },
@@ -95,40 +98,42 @@ const BatchTestCaseGenerator = {
         const q = this.selectedQuestion;
 
         container.innerHTML = `
-            <div style="padding: 1.5rem; background: #f9f9f9; border-radius: 8px;">
-                <h3 style="margin-top: 0; color: #333;">${this.escapeHtml(q.title || q.question_title)}</h3>
+            <div style="padding: 1.5rem; background: var(--bg-surface); border-radius: 8px; border: 1px solid var(--border-subtle);">
+                <h3 style="margin-top: 0; color: var(--text-main);">${this.escapeHtml(q.title || q.question_title)}</h3>
                 
                 <div style="margin-bottom: 1.5rem;">
-                    <h4 style="color: #555; margin-top: 1rem;">Description</h4>
-                    <div style="padding: 1rem; background: white; border-radius: 4px; border: 1px solid #ddd; color: #666;">
+                    <h4 style="color: var(--text-muted); margin-top: 1rem;">Description</h4>
+                    <div style="padding: 1rem; background: var(--bg-app); border-radius: 4px; border: 1px solid var(--border-subtle); color: var(--text-body);">
                         ${this.escapeHtml(q.description || 'No description').substring(0, 200)}...
                     </div>
                 </div>
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
                     <div>
-                        <h4 style="color: #555;">Sample Input</h4>
-                        <div style="padding: 0.75rem; background: white; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 0.85rem; color: #333; max-height: 100px; overflow-y: auto;">
+                        <h4 style="color: var(--text-muted);">Sample Input</h4>
+                        <div class="generated-test-case-box" style="padding: 0.75rem; border-radius: 4px; max-height: 100px; overflow-y: auto;">
                             ${this.escapeHtml(q.sample_input || 'N/A')}
                         </div>
                     </div>
                     <div>
-                        <h4 style="color: #555;">Sample Output</h4>
-                        <div style="padding: 0.75rem; background: white; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 0.85rem; color: #333; max-height: 100px; overflow-y: auto;">
+                        <h4 style="color: var(--text-muted);">Sample Output</h4>
+                         <div class="generated-test-case-box" style="padding: 0.75rem; border-radius: 4px; max-height: 100px; overflow-y: auto;">
                             ${this.escapeHtml(q.sample_output || 'N/A')}
                         </div>
                     </div>
                 </div>
 
-                <div style="background: white; padding: 1rem; border-radius: 4px; border: 1px solid #ddd; margin-bottom: 1.5rem;">
+                <div style="background: var(--bg-elevated); padding: 1rem; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: 1.5rem;">
                     <div style="display: flex; gap: 0.75rem;">
                         <button onclick="BatchTestCaseGenerator.generateTestCases()" 
-                                style="flex: 1; padding: 0.75rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;"
+                                class="btn btn-primary"
+                                style="flex: 1;"
                                 id="generateBtn">
                             Generate Test Cases
                         </button>
                         <button onclick="BatchTestCaseGenerator.clearSelection()" 
-                                style="flex: 1; padding: 0.75rem; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                class="btn btn-secondary"
+                                style="flex: 1;">
                             Clear
                         </button>
                     </div>
@@ -150,7 +155,7 @@ const BatchTestCaseGenerator = {
 
         const required = ['description', 'sample_input', 'sample_output'];
         const missing = required.filter(field => !this.selectedQuestion[field]);
-        
+
         if (missing.length > 0) {
             Utils.showMessage('testCaseMessage', `Question missing required fields: ${missing.join(', ')}`, 'error');
             return;
@@ -213,25 +218,25 @@ const BatchTestCaseGenerator = {
         }
 
         let html = `
-            <div style="margin-top: 1.5rem; padding: 1rem; background: #f0f8ff; border-radius: 4px; border-left: 4px solid #007bff;">
-                <h4 style="margin-top: 0; color: #0056b3;">Generated Test Cases (${testcases.length})</h4>
+            <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 4px; border-left: 4px solid var(--success);">
+                <h4 style="margin-top: 0; color: var(--success);">Generated Test Cases (${testcases.length})</h4>
                 <div style="display: grid; gap: 1rem;">
         `;
 
         testcases.forEach((tc, index) => {
             html += `
-                <div style="padding: 0.75rem; background: white; border: 1px solid #dee2e6; border-radius: 4px;">
-                    <div style="font-weight: 500; color: #333; margin-bottom: 0.5rem;">Test Case ${index + 1}</div>
+                <div style="padding: 0.75rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 4px;">
+                    <div style="font-weight: 500; color: var(--text-main); margin-bottom: 0.5rem;">Test Case ${index + 1}</div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
                         <div>
-                            <span style="color: #666; font-size: 0.85rem;">Input:</span>
-                            <div style="font-family: monospace; color: #333; font-size: 0.85rem; background: #f9f9f9; padding: 0.5rem; border-radius: 3px; word-break: break-all;">
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Input:</span>
+                            <div class="generated-test-case-box" style="padding: 0.5rem; border-radius: 3px; word-break: break-all;">
                                 ${this.escapeHtml(tc.input || tc.test_input || 'N/A')}
                             </div>
                         </div>
                         <div>
-                            <span style="color: #666; font-size: 0.85rem;">Expected Output:</span>
-                            <div style="font-family: monospace; color: #333; font-size: 0.85rem; background: #f9f9f9; padding: 0.5rem; border-radius: 3px; word-break: break-all;">
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">Expected Output:</span>
+                            <div class="generated-test-case-box" style="padding: 0.5rem; border-radius: 3px; word-break: break-all;">
                                 ${this.escapeHtml(tc.expected_output || 'N/A')}
                             </div>
                         </div>
@@ -244,7 +249,7 @@ const BatchTestCaseGenerator = {
                 </div>
                 <div style="margin-top: 1rem;">
                     <button onclick="BatchTestCaseGenerator.saveTestCases()" 
-                            style="padding: 0.75rem 1.5rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">
+                            class="btn btn-success">
                         Save Test Cases
                     </button>
                 </div>

@@ -373,86 +373,33 @@
 
                     <!-- Questions -->
                     <div data-batch-content="questions" style="display: none;">
-                        <div style="display: grid; grid-template-columns: 300px 1fr 1fr; gap: 1.5rem;">
-                            <!-- Topics Panel -->
-                            <div
-                                style="background: #f9f9f9; padding: 1rem; border-radius: 4px; border: 1px solid #ddd;">
-                                <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1rem;">Topics</h3>
-                                <div id="batchQuestionsTopicPanel" style="max-height: 600px; overflow-y: auto;"></div>
+                        <div class="admin-questions-grid"
+                            style="grid-template-columns: minmax(300px, 20%) minmax(450px, 40%) minmax(400px, 40%); height: calc(100vh - 200px);">
+                            <!-- Column 1: List -->
+                            <div class="admin-panel" id="batchQuestionsListPanel">
+                                <div class="admin-panel-header">
+                                    <h3>Questions</h3>
+                                    <button class="btn btn-sm btn-primary" onclick="Questions.prepareCreate()">+
+                                        New</button>
+                                </div>
+                                <div id="batchQuestionsList" class="admin-panel-content">
+                                    <!-- Questions List Loaded Here -->
+                                </div>
                             </div>
 
-                            <!-- Questions Form & List Panel -->
-                            <div
-                                style="background: #f9f9f9; padding: 1rem; border-radius: 4px; border: 1px solid #ddd;">
-                                <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1rem;">Questions</h3>
-
-                                <!-- Form Section -->
-                                <div
-                                    style="background: white; padding: 1rem; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 1rem;">
-                                    <input type="hidden" id="batchQuestionsFormId" />
-
-                                    <div class="form-group" style="margin-bottom: 0.75rem;">
-                                        <label style="font-size: 0.9rem; font-weight: bold;">Topic: <span
-                                                style="color: red;">*</span></label>
-                                        <select id="batchQuestionsFormTopic" required
-                                            style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                                            <option value="">-- Select topic --</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="form-group" style="margin-bottom: 0.75rem;">
-                                        <label style="font-size: 0.9rem; font-weight: bold;">Title: <span
-                                                style="color: red;">*</span></label>
-                                        <input type="text" id="batchQuestionsFormTitle" placeholder="Question title"
-                                            required
-                                            style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" />
-                                    </div>
-
-                                    <div class="form-group" style="margin-bottom: 0.75rem;">
-                                        <label style="font-size: 0.9rem; font-weight: bold;">Description: <span
-                                                style="color: red;">*</span></label>
-                                        <textarea id="batchQuestionsFormDescription" placeholder="Question description"
-                                            required
-                                            style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; min-height: 80px;"></textarea>
-                                    </div>
-
-                                    <div class="form-group" style="margin-bottom: 0.75rem;">
-                                        <label style="font-size: 0.9rem; font-weight: bold;">Sample Input: <span
-                                                style="color: red;">*</span></label>
-                                        <textarea id="batchQuestionsFormSampleInput" placeholder="Sample input" required
-                                            style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; min-height: 60px; font-family: monospace;"></textarea>
-                                    </div>
-
-                                    <div class="form-group" style="margin-bottom: 0.75rem;">
-                                        <label style="font-size: 0.9rem; font-weight: bold;">Sample Output: <span
-                                                style="color: red;">*</span></label>
-                                        <textarea id="batchQuestionsFormSampleOutput" placeholder="Sample output"
-                                            required
-                                            style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; min-height: 60px; font-family: monospace;"></textarea>
-                                    </div>
-
-                                    <div id="batchQuestionsFormMessage" style="margin-bottom: 0.75rem;"></div>
-
-                                    <div style="display: flex; gap: 0.5rem;">
-                                        <button class="btn btn-primary" onclick="BatchQuestions.saveInline()"
-                                            style="flex: 1;">Create Question</button>
-                                        <button class="btn btn-secondary" onclick="BatchQuestions.clearForm()"
-                                            style="flex: 1;" id="batchQuestionsClearBtn"
-                                            style="display: none;">Clear</button>
+                            <!-- Column 2: Edit Form -->
+                            <div class="admin-panel" id="batchQEditPanel">
+                                <div class="admin-panel-content" id="batchQEditForm">
+                                    <div class="text-center text-muted" style="padding: 2rem;">Select a question to edit
                                     </div>
                                 </div>
-
-                                <!-- Questions List Section -->
-                                <div id="batchQuestionsListPanel" style="max-height: 400px; overflow-y: auto;"></div>
                             </div>
 
-                            <!-- Question Detail Panel -->
-                            <div
-                                style="background: #f9f9f9; padding: 1rem; border-radius: 4px; border: 1px solid #ddd;">
-                                <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1rem;">Question Details</h3>
-                                <div id="batchQuestionDetailPanel"
-                                    style="max-height: 600px; overflow-y: auto; font-size: 0.95rem;">
-                                    <p style="color: #999; text-align: center;">Select a question to view details</p>
+                            <!-- Column 3: Details / Test Cases -->
+                            <div class="admin-panel" id="batchQDetailsPanel">
+                                <div class="admin-panel-content" id="batchQDetailsContent">
+                                    <div class="text-center text-muted" style="padding: 2rem;">Select a question to view
+                                        details</div>
                                 </div>
                             </div>
                         </div>
@@ -618,7 +565,7 @@
                             <div id="editorSection" class="code-panel">
 
                                 <!-- Top Half: Code Editor -->
-                                <div class="code-editor-section">
+                                <div id="editorContainer" class="code-editor-section">
                                     <div class="editor-toolbar">
                                         <div style="display: flex; align-items: center; gap: 1rem; color: #bbb;">
                                             <select id="languageSelect"
@@ -700,15 +647,20 @@
                         </div>
                     </div>
                 </div>
-    </main> <!-- Notes Tab Content -->
-    <div id="notesTabContent" style="display: none;">
-        <div style="max-width: 800px;">
-            <h2>Study Notes</h2>
-            <div id="studentNotesList"></div>
-        </div>
-    </div>
-    </div>
-    </div>
+
+                <!-- Notes Tab Content -->
+                <div id="notesTabContent" style="display: none; padding-top: 2rem;">
+                    <div style="max-width: 1200px;"> <!-- Increased width for grid -->
+                        <div style="margin-bottom: 2rem;">
+                            <h2 style="margin: 0; color: var(--text-main);">Study Notes</h2>
+                            <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary);">Resources for your batch</p>
+                        </div>
+                        <div id="studentNotesList"></div>
+                    </div>
+                </div>
+            </div>
+            <!-- End of studentPage (effectively) -->
+
     </main>
 
     <!-- Modals -->
@@ -1413,6 +1365,18 @@ Jane Smith,jane@example.com,password456</pre>
         </div>
     </div>
 
+    <!-- Monaco Editor Loader -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
+    <script>
+        // Configure Monaco Loader
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' } });
+        // Eagerly load the main editor module so it's ready when needed
+        require(['vs/editor/editor.main'], function () {
+            console.log('Monaco Editor loaded successfully');
+            window.monacoLoaded = true;
+        });
+    </script>
+
     <!-- Scripts - Load in correct order -->
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
@@ -1429,8 +1393,7 @@ Jane Smith,jane@example.com,password456</pre>
     <script src="js/department.js"></script>
     <script src="js/batch.js"></script>
     <script src="js/batch-topics.js"></script>
-    <script src="js/batch-questions.js"></script>
-    <script src="js/batch-testcase-generator.js"></script>
+
     <script src="js/batch-notes.js"></script>
     <script src="js/student.js"></script>
     <script src="js/ui.js"></script>

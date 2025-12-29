@@ -49,15 +49,23 @@ const UI = {
      */
     setupNavigation() {
         const user = this.currentUser;
-        const role = user?.role || 'student';
 
-        // Hide all role-specific links
-        document.getElementById('adminLink')?.classList.add('hidden');
-        document.getElementById('collegeLink')?.classList.add('hidden');
-        document.getElementById('deptLink')?.classList.add('hidden');
-        document.getElementById('batchLink')?.classList.add('hidden');
+        // Hide all links by default
+        const links = [
+            'adminLink', 'collegeLink', 'deptLink', 'batchLink',
+            'studentLink', 'logoutBtn'
+        ];
 
-        // Show only relevant links
+        links.forEach(id => {
+            document.getElementById(id)?.classList.add('hidden');
+        });
+
+        // If not logged in, return (navbar remains empty)
+        if (!user) return;
+
+        const role = user.role;
+
+        // Show role-specific links
         if (role === 'admin') {
             document.getElementById('adminLink')?.classList.remove('hidden');
         } else if (role === 'college') {
@@ -68,7 +76,7 @@ const UI = {
             document.getElementById('batchLink')?.classList.remove('hidden');
         }
 
-        // Show student link and logout for all authenticated users
+        // Show student link (Practice) and logout for all authenticated users
         document.getElementById('studentLink')?.classList.remove('hidden');
         document.getElementById('logoutBtn')?.classList.remove('hidden');
     },

@@ -68,7 +68,8 @@ const Batch = {
         if (tabName === 'students') {
             this.loadStudents();
         } else if (tabName === 'questions') {
-            this.loadQuestions();
+            if (Questions.configure) Questions.configure('batch');
+            Questions.load();
         }
     },
 

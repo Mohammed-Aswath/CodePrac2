@@ -55,7 +55,8 @@ nav .container {
 
 /* Page Containers */
 .container {
-    max-width: 1280px;
+    max-width: 95vw;
+    /* Widened to 95vw to utilize screen space */
     margin: 0 auto;
     padding: 2rem 1.5rem;
 }
@@ -146,7 +147,7 @@ nav .container {
 }
 
 .btn-danger {
-    background: var(--danger);
+    background: var(--error);
     color: white;
 }
 
@@ -643,3 +644,223 @@ tr:hover td {
         min-height: 400px;
     }
 }
+
+/* ----------------------------------------------------
+   DASHBOARD IMPROVEMENTS
+   ---------------------------------------------------- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s, border-color 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-500), transparent);
+    opacity: 0.5;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-500);
+}
+
+.stat-card h3 {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-card .value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    font-family: var(--font-ui);
+    line-height: 1.2;
+}
+
+/* ----------------------------------------------------
+   ADMIN PANEL REFACTOR (Questions Tab)
+   ---------------------------------------------------- */
+.admin-questions-grid {
+    display: grid;
+    grid-template-columns: minmax(300px, 20%) minmax(450px, 40%) minmax(400px, 40%);
+    /* Optimized fractions for wide screens */
+    gap: 1.5rem;
+    height: calc(100vh - 200px);
+    /* Increased height utilization */
+    width: 100%;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+.admin-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-panel-header {
+    padding: 1rem 1.25rem;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border-subtle);
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+/* Responsive adjustment */
+@media (max-width: 1400px) {
+    .admin-questions-grid {
+        grid-template-columns: 300px 1fr;
+        grid-template-rows: 1fr 1fr;
+    }
+
+    .admin-panel:nth-child(3) {
+        /* Details panel moves to row 2, spanning full width */
+        grid-column: 1 / -1;
+        display: none;
+        /* Hide details by default on small screens if needed, or stack */
+    }
+
+    .admin-questions-grid.show-details {
+        grid-template-columns: 300px 1fr 300px;
+    }
+}
+
+/* ----------------------------------------------------
+   BUG FIXES & UTILITIES
+   ---------------------------------------------------- */
+/* Fix for hidden test cases rendering */
+.test-case-hidden {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    padding: 0.75rem;
+    border-radius: var(--radius-md);
+    margin-bottom: 0.5rem;
+    color: var(--text-muted);
+}
+
+/* Fix for generated test case text visibility */
+.generated-test-case-box {
+    background: var(--bg-app) !important;
+    border: 1px solid var(--border-subtle) !important;
+    color: var(--text-code) !important;
+    font-family: var(--font-code);
+}
+
+.text-code {
+    color: #e2e8f0;
+}
+
+.card-header {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+/* ----------------------------------------------------
+   COMPACT FORM & GRID UTILITIES
+   ---------------------------------------------------- */
+.form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* 4 Columns for large dropdowns */
+    gap: 1rem;
+}
+
+@media (max-width: 1400px) {
+    .form-grid-4 {
+        grid-template-columns: 1fr 1fr;
+        /* Fallback to 2 columns on smaller screens */
+    }
+}
+
+.form-compact .form-group {
+    margin-bottom: 0.75rem;
+}
+
+.form-compact label {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+    display: block;
+    color: var(--text-muted);
+}
+
+.form-compact select,
+.form-compact input,
+.form-compact textarea {
+    font-size: 0.875rem;
+    padding: 0.5rem;
+}
+
+/* Scrollable Code Block for Test Cases (Fixing Truncation) */
+.code-block-scroll {
+    background: var(--bg-app);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-family: var(--font-code);
+    font-size: 0.8rem;
+    color: var(--text-code, #e2e8f0);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 120px;
+    /* Limit height but allow scrolling */
+    overflow-y: auto;
+}
+
+.btn-icon {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+.form-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+

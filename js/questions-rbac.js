@@ -12,6 +12,19 @@ const Questions = {
     batches: [],
     topics: [],
     pendingTestCases: null,
+    activeAdminPanel: 'list',
+
+    // Configuration for dynamic DOM targeting (admin vs batch)
+    config: {
+        prefix: 'admin' // default
+    },
+
+    /**
+     * Configure module context
+     */
+    configure(prefix) {
+        this.config.prefix = prefix;
+    },
 
     /**
      * Initialize questions module
@@ -44,16 +57,16 @@ const Questions = {
     findBatchNameById(batchId) {
         if (!batchId) return 'N/A';
         const batch = this.batches.find(b => b.id === batchId);
-        return batch ? batch.batch_name : 'N/A';
+        return batch ? (batch.batch_name || batch.name || 'N/A') : 'N/A';
     },
 
     /**
      * Helper: Find topic name by ID
      */
     findTopicNameById(topicId) {
-        if (!topicId) return 'N/A';
+        if (!topicId) return null;
         const topic = this.topics.find(t => t.id === topicId);
-        return topic ? (topic.topic_name || topic.name) : 'N/A';
+        return topic ? (topic.topic_name || topic.name) : null;
     },
 
     /**
@@ -86,6 +99,7 @@ const Questions = {
                 url = '/department/questions';
             } else if (user.role === 'batch') {
                 url = '/batch/questions';
+                await this.loadHierarchyData();
             }
 
             const response = await Utils.apiRequest(url);
@@ -101,18 +115,30 @@ const Questions = {
      * Load all hierarchy data
      */
     async loadHierarchyData() {
+        const user = Auth.getCurrentUser();
         try {
-            const [collegesRes, deptsRes, batchesRes, topicsRes] = await Promise.all([
-                Utils.apiRequest('/admin/colleges'),
-                Utils.apiRequest('/admin/departments'),
-                Utils.apiRequest('/admin/batches'),
-                Utils.apiRequest('/admin/topics')
-            ]);
+            if (user.role === 'admin') {
+                const [collegesRes, deptsRes, batchesRes, topicsRes] = await Promise.all([
+                    Utils.apiRequest('/admin/colleges'),
+                    Utils.apiRequest('/admin/departments'),
+                    Utils.apiRequest('/admin/batches'),
+                    Utils.apiRequest('/admin/topics')
+                ]);
 
-            this.colleges = collegesRes.data?.colleges || collegesRes.colleges || [];
-            this.departments = deptsRes.data?.departments || deptsRes.departments || [];
-            this.batches = batchesRes.data?.batches || batchesRes.batches || [];
-            this.topics = topicsRes.data?.topics || topicsRes.topics || [];
+                this.colleges = collegesRes.data?.colleges || collegesRes.colleges || [];
+                this.departments = deptsRes.data?.departments || deptsRes.departments || [];
+                this.batches = batchesRes.data?.batches || batchesRes.batches || [];
+                this.topics = topicsRes.data?.topics || topicsRes.topics || [];
+            } else if (user.role === 'batch') {
+                // For batch admin, we only really need topics for the mapping?
+                // Or maybe the question itself has the topic_name which is handled in renderAdminList
+                const topicsRes = await Utils.apiRequest('/batch/topics');
+                this.topics = topicsRes.data?.topics || topicsRes.topics || [];
+                // Other fields are not typically needed for batch admin view as they are pre-filtered
+                this.colleges = [];
+                this.departments = [];
+                this.batches = [];
+            }
         } catch (error) {
             console.error('Load hierarchy data error:', error);
         }
@@ -122,9 +148,13 @@ const Questions = {
      * Render questions table or list
      */
     render() {
-        const isAdminPanel = !!document.getElementById('adminQuestionFormPanel');
+        const editPanelId = (this.config.prefix || 'admin') + 'QEditPanel';
+        // Also check for legacy ID if prefix is admin
+        const legacyId = 'adminQuestionFormPanel';
 
-        if (isAdminPanel) {
+        const is3Pane = !!document.getElementById(editPanelId) || (this.config.prefix === 'admin' && !!document.getElementById(legacyId));
+
+        if (is3Pane) {
             this.renderAdminList();
         } else {
             this.renderTable();
@@ -135,7 +165,10 @@ const Questions = {
      * Render questions as clickable list for admin panel
      */
     renderAdminList() {
-        const container = document.getElementById('adminQuestionsList');
+        const prefix = this.config.prefix || 'admin';
+        const listId = prefix + 'QuestionsList';
+        const container = document.getElementById(listId);
+
         if (!container) return;
 
         if (!this.questions || this.questions.length === 0) {
@@ -150,12 +183,20 @@ const Questions = {
             const collegeNm = self.findCollegeNameById(q.college_id);
             const deptName = self.findDepartmentNameById(q.department_id);
             const isSelected = self.editingId === q.id;
-            const bgColor = isSelected ? 'background-color: #e7f3ff; border-left: 3px solid #007bff;' : 'border-left: 3px solid transparent;';
+            const bgColor = isSelected ? 'background-color: var(--bg-elevated); border-left: 3px solid var(--primary-500);' : 'border-left: 3px solid transparent; background: var(--bg-surface);';
+            const hoverStyle = "this.style.background='var(--bg-elevated)'";
 
-            html += '<div style="padding: 0.75rem; background: white; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; ' + bgColor + '" data-qid="' + q.id + '" class="qitem">';
-            html += '<div style="font-weight: bold; margin-bottom: 0.25rem; color: #333;">' + Utils.escapeHtml(q.title) + '</div>';
-            html += '<div style="font-size: 0.75rem; color: #666; margin-bottom: 0.25rem;">' + Utils.escapeHtml(collegeNm) + ' > ' + Utils.escapeHtml(deptName) + '</div>';
-            html += '<div style="font-size: 0.75rem; color: #999;">' + Utils.escapeHtml(q.difficulty || 'Medium') + '</div>';
+            html += '<div style="padding: 0.75rem; border: 1px solid var(--border-subtle); border-radius: 4px; cursor: pointer; ' + bgColor + '" data-qid="' + q.id + '" class="qitem">';
+            html += '<div style="font-weight: bold; margin-bottom: 0.25rem; color: var(--text-main);">' + Utils.escapeHtml(q.title) + '</div>';
+
+            // Show topic below title (Requested for batch admin, but good for all)
+            const topicName = self.findTopicNameById(q.topic_id) || q.topic_name || 'No Topic';
+            html += '<div style="font-size: 0.8rem; color: var(--primary-500); margin-bottom: 0.25rem; font-weight: 500;">' + Utils.escapeHtml(topicName) + '</div>';
+
+            if (collegeNm !== 'N/A' && deptName !== 'N/A') {
+                html += '<div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">' + Utils.escapeHtml(collegeNm) + ' > ' + Utils.escapeHtml(deptName) + '</div>';
+            }
+            html += '<div style="font-size: 0.75rem; color: var(--text-muted);">' + Utils.escapeHtml(q.difficulty || 'Medium') + '</div>';
             html += '</div>';
         });
 
@@ -245,19 +286,32 @@ const Questions = {
      * Show edit form
      */
     showEditForm(question) {
-        const container = document.getElementById('adminQuestionFormPanel');
+        const prefix = this.config.prefix || 'admin';
+        const panelId = prefix + 'QEditPanel';
+        // Fallback for admin legacy
+        const container = document.getElementById(panelId) || (prefix === 'admin' ? document.getElementById('adminQuestionFormPanel') : null);
+
         if (!container) return;
 
         const user = Auth.getCurrentUser();
         const isAdmin = user.role === 'admin';
         const self = this;
+        const formContentId = prefix + 'QEditForm';
 
-        let html = '<div style="background: white; padding: 1rem; border: 1px solid #ddd; border-radius: 4px;">';
-        html += '<input type="hidden" id="adminQEditId" value="' + question.id + '" />';
+        // NOTE: We are generating the inner HTML. We should check if we are targeting the Panel or the Form content container.
+        // Index.html structure: Panel > Header + FormContentDiv.
+        // If container is the Panel, we might overwrite the header.
+        // We should try to find the specific content div if it exists.
+        const contentDiv = document.getElementById(formContentId);
+        const targetContainer = contentDiv || container;
+
+        let html = '<div class="form-compact" style="background: var(--bg-surface); padding: 1.25rem; border: 1px solid var(--border-subtle); border-radius: 4px;">';
+        html += '<input type="hidden" id="' + prefix + 'QEditId" value="' + question.id + '" />';
 
         if (isAdmin) {
-            html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.9rem; font-weight: bold;">College:</label>';
-            html += '<select id="adminQEditCollege" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">';
+            html += '<div class="form-grid-4">';
+            html += '<div class="form-group"><label>College:</label>';
+            html += '<select id="' + prefix + 'QEditCollege" style="width: 100%; border: 1px solid var(--border-subtle); border-radius: 4px; background: var(--bg-app); color: var(--text-main);">';
             html += '<option value="">-- Select --</option>';
             this.colleges.forEach(c => {
                 const sel = c.id === question.college_id ? ' selected' : '';
@@ -265,8 +319,8 @@ const Questions = {
             });
             html += '</select></div>';
 
-            html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.9rem; font-weight: bold;">Department:</label>';
-            html += '<select id="adminQEditDept" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">';
+            html += '<div class="form-group"><label>Department:</label>';
+            html += '<select id="' + prefix + 'QEditDept" style="width: 100%; border: 1px solid var(--border-subtle); border-radius: 4px; background: var(--bg-app); color: var(--text-main);">';
             html += '<option value="">-- Select --</option>';
             this.departments.filter(d => d.college_id === question.college_id).forEach(d => {
                 const sel = d.id === question.department_id ? ' selected' : '';
@@ -274,56 +328,70 @@ const Questions = {
             });
             html += '</select></div>';
 
-            html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.9rem; font-weight: bold;">Batch:</label>';
-            html += '<select id="adminQEditBatch" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">';
+            html += '<div class="form-group"><label>Batch:</label>';
+            html += '<select id="' + prefix + 'QEditBatch" style="width: 100%; border: 1px solid var(--border-subtle); border-radius: 4px; background: var(--bg-app); color: var(--text-main);">';
             html += '<option value="">-- Select --</option>';
             this.batches.filter(b => b.department_id === question.department_id).forEach(b => {
                 const sel = b.id === question.batch_id ? ' selected' : '';
                 html += '<option value="' + b.id + '"' + sel + '>' + Utils.escapeHtml(b.batch_name) + '</option>';
             });
             html += '</select></div>';
+
+            html += '<div class="form-group"><label>Topic:</label>';
+            html += '<select id="' + prefix + 'QEditTopic" style="width: 100%; border: 1px solid var(--border-subtle); border-radius: 4px; background: var(--bg-app); color: var(--text-main);">';
+            html += '<option value="">-- Select --</option>';
+            this.topics.forEach(t => {
+                const sel = t.id === question.topic_id ? ' selected' : '';
+                html += '<option value="' + t.id + '"' + sel + '>' + Utils.escapeHtml(t.topic_name || t.name) + '</option>';
+            });
+            html += '</select></div>';
+            html += '</div>'; // End grid
+        } else {
+            // For non-admin, just topic
+            html += '<div class="form-group"><label>Topic:</label>';
+            html += '<select id="' + prefix + 'QEditTopic" style="width: 100%; border: 1px solid var(--border-subtle); border-radius: 4px; background: var(--bg-app); color: var(--text-main);">';
+            html += '<option value="">-- Select --</option>';
+            this.topics.forEach(t => {
+                const sel = t.id === question.topic_id ? ' selected' : '';
+                html += '<option value="' + t.id + '"' + sel + '>' + Utils.escapeHtml(t.topic_name || t.name) + '</option>';
+            });
+            html += '</select></div>';
         }
 
-        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.9rem; font-weight: bold;">Topic:</label>';
-        html += '<select id="adminQEditTopic" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">';
-        html += '<option value="">-- Select --</option>';
-        this.topics.forEach(t => {
-            const sel = t.id === question.topic_id ? ' selected' : '';
-            html += '<option value="' + t.id + '"' + sel + '>' + Utils.escapeHtml(t.topic_name || t.name) + '</option>';
-        });
-        html += '</select></div>';
 
-        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.9rem; font-weight: bold;">Title:</label>';
-        html += '<input type="text" id="adminQEditTitle" value="' + Utils.escapeHtml(question.title) + '" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;" /></div>';
+        html += '<div class="form-group"><label>Title:</label>';
+        html += '<input type="text" id="' + prefix + 'QEditTitle" value="' + Utils.escapeHtml(question.title) + '" style="width: 100%; border: 1px solid var(--border-subtle); border-radius: 4px; box-sizing: border-box; background: var(--bg-app); color: var(--text-main);" /></div>';
 
-        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.9rem; font-weight: bold;">Description:</label>';
-        html += '<textarea id="adminQEditDesc" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; min-height: 80px;">' + Utils.escapeHtml(question.description) + '</textarea></div>';
+        html += '<div class="form-group"><label>Description:</label>';
+        html += '<textarea id="' + prefix + 'QEditDesc" style="width: 100%; border: 1px solid var(--border-subtle); border-radius: 4px; box-sizing: border-box; min-height: 80px; background: var(--bg-app); color: var(--text-main);">' + Utils.escapeHtml(question.description) + '</textarea></div>';
 
-        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.9rem; font-weight: bold;">Sample Input:</label>';
-        html += '<textarea id="adminQEditInput" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; min-height: 60px; font-family: monospace;">' + Utils.escapeHtml(question.sample_input) + '</textarea></div>';
+        html += '<div class="form-grid-2">';
+        html += '<div class="form-group"><label>Sample Input:</label>';
+        html += '<textarea id="' + prefix + 'QEditInput" class="code-textarea" style="width: 100%; border: 1px solid var(--border-subtle); border-radius: 4px; box-sizing: border-box; min-height: 80px;">' + Utils.escapeHtml(question.sample_input) + '</textarea></div>';
 
-        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.9rem; font-weight: bold;">Sample Output:</label>';
-        html += '<textarea id="adminQEditOutput" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; min-height: 60px; font-family: monospace;">' + Utils.escapeHtml(question.sample_output) + '</textarea></div>';
+        html += '<div class="form-group"><label>Sample Output:</label>';
+        html += '<textarea id="' + prefix + 'QEditOutput" class="code-textarea" style="width: 100%; border: 1px solid var(--border-subtle); border-radius: 4px; box-sizing: border-box; min-height: 80px;">' + Utils.escapeHtml(question.sample_output) + '</textarea></div>';
+        html += '</div>';
 
-        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.9rem; font-weight: bold;">Difficulty:</label>';
-        html += '<select id="adminQEditDiff" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">';
+        html += '<div class="form-group"><label>Difficulty:</label>';
+        html += '<select id="' + prefix + 'QEditDiff" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-subtle); border-radius: 4px; background: var(--bg-app); color: var(--text-main);">';
         html += '<option value="Easy"' + (question.difficulty === 'Easy' ? ' selected' : '') + '>Easy</option>';
         html += '<option value="Medium"' + (question.difficulty === 'Medium' ? ' selected' : '') + '>Medium</option>';
         html += '<option value="Hard"' + (question.difficulty === 'Hard' ? ' selected' : '') + '>Hard</option>';
         html += '</select></div>';
 
-        html += '<div id="adminQEditMessage" style="margin-bottom: 0.75rem;"></div>';
-        html += '<div style="display: flex; gap: 0.5rem;"><button class="btn btn-primary" id="qsave" style="flex: 1;">Save Changes</button>';
-        html += '<button class="btn btn-danger" id="qdel" style="flex: 1;">Delete</button></div></div>';
+        html += '<div id="' + prefix + 'QEditMessage" style="margin-bottom: 0.75rem;"></div>';
+        html += '<div style="display: flex; gap: 0.5rem; margin-top: 1rem;"><button class="btn btn-primary" id="' + prefix + 'QSave" style="flex: 2;">Save Changes</button>';
+        html += '<button class="btn btn-danger btn-icon" id="' + prefix + 'QDel" style="flex: 1;">Delete</button></div></div>';
 
-        container.innerHTML = html;
+        targetContainer.innerHTML = html;
 
-        document.getElementById('qsave').addEventListener('click', function () { self.saveAdminQuestionInline(); });
-        document.getElementById('qdel').addEventListener('click', function () { self.deleteConfirmAdminPanel(); });
+        document.getElementById(prefix + 'QSave').addEventListener('click', function () { self.saveAdminQuestionInline(); });
+        document.getElementById(prefix + 'QDel').addEventListener('click', function () { self.deleteConfirmAdminPanel(); });
 
         if (isAdmin) {
-            document.getElementById('adminQEditCollege').addEventListener('change', function () { self.onAdminQEditCollegeChange(); });
-            document.getElementById('adminQEditDept').addEventListener('change', function () { self.onAdminQEditDeptChange(); });
+            document.getElementById(prefix + 'QEditCollege').addEventListener('change', function () { self.onAdminQEditCollegeChange(); });
+            document.getElementById(prefix + 'QEditDept').addEventListener('change', function () { self.onAdminQEditDeptChange(); });
         }
     },
 
@@ -331,83 +399,91 @@ const Questions = {
      * Show question details
      */
     showQuestionDetails(question) {
-        const container = document.getElementById('adminQuestionDetailPanel');
+        const prefix = this.config.prefix || 'admin';
+        const panelId = prefix + 'QDetailsPanel';
+        // Fallback
+        const container = document.getElementById(panelId) || (prefix === 'admin' ? document.getElementById('adminQuestionDetailPanel') : null);
+
         if (!container) return;
+
+        // Find content container if exists
+        const contentId = prefix + 'QDetailsContent';
+        const targetContainer = document.getElementById(contentId) || container;
 
         const topicName = this.findTopicNameById(question.topic_id);
         const hiddenTestcases = question.hidden_testcases || [];
         const self = this;
 
-        let html = '<div style="padding: 0; background: white; border-radius: 4px; max-height: 600px; overflow-y: auto;">';
+        let html = '<div style="padding: 0; background: var(--bg-surface); border-radius: 4px; max-height: 600px; overflow-y: auto;">';
 
         // Header
-        html += '<div style="padding: 1rem;"><h4 style="margin: 0 0 0.75rem 0; color: #333;">' + Utils.escapeHtml(question.title) + '</h4>';
+        html += '<div style="padding: 1rem;"><h4 style="margin: 0 0 0.75rem 0; color: var(--text-main);">' + Utils.escapeHtml(question.title) + '</h4>';
         html += '<div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">';
-        html += '<span style="background: #e7f3ff; color: #0056b3; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">' + Utils.escapeHtml(topicName) + '</span>';
-        html += '<span style="background: #fff3cd; color: #856404; padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">' + Utils.escapeHtml(question.difficulty || 'Medium') + '</span>';
+        html += '<span style="background: rgba(99, 102, 241, 0.1); color: var(--primary-500); padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">' + Utils.escapeHtml(topicName) + '</span>';
+        html += '<span style="background: rgba(245, 158, 11, 0.1); color: var(--warning); padding: 0.35rem 0.75rem; border-radius: 20px; font-size: 0.85rem;">' + Utils.escapeHtml(question.difficulty || 'Medium') + '</span>';
         html += '</div></div>';
 
         // Open Test Cases (Sample Input/Output)
-        html += '<div style="border-top: 1px solid #ddd; padding: 1rem;"><h5 style="margin: 0 0 0.75rem 0; color: #555; font-size: 0.9rem;">Open Test Case (Sample):</h5>';
-        html += '<div style="background: #f5f5f5; padding: 0.75rem; border-radius: 4px; font-family: monospace; font-size: 0.85rem;">';
+        html += '<div style="border-top: 1px solid var(--border-subtle); padding: 1rem;"><h5 style="margin: 0 0 0.75rem 0; color: var(--text-muted); font-size: 0.9rem;">Open Test Case (Sample):</h5>';
+        html += '<div class="generated-test-case-box" style="padding: 0.75rem; border-radius: 4px; font-size: 0.85rem;">';
         html += '<div style="margin-bottom: 0.5rem;"><strong>Input:</strong><br>' + Utils.escapeHtml(question.sample_input) + '</div>';
         html += '<div><strong>Output:</strong><br>' + Utils.escapeHtml(question.sample_output) + '</div></div></div>';
 
         // Hidden Test Cases
-        html += '<div style="border-top: 1px solid #ddd; padding: 1rem;">';
+        html += '<div style="border-top: 1px solid var(--border-subtle); padding: 1rem;">';
         html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">';
-        html += '<h5 style="margin: 0; color: #155724; font-size: 0.9rem;">Hidden Test Cases (' + hiddenTestcases.length + ')</h5>';
-        html += '<button id="qaddtest" style="padding: 0.4rem 0.75rem; background: #17a2b8; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">+ Add</button>';
+        html += '<h5 style="margin: 0; color: var(--success); font-size: 0.9rem;">Hidden Test Cases (' + hiddenTestcases.length + ')</h5>';
+        html += '<button id="' + prefix + 'QAddTest" class="btn btn-sm btn-primary" style="font-size: 0.85rem;">+ Add</button>';
         html += '</div>';
 
         if (hiddenTestcases && hiddenTestcases.length > 0) {
-            html += '<div style="display: grid; gap: 0.75rem; max-height: 300px; overflow-y: auto;">';
+            html += '<div style="display: grid; gap: 0.75rem; max-height: 400px; overflow-y: auto;">';
             hiddenTestcases.forEach((tc, idx) => {
-                html += '<div style="padding: 0.75rem; background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 4px;">';
+                html += '<div class="test-case-hidden">';
                 html += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">';
-                html += '<div style="font-weight: 500; color: #0056b3; font-size: 0.85rem;">Test ' + (idx + 1) + '</div>';
+                html += '<div style="font-weight: 500; color: var(--primary-500); font-size: 0.85rem;">Test ' + (idx + 1) + '</div>';
                 html += '<div style="display: flex; gap: 0.25rem;">';
-                html += '<button class="qtcedit" data-tcidx="' + idx + '" style="padding: 0.25rem 0.5rem; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.75rem;">Edit</button>';
-                html += '<button class="qtcdel" data-tcidx="' + idx + '" style="padding: 0.25rem 0.5rem; background: #dc3545; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.75rem;">Delete</button>';
+                html += '<button class="qtcedit btn btn-sm btn-secondary btn-icon" data-tcidx="' + idx + '">Edit</button>';
+                html += '<button class="qtcdel btn btn-sm btn-danger btn-icon" data-tcidx="' + idx + '">Del</button>';
                 html += '</div></div>';
-                html += '<div style="font-family: monospace; font-size: 0.8rem; color: #555;">';
-                html += '<div><strong>Input:</strong><br>' + Utils.escapeHtml((tc.input || '').substring(0, 60)) + '</div>';
-                html += '<div><strong>Output:</strong><br>' + Utils.escapeHtml((tc.expected_output || '').substring(0, 60)) + '</div></div></div>';
+                html += '<div>';
+                html += '<div style="margin-bottom: 0.5rem;"><strong style="color:var(--text-muted); font-size:0.75rem;">Input:</strong><div class="code-block-scroll">' + Utils.escapeHtml(tc.input || '') + '</div></div>';
+                html += '<div><strong style="color:var(--text-muted); font-size:0.75rem;">Output:</strong><div class="code-block-scroll">' + Utils.escapeHtml(tc.expected_output || '') + '</div></div></div></div>';
             });
             html += '</div>';
         } else {
-            html += '<div style="color: #999; font-style: italic;">No hidden test cases yet</div>';
+            html += '<div style="color: var(--text-muted); font-style: italic;">No hidden test cases yet</div>';
         }
         html += '</div>';
 
         // Generate AI Test Cases Button
-        html += '<div style="border-top: 1px solid #ddd; padding: 1rem;">';
-        html += '<button id="qtestgen" style="padding: 0.75rem 1rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; width: 100%; margin-bottom: 1rem;">Generate with AI</button>';
+        html += '<div style="border-top: 1px solid var(--border-subtle); padding: 1rem;">';
+        html += '<button id="' + prefix + 'QTestGen" class="btn btn-success" style="width: 100%; margin-bottom: 1rem;">Generate with AI</button>';
         html += '</div>';
 
-        html += '<div id="adminQTestCaseContainer" style="display: none; padding: 1rem; border-top: 1px solid #ddd;"></div>';
-        html += '<div id="adminQEditTestCasePanel" style="display: none; padding: 1rem; border-top: 1px solid #ddd;"></div>';
+        html += '<div id="' + prefix + 'QTestCaseContainer" style="display: none; padding: 1rem; border-top: 1px solid var(--border-subtle);"></div>';
+        html += '<div id="' + prefix + 'QEditTestCasePanel" style="display: none; padding: 1rem; border-top: 1px solid var(--border-subtle);"></div>';
         html += '</div>';
 
-        container.innerHTML = html;
+        targetContainer.innerHTML = html;
 
         // Event listeners
-        document.getElementById('qtestgen').addEventListener('click', function () {
+        document.getElementById(prefix + 'QTestGen').addEventListener('click', function () {
             self.generateTestCasesForAdmin(question.id);
         });
 
-        document.getElementById('qaddtest').addEventListener('click', function () {
+        document.getElementById(prefix + 'QAddTest').addEventListener('click', function () {
             self.showAddTestCaseForm(question.id, hiddenTestcases.length);
         });
 
-        document.querySelectorAll('.qtcedit').forEach(btn => {
+        targetContainer.querySelectorAll('.qtcedit').forEach(btn => {
             btn.addEventListener('click', function () {
                 const idx = parseInt(this.getAttribute('data-tcidx'));
                 self.showEditTestCaseForm(question.id, idx, hiddenTestcases[idx]);
             });
         });
 
-        document.querySelectorAll('.qtcdel').forEach(btn => {
+        targetContainer.querySelectorAll('.qtcdel').forEach(btn => {
             btn.addEventListener('click', function () {
                 const idx = parseInt(this.getAttribute('data-tcidx'));
                 self.deleteTestCase(question.id, idx);
@@ -419,29 +495,31 @@ const Questions = {
      * Show form to add new test case
      */
     showAddTestCaseForm(questionId, testCaseNum) {
-        const panel = document.getElementById('adminQEditTestCasePanel');
+        const prefix = this.config.prefix || 'admin';
+        const panelId = prefix + 'QEditTestCasePanel';
+        const panel = document.getElementById(panelId);
         if (!panel) return;
 
         const self = this;
-        let html = '<div style="background: #e8f5e9; border: 1px solid #81c784; border-radius: 4px; padding: 1rem;">';
-        html += '<h5 style="margin: 0 0 0.75rem 0; color: #2e7d32;">Add New Test Case</h5>';
-        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.85rem; font-weight: bold;">Input:</label>';
-        html += '<textarea id="qnewtcinput" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px; font-family: monospace; font-size: 0.8rem; min-height: 60px; box-sizing: border-box;"></textarea></div>';
-        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.85rem; font-weight: bold;">Expected Output:</label>';
-        html += '<textarea id="qnewtcoutput" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px; font-family: monospace; font-size: 0.8rem; min-height: 60px; box-sizing: border-box;"></textarea></div>';
+        let html = '<div style="background: var(--bg-elevated); border: 1px solid var(--success); border-radius: 4px; padding: 1rem;">';
+        html += '<h5 style="margin: 0 0 0.75rem 0; color: var(--success);">Add New Test Case</h5>';
+        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.85rem; font-weight: bold; color: var(--text-main);">Input:</label>';
+        html += '<textarea id="' + prefix + 'QNewtcInput" class="code-textarea" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-subtle); border-radius: 3px; font-family: var(--font-code); font-size: 0.8rem; min-height: 60px; box-sizing: border-box;"></textarea></div>';
+        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.85rem; font-weight: bold; color: var(--text-main);">Expected Output:</label>';
+        html += '<textarea id="' + prefix + 'QNewtcOutput" class="code-textarea" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-subtle); border-radius: 3px; font-family: var(--font-code); font-size: 0.8rem; min-height: 60px; box-sizing: border-box;"></textarea></div>';
         html += '<div style="display: flex; gap: 0.5rem;">';
-        html += '<button id="qsavenewtc" style="padding: 0.5rem 1rem; background: #4caf50; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85rem; flex: 1;">Add Test Case</button>';
-        html += '<button id="qcancnewtc" style="padding: 0.5rem 1rem; background: #999; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85rem; flex: 1;">Cancel</button>';
+        html += '<button id="' + prefix + 'QSaveNewtc" class="btn btn-success" style="padding: 0.5rem 1rem; flex: 1; font-size: 0.85rem;">Add Test Case</button>';
+        html += '<button id="' + prefix + 'QCancNewtc" class="btn btn-secondary" style="padding: 0.5rem 1rem; flex: 1; font-size: 0.85rem;">Cancel</button>';
         html += '</div></div>';
 
         panel.innerHTML = html;
         panel.style.display = 'block';
 
-        document.getElementById('qsavenewtc').addEventListener('click', function () {
+        document.getElementById(prefix + 'QSaveNewtc').addEventListener('click', function () {
             self.saveNewTestCase(questionId);
         });
 
-        document.getElementById('qcancnewtc').addEventListener('click', function () {
+        document.getElementById(prefix + 'QCancNewtc').addEventListener('click', function () {
             panel.style.display = 'none';
         });
     },
@@ -450,29 +528,31 @@ const Questions = {
      * Show form to edit test case
      */
     showEditTestCaseForm(questionId, tcIdx, testcase) {
-        const panel = document.getElementById('adminQEditTestCasePanel');
+        const prefix = this.config.prefix || 'admin';
+        const panelId = prefix + 'QEditTestCasePanel';
+        const panel = document.getElementById(panelId);
         if (!panel) return;
 
         const self = this;
-        let html = '<div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; padding: 1rem;">';
-        html += '<h5 style="margin: 0 0 0.75rem 0; color: #856404;">Edit Test Case ' + (tcIdx + 1) + '</h5>';
-        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.85rem; font-weight: bold;">Input:</label>';
-        html += '<textarea id="qedittcinput" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px; font-family: monospace; font-size: 0.8rem; min-height: 60px; box-sizing: border-box;">' + Utils.escapeHtml(testcase.input || '') + '</textarea></div>';
-        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.85rem; font-weight: bold;">Expected Output:</label>';
-        html += '<textarea id="qedittcoutput" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 3px; font-family: monospace; font-size: 0.8rem; min-height: 60px; box-sizing: border-box;">' + Utils.escapeHtml(testcase.expected_output || '') + '</textarea></div>';
+        let html = '<div style="background: var(--bg-elevated); border: 1px solid var(--warning); border-radius: 4px; padding: 1rem;">';
+        html += '<h5 style="margin: 0 0 0.75rem 0; color: var(--warning);">Edit Test Case ' + (tcIdx + 1) + '</h5>';
+        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.85rem; font-weight: bold; color: var(--text-main);">Input:</label>';
+        html += '<textarea id="' + prefix + 'QEditTcInput" class="code-textarea" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-subtle); border-radius: 3px; font-family: var(--font-code); font-size: 0.8rem; min-height: 60px; box-sizing: border-box;">' + Utils.escapeHtml(testcase.input || '') + '</textarea></div>';
+        html += '<div style="margin-bottom: 0.75rem;"><label style="font-size: 0.85rem; font-weight: bold; color: var(--text-main);">Expected Output:</label>';
+        html += '<textarea id="' + prefix + 'QEditTcOutput" class="code-textarea" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border-subtle); border-radius: 3px; font-family: var(--font-code); font-size: 0.8rem; min-height: 60px; box-sizing: border-box;">' + Utils.escapeHtml(testcase.expected_output || '') + '</textarea></div>';
         html += '<div style="display: flex; gap: 0.5rem;">';
-        html += '<button id="qsaveedittc" style="padding: 0.5rem 1rem; background: #ffc107; color: black; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85rem; flex: 1;">Update Test Case</button>';
-        html += '<button id="qcancedittc" style="padding: 0.5rem 1rem; background: #999; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.85rem; flex: 1;">Cancel</button>';
+        html += '<button id="' + prefix + 'QSaveEditTc" class="btn btn-warning" style="padding: 0.5rem 1rem; flex: 1; font-size: 0.85rem; color: black;">Update Test Case</button>';
+        html += '<button id="' + prefix + 'QCancEditTc" class="btn btn-secondary" style="padding: 0.5rem 1rem; flex: 1; font-size: 0.85rem;">Cancel</button>';
         html += '</div></div>';
 
         panel.innerHTML = html;
         panel.style.display = 'block';
 
-        document.getElementById('qsaveedittc').addEventListener('click', function () {
+        document.getElementById(prefix + 'QSaveEditTc').addEventListener('click', function () {
             self.saveEditTestCase(questionId, tcIdx);
         });
 
-        document.getElementById('qcancedittc').addEventListener('click', function () {
+        document.getElementById(prefix + 'QCancEditTc').addEventListener('click', function () {
             panel.style.display = 'none';
         });
     },
@@ -481,8 +561,9 @@ const Questions = {
      * Save new test case
      */
     async saveNewTestCase(questionId) {
-        const input = document.getElementById('qnewtcinput').value.trim();
-        const output = document.getElementById('qnewtcoutput').value.trim();
+        const prefix = this.config.prefix || 'admin';
+        const input = document.getElementById(prefix + 'QNewtcInput').value.trim();
+        const output = document.getElementById(prefix + 'QNewtcOutput').value.trim();
 
         if (!input || !output) {
             alert('Please fill in both input and output');
@@ -508,7 +589,7 @@ const Questions = {
             if (!response.ok) throw new Error('Save failed');
 
             Utils.showMessage('adminMessage', 'Test case added', 'success');
-            document.getElementById('adminQEditTestCasePanel').style.display = 'none';
+            document.getElementById(prefix + 'QEditTestCasePanel').style.display = 'none';
             await this.loadQuestions();
         } catch (error) {
             alert('Failed to add test case: ' + error.message);
@@ -519,8 +600,9 @@ const Questions = {
      * Save edited test case
      */
     async saveEditTestCase(questionId, tcIdx) {
-        const input = document.getElementById('qedittcinput').value.trim();
-        const output = document.getElementById('qedittcoutput').value.trim();
+        const prefix = this.config.prefix || 'admin';
+        const input = document.getElementById(prefix + 'QEditTcInput').value.trim();
+        const output = document.getElementById(prefix + 'QEditTcOutput').value.trim();
 
         if (!input || !output) {
             alert('Please fill in both input and output');
@@ -548,7 +630,7 @@ const Questions = {
             if (!response.ok) throw new Error('Save failed');
 
             Utils.showMessage('adminMessage', 'Test case updated', 'success');
-            document.getElementById('adminQEditTestCasePanel').style.display = 'none';
+            document.getElementById(prefix + 'QEditTestCasePanel').style.display = 'none';
             await this.loadQuestions();
         } catch (error) {
             alert('Failed to update test case: ' + error.message);
@@ -587,37 +669,68 @@ const Questions = {
     },
 
     /**
+     * Prepare Create Form
+     */
+    prepareCreate() {
+        const createObj = {
+            id: '',
+            title: '',
+            description: '',
+            sample_input: '',
+            sample_output: '',
+            difficulty: 'Medium',
+            topic_id: ''
+        };
+        this.editingId = null;
+        this.showEditForm(createObj);
+
+        // Update header of edit form if possible?
+        // showEditForm regenerates the HTML.
+    },
+
+    /**
      * Save question inline
      */
     async saveAdminQuestionInline() {
-        const questionId = document.getElementById('adminQEditId').value;
+        const prefix = this.config.prefix || 'admin';
+        const questionId = document.getElementById(prefix + 'QEditId').value;
         const user = Auth.getCurrentUser();
+        const isNew = !questionId;
 
         const payload = {
-            title: document.getElementById('adminQEditTitle').value.trim(),
-            description: document.getElementById('adminQEditDesc').value.trim(),
-            sample_input: document.getElementById('adminQEditInput').value.trim(),
-            sample_output: document.getElementById('adminQEditOutput').value.trim(),
-            difficulty: document.getElementById('adminQEditDiff').value
+            title: document.getElementById(prefix + 'QEditTitle').value.trim(),
+            description: document.getElementById(prefix + 'QEditDesc').value.trim(),
+            sample_input: document.getElementById(prefix + 'QEditInput').value.trim(),
+            sample_output: document.getElementById(prefix + 'QEditOutput').value.trim(),
+            difficulty: document.getElementById(prefix + 'QEditDiff').value
         };
 
         if (user.role === 'admin') {
-            payload.college_id = document.getElementById('adminQEditCollege').value;
-            payload.department_id = document.getElementById('adminQEditDept').value;
-            payload.batch_id = document.getElementById('adminQEditBatch').value;
-            payload.topic_id = document.getElementById('adminQEditTopic').value;
+            payload.college_id = document.getElementById(prefix + 'QEditCollege').value;
+            payload.department_id = document.getElementById(prefix + 'QEditDept').value;
+            payload.batch_id = document.getElementById(prefix + 'QEditBatch').value;
+            payload.topic_id = document.getElementById(prefix + 'QEditTopic').value;
         } else {
-            payload.topic_id = document.getElementById('adminQEditTopic').value;
+            payload.topic_id = document.getElementById(prefix + 'QEditTopic').value;
         }
 
         try {
-            const url = user.role === 'admin' ? '/admin/questions/' + questionId : '/batch/questions/' + questionId;
-            await Utils.apiRequest(url, { method: 'PUT', body: JSON.stringify(payload) });
-            Utils.showMessage('adminMessage', 'Question updated successfully', 'success');
+            let url = user.role === 'admin' ? '/admin/questions' : '/batch/questions';
+            if (!isNew) {
+                url += '/' + questionId;
+            }
+
+            const method = isNew ? 'POST' : 'PUT';
+
+            await Utils.apiRequest(url, { method: method, body: JSON.stringify(payload) });
+            Utils.showMessage('adminMessage', isNew ? 'Question created successfully' : 'Question updated successfully', 'success');
             await this.loadQuestions();
+
+            // If new, clear form or select the new question?
+            // Reloading questions refreshes the list. User can select again.
         } catch (error) {
-            const msgEl = document.getElementById('adminQEditMessage');
-            if (msgEl) msgEl.textContent = 'Update failed: ' + error.message;
+            const msgEl = document.getElementById(prefix + 'QEditMessage');
+            if (msgEl) msgEl.textContent = (isNew ? 'Create' : 'Update') + ' failed: ' + error.message;
         }
     },
 
@@ -626,7 +739,8 @@ const Questions = {
      */
     async deleteConfirmAdminPanel() {
         if (!confirm('Delete this question permanently?')) return;
-        const questionId = document.getElementById('adminQEditId').value;
+        const prefix = this.config.prefix || 'admin';
+        const questionId = document.getElementById(prefix + 'QEditId').value;
         this.delete(questionId);
     },
 
@@ -637,8 +751,11 @@ const Questions = {
         const question = this.questions.find(q => q.id === questionId);
         if (!question) return;
 
+        const prefix = this.config.prefix || 'admin';
+        const btnId = prefix + 'QTestGen';
+
         try {
-            const btn = document.getElementById('qtestgen');
+            const btn = document.getElementById(btnId);
             if (btn) { btn.disabled = true; btn.textContent = 'Generating...'; }
 
             const user = Auth.getCurrentUser();
@@ -659,7 +776,7 @@ const Questions = {
         } catch (error) {
             Utils.showMessage('adminMessage', 'Failed to generate: ' + error.message, 'error');
         } finally {
-            const btn = document.getElementById('qtestgen');
+            const btn = document.getElementById(btnId);
             if (btn) { btn.disabled = false; btn.textContent = 'Generate Hidden Test Cases'; }
         }
     },
@@ -668,29 +785,30 @@ const Questions = {
      * Display generated test cases
      */
     displayGeneratedTestCasesAdmin(questionId, testcases) {
-        const container = document.getElementById('adminQTestCaseContainer');
+        const prefix = this.config.prefix || 'admin';
+        const container = document.getElementById(prefix + 'QTestCaseContainer');
         if (!container || !testcases.length) return;
 
         const self = this;
-        let html = '<div style="padding: 1rem; background: #f0f8ff; border-radius: 4px; border-left: 4px solid #28a745;">';
-        html += '<h5 style="margin: 0 0 1rem 0; color: #155724;">Generated Test Cases (' + testcases.length + ')</h5>';
+        let html = '<div style="padding: 1rem; background: var(--bg-elevated); border-radius: 4px; border-left: 4px solid var(--success);">';
+        html += '<h5 style="margin: 0 0 1rem 0; color: var(--success);">Generated Test Cases (' + testcases.length + ')</h5>';
         html += '<div style="display: grid; gap: 0.75rem; max-height: 250px; overflow-y: auto; margin-bottom: 1rem;">';
 
         testcases.forEach((tc, idx) => {
-            html += '<div style="padding: 0.75rem; background: white; border: 1px solid #dee2e6; border-radius: 4px;"><div style="font-weight: 500; margin-bottom: 0.5rem;">Test ' + (idx + 1) + '</div>';
+            html += '<div style="padding: 0.75rem; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: 4px;"><div style="font-weight: 500; margin-bottom: 0.5rem; color: var(--text-main);">Test ' + (idx + 1) + '</div>';
             html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.85rem;">';
-            html += '<div><span style="color: #666; font-size: 0.8rem;">Input:</span><div style="font-family: monospace; background: #f9f9f9; padding: 0.5rem; border-radius: 3px; word-break: break-all;">' + Utils.escapeHtml((tc.input || '').substring(0, 60)) + '</div></div>';
-            html += '<div><span style="color: #666; font-size: 0.8rem;">Output:</span><div style="font-family: monospace; background: #f9f9f9; padding: 0.5rem; border-radius: 3px; word-break: break-all;">' + Utils.escapeHtml((tc.expected_output || '').substring(0, 60)) + '</div></div>';
+            html += '<div><span style="color: var(--text-muted); font-size: 0.8rem;">Input:</span><div class="generated-test-case-box" style="padding: 0.5rem; border-radius: 3px; word-break: break-all;">' + Utils.escapeHtml((tc.input || '').substring(0, 60)) + '</div></div>';
+            html += '<div><span style="color: var(--text-muted); font-size: 0.8rem;">Output:</span><div class="generated-test-case-box" style="padding: 0.5rem; border-radius: 3px; word-break: break-all;">' + Utils.escapeHtml((tc.expected_output || '').substring(0, 60)) + '</div></div>';
             html += '</div></div>';
         });
 
-        html += '</div><button id="qsavtest" style="padding: 0.75rem 1rem; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; width: 100%;">Save Test Cases</button></div>';
+        html += '</div><button id="' + prefix + 'QSavTest" class="btn btn-success" style="padding: 0.75rem 1rem; width: 100%;">Save Test Cases</button></div>';
 
         container.innerHTML = html;
         container.style.display = 'block';
         this.pendingTestCases = { questionId, testcases };
 
-        document.getElementById('qsavtest').addEventListener('click', function () {
+        document.getElementById(prefix + 'QSavTest').addEventListener('click', function () {
             self.saveTestCasesAdmin(questionId);
         });
     },
@@ -715,7 +833,8 @@ const Questions = {
 
             Utils.showMessage('adminMessage', 'Test cases saved', 'success');
             this.pendingTestCases = null;
-            const container = document.getElementById('adminQTestCaseContainer');
+            const prefix = this.config.prefix || 'admin';
+            const container = document.getElementById(prefix + 'QTestCaseContainer');
             if (container) container.style.display = 'none';
             await this.loadQuestions();
         } catch (error) {
