@@ -156,7 +156,7 @@ const Admin = {
         if (!container) return;
 
         if (!this.colleges || this.colleges.length === 0) {
-            container.innerHTML = '<div class="text-center text-secondary">No colleges found</div>';
+            container.innerHTML = '<div class="text-center text-muted">No colleges found</div>';
             return;
         }
 
@@ -355,7 +355,7 @@ const Admin = {
         if (!container) return;
 
         if (!this.departments || this.departments.length === 0) {
-            container.innerHTML = '<div class="text-center text-secondary">No departments found</div>';
+            container.innerHTML = '<div class="text-center text-muted">No departments found</div>';
             return;
         }
 
@@ -516,7 +516,7 @@ const Admin = {
         if (!container) return;
 
         if (!this.batches || this.batches.length === 0) {
-            container.innerHTML = '<div class="text-center text-secondary">No batches found</div>';
+            container.innerHTML = '<div class="text-center text-muted">No batches found</div>';
             return;
         }
 
@@ -706,7 +706,7 @@ const Admin = {
         if (!container) return;
 
         if (!this.students || this.students.length === 0) {
-            container.innerHTML = '<div class="text-center text-secondary">No students found</div>';
+            container.innerHTML = '<div class="text-center text-muted">No students found</div>';
             return;
         }
 
@@ -727,7 +727,7 @@ const Admin = {
                 <tbody>
                     ${this.students.map(s => `
                         <tr>
-                            <td><a href="#" onclick="StudentProfileViewer.open('${s.id}'); return false;" style="color: #3b82f6; text-decoration: none; font-weight: 500;">${Utils.escapeHtml(s.username || s.name || 'N/A')}</a></td>
+                            <td><a href="#" onclick="StudentProfileViewer.open('${s.id}'); return false;" style="color: var(--primary-500); text-decoration: none; font-weight: 500;">${Utils.escapeHtml(s.username || s.name || 'N/A')}</a></td>
                             <td>${Utils.escapeHtml(s.email || 'N/A')}</td>
                             <td>${Utils.escapeHtml(this.findCollegeNameById(s.college_id) || 'N/A')}</td>
                             <td>${Utils.escapeHtml(this.findDepartmentNameById(s.department_id) || 'N/A')}</td>

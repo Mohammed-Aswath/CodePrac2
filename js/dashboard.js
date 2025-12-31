@@ -167,14 +167,14 @@ const Dashboard = {
         const role = user.role;
 
         let html = `
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
-                <h2 style="margin-top:0; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem; margin-bottom: 1.5rem;">Student Overview</h2>
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                <h2 style="margin-top:0; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem; margin-bottom: 1.5rem; color: var(--text-main);">Student Overview</h2>
                 
                 <!-- Filters -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
                     <div>
                         <input type="text" id="dashSearch" placeholder="Search students..." 
-                            style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px;">
+                            style="width: 100%; padding: 0.75rem; background: var(--bg-app); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 4px;">
                     </div>
         `;
 
@@ -182,7 +182,7 @@ const Dashboard = {
         if (role === 'admin') {
             html += `
                 <div>
-                    <select id="dashFilterCollege" style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px;">
+                    <select id="dashFilterCollege" style="width: 100%; padding: 0.75rem; background: var(--bg-app); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 4px;">
                         <option value="">All Colleges</option>
                         ${this.hierarchy.colleges.map(c => `<option value="${c.id}">${Utils.escapeHtml(c.college_name || c.name)}</option>`).join('')}
                     </select>
@@ -193,7 +193,7 @@ const Dashboard = {
         if (['admin', 'college'].includes(role)) {
             html += `
                 <div>
-                    <select id="dashFilterDept" style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px;">
+                    <select id="dashFilterDept" style="width: 100%; padding: 0.75rem; background: var(--bg-app); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 4px;">
                         <option value="">All Departments</option>
                         ${this.hierarchy.departments.map(d => `<option value="${d.id}">${Utils.escapeHtml(d.department_name || d.name)}</option>`).join('')}
                     </select>
@@ -204,7 +204,7 @@ const Dashboard = {
         if (['admin', 'college', 'department'].includes(role)) {
             html += `
                 <div>
-                    <select id="dashFilterBatch" style="width: 100%; padding: 0.75rem; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 4px;">
+                    <select id="dashFilterBatch" style="width: 100%; padding: 0.75rem; background: var(--bg-app); border: 1px solid var(--border-subtle); color: var(--text-main); border-radius: 4px;">
                         <option value="">All Batches</option>
                         ${this.hierarchy.batches.map(b => `<option value="${b.id}">${Utils.escapeHtml(b.batch_name)}</option>`).join('')}
                     </select>
@@ -216,9 +216,9 @@ const Dashboard = {
                 </div>
                 
                 <!-- Stats Row inside card -->
-                <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem; color: #a0aec0; font-size: 0.9rem;">
-                    <div>Total Students: <strong style="color: white;" id="dashTotalCount">${this.filteredStudents.length}</strong></div>
-                    <div>Active: <strong style="color: #34d399;" id="dashActiveCount">${this.filteredStudents.filter(s => !s.is_disabled).length}</strong></div>
+                <div style="display: flex; gap: 2rem; margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                    <div>Total Students: <strong style="color: var(--text-main);" id="dashTotalCount">${this.filteredStudents.length}</strong></div>
+                    <div>Active: <strong style="color: var(--success);" id="dashActiveCount">${this.filteredStudents.filter(s => !s.is_disabled).length}</strong></div>
                 </div>
 
                 <!-- Table -->
@@ -297,7 +297,7 @@ const Dashboard = {
         if (!tbody) return;
 
         if (this.filteredStudents.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #718096; padding: 2rem;">No students found matching your criteria.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No students found matching your criteria.</td></tr>';
             return;
         }
 
@@ -311,22 +311,22 @@ const Dashboard = {
             const batchName = this.getName(s.batch_id, 'batches');
 
             let html = `
-                <tr style="cursor: pointer; transition: background 0.1s;" onclick="StudentProfileViewer.open('${s.id}', ${JSON.stringify(s).replace(/"/g, '&quot;')})" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+                <tr style="cursor: pointer; transition: background 0.1s;" onclick="StudentProfileViewer.open('${s.id}', ${JSON.stringify(s).replace(/"/g, '&quot;')})" onmouseover="this.style.background='var(--bg-elevated)'" onmouseout="this.style.background='transparent'">
                     <td>
-                        <div style="font-weight: 500; color: #e2e8f0;">${Utils.escapeHtml(s.username || s.name || 'Unknown')}</div>
+                        <div style="font-weight: 500; color: var(--text-main);">${Utils.escapeHtml(s.username || s.name || 'Unknown')}</div>
                     </td>
-                    <td style="color: #a0aec0;">${Utils.escapeHtml(s.email)}</td>
+                    <td style="color: var(--text-muted);">${Utils.escapeHtml(s.email)}</td>
             `;
 
-            if (role === 'admin') html += `<td style="color: #a0aec0; font-size: 0.9rem;">${Utils.escapeHtml(collegeName)}</td>`;
-            if (['admin', 'college'].includes(role)) html += `<td style="color: #a0aec0; font-size: 0.9rem;">${Utils.escapeHtml(deptName)}</td>`;
+            if (role === 'admin') html += `<td style="color: var(--text-muted); font-size: 0.9rem;">${Utils.escapeHtml(collegeName)}</td>`;
+            if (['admin', 'college'].includes(role)) html += `<td style="color: var(--text-muted); font-size: 0.9rem;">${Utils.escapeHtml(deptName)}</td>`;
 
             html += `
-                    <td style="color: #a0aec0; font-size: 0.9rem;">${Utils.escapeHtml(batchName)}</td>
+                    <td style="color: var(--text-muted); font-size: 0.9rem;">${Utils.escapeHtml(batchName)}</td>
                     <td>
                         ${!s.is_disabled
-                    ? '<span style="background: rgba(16,185,129,0.2); color: #34d399; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">Active</span>'
-                    : '<span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.8rem;">Disabled</span>'}
+                    ? '<span class="badge badge-success">Active</span>'
+                    : '<span class="badge badge-secondary">Disabled</span>'}
                     </td>
                     <td style="text-align: right;">
                         <button class="btn btn-sm btn-secondary" style="font-size: 0.8rem;">View Profile</button>

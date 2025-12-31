@@ -10,6 +10,7 @@ const UI = {
      * Initialize the application
      */
     init() {
+        this.initTheme(); // Initialize theme before UI setup
         this.setupEventListeners();
         this.checkAuthentication();
     },
@@ -166,6 +167,12 @@ const UI = {
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => this.handleLogout());
+        }
+
+        // Theme Toggle
+        const themeBtn = document.getElementById('themeToggle');
+        if (themeBtn) {
+            themeBtn.addEventListener('click', () => this.toggleTheme());
         }
 
         // Navigation links
@@ -363,6 +370,43 @@ const UI = {
         if (modal) {
             modal.classList.remove('active');
         }
+    },
+
+    /**
+     * Initialize Theme from LocalStorage
+     */
+    initTheme() {
+        const storedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // Default to dark if no preference, or if stored is 'dark'
+        // If stored is 'light', use light.
+        // If no stored, use dark (per user requirement default).
+
+        let theme = 'dark';
+        if (storedTheme) {
+            theme = storedTheme;
+        }
+
+        // Apply
+        document.documentElement.setAttribute('data-theme', theme);
+    },
+
+    /**
+     * Toggle Theme (Dark <-> Light)
+     */
+    toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        // Apply
+        document.documentElement.setAttribute('data-theme', newTheme);
+
+        // Save
+        localStorage.setItem('theme', newTheme);
+
+        // Optional: Animate a "flash" or transition if desired, but CSS transition on body is usually enough.
+        console.log(`Switched to ${newTheme} theme`);
     }
 };
 

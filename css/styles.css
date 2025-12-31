@@ -156,6 +156,34 @@ nav .container {
     font-size: 0.8rem;
 }
 
+/* Badges */
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-secondary {
+    background: rgba(107, 114, 128, 0.15);
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
 /* Forms */
 .form-group {
     margin-bottom: 1.5rem;
@@ -274,7 +302,7 @@ td {
 }
 
 tr:hover td {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--bg-elevated);
 }
 
 /* Tabs */
@@ -863,4 +891,95 @@ tr:hover td {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
+}
+
+/* ----------------------------------------------------
+   THEME TOGGLE SWITCH (Cool Mode)
+   ---------------------------------------------------- */
+.theme-switch {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    outline: none;
+}
+
+.switch-track {
+    width: 52px;
+    height: 28px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: 9999px;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.switch-handle {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    /* Bouncy spring effect */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    z-index: 2;
+}
+
+.switch-handle svg {
+    width: 12px;
+    height: 12px;
+    color: var(--bg-app);
+    /* Icon color matches app bg for contrast against primary */
+    position: absolute;
+    transition: all 0.3s ease;
+}
+
+.icon-sun {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.5);
+}
+
+.icon-moon {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+}
+
+/* Light Theme State (Applied via [data-theme="light"] on body/html) */
+html[data-theme="light"] .switch-track {
+    background: #e5e7eb;
+    /* Light gray track for day */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+html[data-theme="light"] .switch-handle {
+    transform: translateX(24px);
+    /* Move to right */
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    /* Bright Orange Sun */
+}
+
+html[data-theme="light"] .icon-sun {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+}
+
+html[data-theme="light"] .icon-moon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.5);
+}
+
+/* Hover Effects */
+.theme-switch:hover .switch-handle {
+    box-shadow: 0 0 15px var(--primary-500);
 }
