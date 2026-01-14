@@ -185,6 +185,23 @@ def enable_user_firebase(uid):
         return False
 
 
+def delete_user_firebase(uid):
+    """Delete user in Firebase Auth.
+    
+    Args:
+        uid: Firebase UID
+    
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        get_auth().delete_user(uid)
+        return True
+    except Exception as e:
+        print(f"Firebase delete user error: {e}")
+        return False
+
+
 def verify_firebase_token(token):
     """Verify Firebase ID token (for frontend token validation).
     

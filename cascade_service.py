@@ -3,7 +3,7 @@ from models import (
     CollegeModel, DepartmentModel, BatchModel, StudentModel,
     QuestionModel, NoteModel, PerformanceModel
 )
-from auth import disable_user_firebase
+from auth import disable_user_firebase, delete_user_firebase
 from utils import audit_log
 
 
@@ -54,9 +54,9 @@ class CascadeService:
         CollegeModel().hard_delete(college_id)
         deleted_count["college"] = 1
         
-        # Disable Firebase user for college
+        # Delete Firebase user for college
         if college.get("firebase_uid"):
-            disable_user_firebase(college.get("firebase_uid"))
+            delete_user_firebase(college.get("firebase_uid"))
 
         # Audit log
         audit_log(user_id, "delete_college_cascade", "college", college_id, 
@@ -106,9 +106,9 @@ class CascadeService:
             DepartmentModel().hard_delete(dept_id)
             deleted_count["department"] = 1
             
-            # Disable Firebase user for department
+            # Delete Firebase user for department
             if dept.get("firebase_uid"):
-                disable_user_firebase(dept.get("firebase_uid"))
+                delete_user_firebase(dept.get("firebase_uid"))
             
             # Audit log
             audit_log(user_id, "delete_department_cascade", "department", dept_id, 
@@ -117,7 +117,7 @@ class CascadeService:
             # Still mark as deleted but don't audit separately
             DepartmentModel().hard_delete(dept_id)
             if dept.get("firebase_uid"):
-                disable_user_firebase(dept.get("firebase_uid"))
+                delete_user_firebase(dept.get("firebase_uid"))
 
         return True, "Department and all dependencies deleted successfully", deleted_count
 
@@ -168,9 +168,9 @@ class CascadeService:
             StudentModel().hard_delete(student_id)
             deleted_count["students"] += 1
             
-            # Disable Firebase user for student
+            # Delete Firebase user for student
             if student.get("firebase_uid"):
-                disable_user_firebase(student.get("firebase_uid"))
+                delete_user_firebase(student.get("firebase_uid"))
 
         # Delete all questions for this batch
         for question in questions:
@@ -182,9 +182,9 @@ class CascadeService:
             BatchModel().hard_delete(batch_id)
             deleted_count["batch"] = 1
             
-            # Disable Firebase user for batch
+            # Delete Firebase user for batch
             if batch.get("firebase_uid"):
-                disable_user_firebase(batch.get("firebase_uid"))
+                delete_user_firebase(batch.get("firebase_uid"))
             
             # Audit log
             audit_log(user_id, "delete_batch_cascade", "batch", batch_id, 
@@ -193,7 +193,7 @@ class CascadeService:
             # Still mark as deleted but don't audit separately
             BatchModel().hard_delete(batch_id)
             if batch.get("firebase_uid"):
-                disable_user_firebase(batch.get("firebase_uid"))
+                delete_user_firebase(batch.get("firebase_uid"))
 
         return True, "Batch and all dependencies deleted successfully", deleted_count
 
@@ -230,9 +230,9 @@ class CascadeService:
         StudentModel().hard_delete(student_id)
         deleted_count["student"] = 1
 
-        # Disable Firebase user for student
+        # Delete Firebase user for student
         if student.get("firebase_uid"):
-            disable_user_firebase(student.get("firebase_uid"))
+            delete_user_firebase(student.get("firebase_uid"))
 
         # Audit log
         audit_log(user_id, "delete_student_cascade", "student", student_id, 
