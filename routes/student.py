@@ -127,9 +127,17 @@ def get_questions():
     
     questions = QuestionModel().query(**filters)
     
-    # Remove hidden test cases
+    # Check attempts
+    student_id = request.user.get("student_id")
+    attempts = PerformanceModel().query(student_id=student_id)
+    attempted_ids = {a.get("question_id") for a in attempts}
+    solved_ids = {a.get("question_id") for a in attempts if a.get("status") == "correct"}
+    
+    # Remove hidden test cases and add flags
     for q in questions:
         q.pop("hidden_testcases", None)
+        q["is_attempted"] = q.get("id") in attempted_ids
+        q["is_solved"] = q.get("id") in solved_ids
     
     return success_response({"questions": questions})
 
@@ -173,9 +181,17 @@ def get_questions_by_topic(topic_id):
     # Query questions for this topic and batch
     questions = QuestionModel().query(topic_id=topic_id, batch_id=batch_id)
     
-    # Remove hidden test cases
+    # Check attempts
+    student_id = request.user.get("student_id")
+    attempts = PerformanceModel().query(student_id=student_id)
+    attempted_ids = {a.get("question_id") for a in attempts}
+    solved_ids = {a.get("question_id") for a in attempts if a.get("status") == "correct"}
+    
+    # Remove hidden test cases and add flags
     for q in questions:
         q.pop("hidden_testcases", None)
+        q["is_attempted"] = q.get("id") in attempted_ids
+        q["is_solved"] = q.get("id") in solved_ids
     
     return success_response({"questions": questions})
 
@@ -441,6 +457,12 @@ def get_performance():
         filters["question_id"] = question_id
     
     performance = PerformanceModel().query(**filters)
+    
+    # Enriched performance data with question details
+    for p in performance:
+        q = QuestionModel().get(p.get("question_id"))
+        p["question_title"] = q.get("title") if q else "Unknown Question"
+        p["question_difficulty"] = q.get("difficulty") if q else "Medium"
     
     # Sort by submission time (descending)
     performance.sort(key=lambda x: x.get("submitted_at"), reverse=True)

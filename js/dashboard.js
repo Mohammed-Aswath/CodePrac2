@@ -379,7 +379,7 @@ const Dashboard = {
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Question ID</th>
+                                    <th>Question</th>
                                     <th>Status</th>
                                     <th>Date</th>
                                 </tr>
@@ -387,7 +387,7 @@ const Dashboard = {
                             <tbody>
                                 ${recentSubmissions.map(submission => `
                                     <tr>
-                                        <td>${Utils.escapeHtml(submission.question_id || 'Unknown')}</td>
+                                        <td>${Utils.escapeHtml(submission.question_title || submission.question_id || 'Unknown')}</td>
                                         <td>
                                             <span class="badge ${submission.status === 'correct' ? 'badge-success' : submission.status === 'execution_error' ? 'badge-danger' : 'badge-warning'}">
                                                 ${submission.status || 'pending'}

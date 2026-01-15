@@ -329,12 +329,16 @@ const StudentPractice = {
             <div class="question-card" onclick="StudentPractice.selectQuestion('${question.id}')">
                 <div>
                     <h4 style="margin: 0; margin-bottom: 0.5rem; font-size: 1.1rem; color: var(--text-main);">${Utils.escapeHtml(question.title || question.question_title)}</h4>
-                    <span class="badge" style="background: ${this.getDifficultyColor(question.difficulty)}; color: white;">
-                        ${question.difficulty || 'Medium'}
-                    </span>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <span class="badge" style="background: ${this.getDifficultyColor(question.difficulty)}; color: white;">
+                            ${question.difficulty || 'Medium'}
+                        </span>
+                        ${question.is_solved ? '<span class="badge" style="background: var(--success); color: white;">Solved</span>' :
+                (question.is_attempted ? '<span class="badge" style="background: var(--warning); color: black;">Attempted</span>' : '')}
+                    </div>
                 </div>
                 <div style="color: var(--primary);">
-                    Solve &rarr;
+                    ${question.is_solved ? 'Revise &rarr;' : 'Solve &rarr;'}
                 </div>
             </div>
         `).join('') + `</div>`;
