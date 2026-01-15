@@ -301,7 +301,15 @@ const StudentProfileViewer = {
             let student = null;
 
             try {
-                const response = await Utils.apiRequest(`${baseUrl}/students/${studentId}`);
+                let endpoint = `${baseUrl}/students/${studentId}`;
+
+                // Special case for Student role fetching own profile
+                const currentUser = Auth.getCurrentUser();
+                if (currentUser && currentUser.role === 'student' && (!studentId || studentId === currentUser.student_id || studentId === currentUser.uid)) {
+                    endpoint = '/student/profile';
+                }
+
+                const response = await Utils.apiRequest(endpoint);
                 student = response.data?.student || response.student;
             } catch (e) {
                 console.warn('Direct fetch failed', e);
@@ -401,9 +409,9 @@ const StudentProfileViewer = {
         }
 
         // Hierarchy Names
-        const collegeName = this.resolveName('College', student.college_id);
-        const deptName = this.resolveName('Department', student.department_id);
-        const batchName = this.resolveName('Batch', student.batch_id);
+        const collegeName = student.college_name 
+        const deptName = student.department_name 
+        const batchName = student.batch_name
 
         document.getElementById('sp-college').textContent = collegeName;
         document.getElementById('sp-dept').textContent = deptName;

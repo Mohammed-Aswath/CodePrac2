@@ -187,7 +187,7 @@ const Admin = {
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Admin.editCollege('${c.id}')">Edit</button>
                                 ${!c.is_disabled ?
-                `<button class="btn btn-sm btn-warning" onclick="Admin.disableCollege('${c.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-secondary" onclick="Admin.disableCollege('${c.id}')">Disable</button>` :
                 `<button class="btn btn-sm btn-success" onclick="Admin.enableCollege('${c.id}')">Enable</button>`
             }
                                 <button class="btn btn-sm btn-danger" onclick="Admin.deleteCollege('${c.id}')">Delete</button>
@@ -388,7 +388,7 @@ const Admin = {
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Admin.editDepartment('${d.id}')">Edit</button>
                                 ${!d.is_disabled ?
-                `<button class="btn btn-sm btn-warning" onclick="Admin.disableDepartment('${d.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-secondary" onclick="Admin.disableDepartment('${d.id}')">Disable</button>` :
                 `<button class="btn btn-sm btn-success" onclick="Admin.enableDepartment('${d.id}')">Enable</button>`
             }
                                 <button class="btn btn-sm btn-danger" onclick="Admin.deleteDepartment('${d.id}')">Delete</button>
@@ -551,7 +551,7 @@ const Admin = {
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Admin.editBatch('${b.id}')">Edit</button>
                                 ${!b.is_disabled ?
-                `<button class="btn btn-sm btn-warning" onclick="Admin.disableBatch('${b.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-secondary" onclick="Admin.disableBatch('${b.id}')">Disable</button>` :
                 `<button class="btn btn-sm btn-success" onclick="Admin.enableBatch('${b.id}')">Enable</button>`
             }
                                 <button class="btn btn-sm btn-danger" onclick="Admin.deleteBatch('${b.id}')">Delete</button>
@@ -743,7 +743,7 @@ const Admin = {
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Admin.editStudent('${s.id}')">Edit</button>
                                 ${!s.is_disabled ?
-                '<button class="btn btn-sm btn-warning" onclick="Admin.disableStudent(\'' + s.id + '\')">Disable</button>' :
+                '<button class="btn btn-sm btn-secondary" onclick="Admin.disableStudent(\'' + s.id + '\')">Disable</button>' :
                 '<button class="btn btn-sm btn-success" onclick="Admin.enableStudent(\'' + s.id + '\')">Enable</button>'
             }
                                 <button class="btn btn-sm btn-danger" onclick="Admin.deleteStudent('${s.id}')">Delete</button>

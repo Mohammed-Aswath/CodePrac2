@@ -20,9 +20,9 @@ const StudentPractice = {
     currentPhase: 'topics', // 'topics', 'questions', or 'editor'
 
     // API Endpoints
-    topicsEndpoint: `${CONFIG.API_BASE_URL}/student/topics`,
-    questionsEndpoint: `${CONFIG.API_BASE_URL}/student/questions`,
-    notesEndpoint: `${CONFIG.API_BASE_URL}/student/notes`,
+    topicsEndpoint: `${Config.API_BASE}/student/topics`,
+    questionsEndpoint: `${Config.API_BASE}/student/questions`,
+    notesEndpoint: `${Config.API_BASE}/student/notes`,
 
     /**
      * Load student practice page
@@ -40,10 +40,12 @@ const StudentPractice = {
                 student_id: user.student_id
             });
 
-            document.getElementById('collegeDisplay').textContent = user.college_id || 'NOT SET';
-            document.getElementById('departmentDisplay').textContent = user.department_id || 'NOT SET';
-            document.getElementById('batchDisplay').textContent = user.batch_id || 'NOT SET';
-            document.getElementById('studentIdDisplay').textContent = user.student_id || 'NOT SET';
+            // Prevent FOUC (Flash of Unstyled Content) - Do NOT show IDs
+            // Use cached names if available, otherwise 'Loading...'
+            document.getElementById('collegeDisplay').textContent = user.college_name || 'Loading...';
+            document.getElementById('departmentDisplay').textContent = user.department_name || 'Loading...';
+            document.getElementById('batchDisplay').textContent = user.batch_name || 'Loading...';
+            document.getElementById('studentIdDisplay').textContent = user.name || user.username || 'Loading...';
 
             // CRITICAL GUARD: Student must have complete hierarchy
             if (!user.college_id || !user.department_id || !user.batch_id) {
@@ -80,20 +82,53 @@ const StudentPractice = {
      */
     async fetchProfile() {
         try {
-            const response = await fetch(`${CONFIG.API_BASE_URL}/student/profile`, {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                const student = data.data?.student || data.student;
-                if (student) {
-                    if (student.college_name) document.getElementById('collegeDisplay').textContent = student.college_name;
-                    if (student.department_name) document.getElementById('departmentDisplay').textContent = student.department_name;
-                    if (student.batch_name) document.getElementById('batchDisplay').textContent = student.batch_name;
+            // Use Utils.apiRequest which handles auth headers and base URL correctly
+            const response = await Utils.apiRequest('/student/profile');
+
+            // Handle potentially different response structures
+            const student = response.data?.student || response.student;
+
+            if (student) {
+                // Helper to update text textContent safely
+                const updateText = (id, text) => {
+                    const el = document.getElementById(id);
+                    if (el && text) el.textContent = text;
+                };
+
+                const collegeName = student.college_name || 'Unknown College';
+                const deptName = student.department_name || 'Unknown Department';
+                const batchName = student.batch_name || 'Unknown Batch';
+                const studentName = student.name || student.username || 'Unknown';
+
+                updateText('collegeDisplay', collegeName);
+                updateText('departmentDisplay', deptName);
+                updateText('batchDisplay', batchName);
+                updateText('studentIdDisplay', studentName);
+
+                // Try to update the label if possible (Best effort)
+                const label = document.getElementById('studentIdDisplay')?.previousElementSibling;
+                if (label && (label.textContent.includes('ID') || label.tagName === 'LABEL')) {
+                    label.textContent = 'Name:'; // Update label to Name
+                }
+
+                // CACHE: Update local storage so next load is instant
+                try {
+                    const currentUser = Auth.getCurrentUser();
+                    const updatedUser = {
+                        ...currentUser,
+                        college_name: collegeName,
+                        department_name: deptName,
+                        batch_name: batchName,
+                        name: studentName // Ensure name is synced
+                    };
+                    localStorage.setItem('user', JSON.stringify(updatedUser));
+                } catch (e) {
+                    console.warn('Failed to cache resolved names to localStorage', e);
                 }
             }
-        } catch (e) {
-            console.warn('Failed to fetch profile names', e);
+        } catch (error) {
+            console.warn('Failed to fetch profile names:', error);
+            // Note: If fetch fails, we stick with the IDs already displayed by load()
         }
     },
 

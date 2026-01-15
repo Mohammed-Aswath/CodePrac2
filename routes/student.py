@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 from auth import require_auth, get_token_from_request, decode_jwt_token
 from models import (
     StudentModel, BatchModel, QuestionModel, NoteModel, TopicModel, PerformanceModel,
-    can_student_access
+    CollegeModel, DepartmentModel, can_student_access
 )
 from topic_service import TopicService
 from agent_wrappers import (
@@ -13,6 +13,50 @@ from utils import error_response, success_response
 from datetime import datetime
 
 student_bp = Blueprint("student", __name__, url_prefix="/api/student")
+
+
+# ============================================================================
+# PROFILE ENDPOINT
+# ============================================================================
+
+@student_bp.route("/ping", methods=["GET"])
+def ping():
+    return jsonify({"message": "Student routes working", "status": "ok"}), 200
+
+@student_bp.route("/profile", methods=["GET", "OPTIONS"])
+@require_auth(allowed_roles=["student"])
+def get_profile():
+    """Get student profile with resolved names."""
+    if request.method == "OPTIONS":
+        return "", 200
+    
+    student_id = request.user.get("student_id")
+    if not student_id:
+        return error_response("NO_STUDENT_ID", "Student ID not found in token", status_code=400)
+        
+    student = StudentModel().get(student_id)
+    
+    # Fallback: If not found by ID, check if the ID provided is actually a firebase_uid
+    if not student:
+        # Try finding by firebase_uid
+        results = StudentModel().query(firebase_uid=student_id)
+        if results:
+            student = results[0]
+            
+    if not student:
+        print(f"DEBUG: Student not found for ID: {student_id}")
+        return error_response("NOT_FOUND", "Student not found", status_code=404)
+        
+    # Resolve names
+    college = CollegeModel().get(student.get("college_id"))
+    department = DepartmentModel().get(student.get("department_id"))
+    batch = BatchModel().get(student.get("batch_id"))
+    
+    student["college_name"] = college.get("name") if college else "Unknown College"
+    student["department_name"] = department.get("name") if department else "Unknown Department"
+    student["batch_name"] = batch.get("batch_name") if batch else "Unknown Batch"
+    
+    return success_response({"student": student})
 
 
 # ============================================================================

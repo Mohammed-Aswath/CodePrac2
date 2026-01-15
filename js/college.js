@@ -185,7 +185,7 @@ const College = {
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="College.editDepartment('${d.id}')">Edit</button>
                                 ${!d.is_disabled ?
-                `<button class="btn btn-sm btn-warning" onclick="College.disableDepartment('${d.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-secondary" onclick="College.disableDepartment('${d.id}')">Disable</button>` :
                 `<button class="btn btn-sm btn-success" onclick="College.enableDepartment('${d.id}')">Enable</button>`
             }
                                 <button class="btn btn-sm btn-danger" onclick="College.deleteDepartment('${d.id}')">Delete</button>
@@ -393,7 +393,7 @@ const College = {
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="College.editBatch('${b.id}')">Edit</button>
                                 ${!b.is_disabled ?
-                `<button class="btn btn-sm btn-warning" onclick="College.disableBatch('${b.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-secondary" onclick="College.disableBatch('${b.id}')">Disable</button>` :
                 `<button class="btn btn-sm btn-success" onclick="College.enableBatch('${b.id}')">Enable</button>`
             }
                                 <button class="btn btn-sm btn-danger" onclick="College.deleteBatch('${b.id}')">Delete</button>
@@ -647,7 +647,7 @@ const College = {
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="College.editStudent('${s.id}')">Edit</button>
                                 ${!s.is_disabled ?
-                `<button class="btn btn-sm btn-warning" onclick="College.disableStudent('${s.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-secondary" onclick="College.disableStudent('${s.id}')">Disable</button>` :
                 `<button class="btn btn-sm btn-success" onclick="College.enableStudent('${s.id}')">Enable</button>`
             }
                                 <button class="btn btn-sm btn-danger" onclick="College.deleteStudent('${s.id}')">Delete</button>

@@ -89,6 +89,11 @@ def create_app():
         app.register_blueprint(student_bp)
         logger.info("✓ All blueprints registered")
         
+        # DEBUG: Print all registered routes
+        logger.info("Registered Routes:")
+        for rule in app.url_map.iter_rules():
+            logger.info(f"{rule.endpoint}: {rule}")
+        
         # Root endpoint
         @app.route("/", methods=["GET"])
         def root():

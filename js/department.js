@@ -136,7 +136,7 @@ const Department = {
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Department.editBatch('${b.id}')">Edit</button>
                                 ${!b.is_disabled ?
-                `<button class="btn btn-sm btn-warning" onclick="Department.disableBatch('${b.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-secondary" onclick="Department.disableBatch('${b.id}')">Disable</button>` :
                 `<button class="btn btn-sm btn-success" onclick="Department.enableBatch('${b.id}')">Enable</button>`
             }
                                 <button class="btn btn-sm btn-danger" onclick="Department.deleteBatch('${b.id}')">Delete</button>
@@ -339,7 +339,7 @@ const Department = {
                             <td class="flex-gap">
                                 <button class="btn btn-sm btn-secondary" onclick="Department.editStudent('${s.id}')">Edit</button>
                                 ${!s.is_disabled ?
-                `<button class="btn btn-sm btn-warning" onclick="Department.disableStudent('${s.id}')">Disable</button>` :
+                `<button class="btn btn-sm btn-secondary" onclick="Department.disableStudent('${s.id}')">Disable</button>` :
                 `<button class="btn btn-sm btn-success" onclick="Department.enableStudent('${s.id}')">Enable</button>`
             }
                                 <button class="btn btn-sm btn-danger" onclick="Department.deleteStudent('${s.id}')">Delete</button>

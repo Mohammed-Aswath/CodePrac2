@@ -151,6 +151,53 @@ const UI = {
      * Setup global event listeners
      */
     setupEventListeners() {
+        // Global Enter Key Handler
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const target = e.target;
+
+                // Only act if target is an input field (input, select, textarea)
+                if (target.matches('input') || target.matches('select') || target.matches('textarea')) {
+
+                    // Case 1: Active Modal (including Password Reset Modal)
+                    const activeModal = document.querySelector('.modal.active');
+                    if (activeModal) {
+                        e.preventDefault();
+
+                        // Find the Primary Button in the modal footer
+                        const submitBtn = activeModal.querySelector('.modal-footer .btn-primary');
+                        if (submitBtn) {
+                            submitBtn.click();
+                        }
+                        return;
+                    }
+
+                    // Case 2: Auth Forms (Login/Register)
+                    const authPage = document.getElementById('authPage');
+                    // Check if authPage is visible. It usually doesn't have 'hidden' class when active.
+                    if (authPage && !authPage.classList.contains('hidden')) {
+
+                        const loginForm = document.getElementById('loginForm');
+                        const registerForm = document.getElementById('registerForm');
+                        const forgotForm = document.getElementById('forgotPasswordForm');
+
+                        // Determine which form is currently visible
+                        if (forgotForm && !forgotForm.classList.contains('hidden')) {
+                            e.preventDefault();
+                            document.getElementById('forgotPasswordBtn')?.click();
+                        } else if (registerForm && !registerForm.classList.contains('hidden')) {
+                            e.preventDefault();
+                            document.getElementById('registerBtn')?.click();
+                        } else if (loginForm && !loginForm.classList.contains('hidden')) {
+                            // Default to login if others aren't explicitly active
+                            e.preventDefault();
+                            document.getElementById('loginBtn')?.click();
+                        }
+                    }
+                }
+            }
+        });
+
         // Login form
         const loginBtn = document.getElementById('loginBtn');
         if (loginBtn) {
