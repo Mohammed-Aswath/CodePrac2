@@ -14,22 +14,12 @@ def check_language_support(language):
     Returns:
         (bool, str or None): (supported, error_message)
     """
-    valid_languages = ['python', 'cpp', 'java', 'javascript']
+    valid_languages = ['python', 'cpp', 'java', 'javascript', 'c']
     
     if language.lower() not in valid_languages:
         return False, f"Unsupported language: {language}. Supported: {', '.join(valid_languages)}"
     
-    executables = {
-        'python': 'python',
-        'javascript': 'node',
-        'cpp': 'g++',
-        'java': 'javac'
-    }
-    
-    exe = executables.get(language.lower())
-    if exe and not shutil.which(exe):
-        return False, f"Compiler/runtime not installed: {exe}"
-    
+    # Validation skipped: we rely on LLM simulation now.
     return True, None
 
 
@@ -38,21 +28,30 @@ def run_code_with_agent(question_description, code, language, test_input=None):
     Simulate code execution via LLM. In production, replace with sandboxed runner (e.g., Judge0).
     Returns dict with either {"output": "..."} or {"error": "..."}.
     """
+    print(f"DEBUG: run_code_with_agent called with language={language}", flush=True)
+    print(f"DEBUG: Code being run (first 50 chars): {code[:50] if code else 'None'}", flush=True)
+    
     # Validate language support
     supported, error = check_language_support(language)
     if not supported:
         logger.error(error)
+        print(f"DEBUG: check_language_support failed: {error}", flush=True)
         return {"error": error}
     
+    print("DEBUG: Language support check passed. calling GroqClient...", flush=True)
     client = GroqClient()
     safe_input = test_input or ""
     system = (
         "You are a strict code runner. "
-        "Execute ONLY the provided code exactly as-is. "
-        "Use the provided input stdin; if empty, run with empty stdin. "
-        "DO NOT propose alternative solutions. DO NOT modify the code. "
-        "If the code prints nothing, return an empty string output. "
-        "If there is an error, return it. "
+        "Your goal is to simulate the execution of the provided code in the SPECIFIED LANGUAGE ONLY. "
+        "1. If the code is written in a different language than specified, you MUST return a syntax error "
+        "   appropriate for the SPECIFIED language (e.g., if language is 'python' but code is C++, "
+        "   return a NameError or SyntaxError that Python would raise). "
+        "2. Execute ONLY the provided code exactly as-is using the specified language's standard rules. "
+        "3. Use the provided input stdin; if empty, run with empty stdin. "
+        "4. DO NOT propose alternative solutions. DO NOT modify the code. "
+        "5. If the code prints nothing, return an empty string output. "
+        "6. If there is an error, return it. "
         'Respond with JSON ONLY: {"output": "<stdout>"} or {"error": "<message>"}. '
         "No markdown, no extra keys, no code fences."
     )

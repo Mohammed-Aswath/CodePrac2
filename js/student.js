@@ -697,6 +697,7 @@ int main() {
      * Run code with sample test case (Compiler Agent)
      */
     async runCode() {
+        console.log('DEBUG: runCode CLICKED. API_BASE:', Config.API_BASE);
         this.switchConsoleTab('result'); // Auto-switch to result tab
 
         const editor = document.getElementById('codeEditor');
@@ -742,18 +743,21 @@ int main() {
             // Run code against all test cases
             const results = [];
             for (const tc of testCases) {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/student/run`, {
+                const payload = {
+                    question_id: this.selectedQuestion.id,
+                    code: this.code,
+                    language: this.currentLanguage,
+                    test_input: tc.input
+                };
+                console.log('DEBUG: Sending run request:', payload);
+
+                const response = await fetch(`${Config.API_BASE}/student/run`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     },
-                    body: JSON.stringify({
-                        question_id: this.selectedQuestion.id,
-                        code: this.code,
-                        language: this.currentLanguage,
-                        test_input: tc.input
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 const data = await response.json();

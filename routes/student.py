@@ -188,6 +188,7 @@ def get_questions_by_topic(topic_id):
 @require_auth(allowed_roles=["student"])
 def run_code():
     """Run code against sample test case (Compiler Agent)."""
+    print(f"DEBUG: /api/student/run HIT. User: {request.user.get('student_id') if request.user else 'Unknown'}", flush=True)
     if request.method == "OPTIONS":
         return "", 200
     
@@ -222,6 +223,7 @@ def run_code():
     )
     
     if not compile_result["success"]:
+        print(f"DEBUG: compile_result (error): {compile_result}", flush=True)
         return success_response({
             "status": "error",
             "error": compile_result["error"],
