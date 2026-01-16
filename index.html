@@ -895,7 +895,18 @@
                 </div>
                 <div class="form-group" id="studentPassword">
                     <label>Password:</label>
-                    <input type="password" id="studentPasswordInput" />
+                    <div style="position: relative;">
+                        <input type="password" id="studentPasswordInput" style="width: 100%; padding-right: 2.5rem;" />
+                        <button type="button" onclick="UI.togglePassword('studentPasswordInput', this)"
+                            style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer; padding: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="studentsMessage"></div>
             </div>
@@ -925,7 +936,19 @@
                 </div>
                 <div class="form-group">
                     <label>Password:</label>
-                    <input type="password" id="collegePassword" required />
+                    <div style="position: relative;">
+                        <input type="password" id="collegePassword" required
+                            style="width: 100%; padding-right: 2.5rem;" />
+                        <button type="button" onclick="UI.togglePassword('collegePassword', this)"
+                            style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer; padding: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="collegesMessage"></div>
             </div>
@@ -959,7 +982,19 @@
                 </div>
                 <div class="form-group">
                     <label>Password:</label>
-                    <input type="password" id="departmentPassword" required />
+                    <div style="position: relative;">
+                        <input type="password" id="departmentPassword" required
+                            style="width: 100%; padding-right: 2.5rem;" />
+                        <button type="button" onclick="UI.togglePassword('departmentPassword', this)"
+                            style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer; padding: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="departmentsMessage"></div>
             </div>
@@ -998,7 +1033,19 @@
                 </div>
                 <div class="form-group">
                     <label>Password:</label>
-                    <input type="password" id="batchPassword" required />
+                    <div style="position: relative;">
+                        <input type="password" id="batchPassword" required
+                            style="width: 100%; padding-right: 2.5rem;" />
+                        <button type="button" onclick="UI.togglePassword('batchPassword', this)"
+                            style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer; padding: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="batchesMessage"></div>
             </div>
@@ -1053,7 +1100,19 @@
                 </div>
                 <div class="form-group">
                     <label>Password:</label>
-                    <input type="password" id="collegeDepartmentPassword" required />
+                    <div style="position: relative;">
+                        <input type="password" id="collegeDepartmentPassword" required
+                            style="width: 100%; padding-right: 2.5rem;" />
+                        <button type="button" onclick="UI.togglePassword('collegeDepartmentPassword', this)"
+                            style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer; padding: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="collegeDepartmentMessage"></div>
             </div>
@@ -1087,7 +1146,19 @@
                 </div>
                 <div class="form-group">
                     <label>Password:</label>
-                    <input type="password" id="collegeBatchPassword" required />
+                    <div style="position: relative;">
+                        <input type="password" id="collegeBatchPassword" required
+                            style="width: 100%; padding-right: 2.5rem;" />
+                        <button type="button" onclick="UI.togglePassword('collegeBatchPassword', this)"
+                            style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer; padding: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="collegeBatchMessage"></div>
             </div>
@@ -1125,7 +1196,19 @@
                 </div>
                 <div class="form-group">
                     <label>Password:</label>
-                    <input type="password" id="collegeStudentPassword" required />
+                    <div style="position: relative;">
+                        <input type="password" id="collegeStudentPassword" required
+                            style="width: 100%; padding-right: 2.5rem;" />
+                        <button type="button" onclick="UI.togglePassword('collegeStudentPassword', this)"
+                            style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer; padding: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="collegeStudentMessage"></div>
             </div>
@@ -1154,7 +1237,19 @@
                 </div>
                 <div class="form-group">
                     <label>Password:</label>
-                    <input type="password" id="departmentBatchPassword" required />
+                    <div style="position: relative;">
+                        <input type="password" id="departmentBatchPassword" required
+                            style="width: 100%; padding-right: 2.5rem;" />
+                        <button type="button" onclick="UI.togglePassword('departmentBatchPassword', this)"
+                            style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer; padding: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="departmentBatchMessage"></div>
             </div>
@@ -1187,7 +1282,19 @@
                 </div>
                 <div class="form-group">
                     <label>Password:</label>
-                    <input type="password" id="departmentStudentPassword" required />
+                    <div style="position: relative;">
+                        <input type="password" id="departmentStudentPassword" required
+                            style="width: 100%; padding-right: 2.5rem;" />
+                        <button type="button" onclick="UI.togglePassword('departmentStudentPassword', this)"
+                            style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer; padding: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="departmentStudentMessage"></div>
             </div>
@@ -1217,7 +1324,19 @@
                 </div>
                 <div class="form-group">
                     <label>Password:</label>
-                    <input type="password" id="batchStudentPassword" required />
+                    <div style="position: relative;">
+                        <input type="password" id="batchStudentPassword" required
+                            style="width: 100%; padding-right: 2.5rem;" />
+                        <button type="button" onclick="UI.togglePassword('batchStudentPassword', this)"
+                            style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #888; cursor: pointer; padding: 0;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div id="batchStudentsMessage"></div>
             </div>
